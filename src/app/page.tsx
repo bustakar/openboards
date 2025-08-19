@@ -38,7 +38,7 @@ export default async function Home() {
           <BoardsList boards={boards} />
         </div>
         <div className="col-span-12 md:col-span-8">
-          <PostsList posts={posts} />
+          <PostsList posts={posts} boardSlug={boards[0]?.slug ?? 'features'} />
         </div>
       </div>
     </main>

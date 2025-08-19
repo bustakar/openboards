@@ -26,7 +26,7 @@ function statusVariant(status: PostItem["status"]) {
   }
 }
 
-export function PostCard({ post }: { post: PostItem }) {
+export function PostCard({ post, href }: { post: PostItem; href?: string }) {
   const st = statusVariant(post.status);
   return (
     <Card className="hover:bg-muted/50 transition">
@@ -38,7 +38,13 @@ export function PostCard({ post }: { post: PostItem }) {
           <div className="flex items-center gap-2">
             <Badge variant={st.variant}>{st.label}</Badge>
           </div>
-          <div className="font-medium mt-1 line-clamp-2">{post.title}</div>
+          {href ? (
+            <a href={href} className="font-medium mt-1 line-clamp-2 hover:underline">
+              {post.title}
+            </a>
+          ) : (
+            <div className="font-medium mt-1 line-clamp-2">{post.title}</div>
+          )}
           <div className="text-xs text-muted-foreground mt-1">{post.commentCount} comments</div>
         </div>
       </CardContent>
