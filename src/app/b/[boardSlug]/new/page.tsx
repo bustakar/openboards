@@ -1,7 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormClient } from "./FormClient";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FormClient } from './FormClient';
 
-export default async function NewPostPage(props: { params: Promise<{ boardSlug: string }> }) {
+export default async function NewPostPage(props: {
+  params: Promise<{ boardSlug: string }>;
+}) {
   const params = await props.params;
   return (
     <main className="container mx-auto p-6">
@@ -18,5 +20,3 @@ export default async function NewPostPage(props: { params: Promise<{ boardSlug: 
     </main>
   );
 }
-
-
