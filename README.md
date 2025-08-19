@@ -2,19 +2,29 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-Setup Postgres `DATABASE_URL`, install deps, run migrations, seed, then start dev server.
+### 1. Configure environment
 
-Environment:
+Copy the example env file and edit values as needed:
 ```bash
-export DATABASE_URL="postgres://user:password@localhost:5432/openboards"
+cp .env.example .env.local
 ```
 
-Install and migrate:
+Ensure `DATABASE_URL` points to a Postgres database and `NEXT_PUBLIC_BASE_URL` matches your local URL.
+
+### 2. Install dependencies
 ```bash
 npm install
+```
+
+### 3. Run migrations and seed
+```bash
 npm run drizzle:generate
 npm run drizzle:migrate
 npm run seed
+```
+
+### 4. Start the dev server
+```bash
 npm run dev
 ```
 
