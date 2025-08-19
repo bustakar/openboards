@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { getBoardBySlug } from "@/server/repos/boards";
 import { listPosts, type PostStatus, type PostSort } from "@/server/repos/posts";
 import { PostsList } from "@/components/posts/PostsList";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function BoardPage(props: { params: Promise<{ boardSlug: string }>; searchParams?: Promise<{ status?: PostStatus; sort?: PostSort; q?: string }> }) {
@@ -19,7 +21,12 @@ export default async function BoardPage(props: { params: Promise<{ boardSlug: st
       <div className="max-w-4xl mx-auto space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>{board.name}</CardTitle>
+            <div className="flex items-center justify-between gap-4">
+              <CardTitle>{board.name}</CardTitle>
+              <Link href={`/b/${board.slug}/new`}>
+                <Button>New post</Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">{board.description ?? ""}</p>
