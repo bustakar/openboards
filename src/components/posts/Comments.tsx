@@ -1,8 +1,9 @@
-import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import * as React from 'react';
+import { listComments } from '@/server/repos/comments';
 
 export type CommentItem = {
   id: string;
@@ -12,8 +13,13 @@ export type CommentItem = {
 };
 
 export async function Comments({ postId }: { postId: string }) {
-  // In MVP, the GET /api/posts/[id] returns post but not comments; placeholder empty list for now.
-  const items: CommentItem[] = [];
+  const rows = await listComments(postId);
+  const items: CommentItem[] = rows.map((r) => ({
+    id: r.id,
+    body: r.body,
+    authorName: r.authorName,
+    createdAt: String(r.createdAt),
+  }));
 
   return (
     <Card>
@@ -27,9 +33,12 @@ export async function Comments({ postId }: { postId: string }) {
           <ul className="space-y-3">
             {items.map((c) => (
               <li key={c.id} className="rounded border p-3">
-                <div className="text-sm whitespace-pre-wrap break-words">{c.body}</div>
+                <div className="text-sm whitespace-pre-wrap break-words">
+                  {c.body}
+                </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {c.authorName ?? "Anonymous"} • {new Date(c.createdAt).toLocaleString()}
+                  {c.authorName ?? 'Anonymous'} •{' '}
+                  {new Date(c.createdAt).toLocaleString()}
                 </div>
               </li>
             ))}
@@ -43,25 +52,36 @@ export async function Comments({ postId }: { postId: string }) {
 
 function CommentForm({ postId }: { postId: string }) {
   async function action(formData: FormData) {
-    "use server";
-    const body = String(formData.get("body") || "").trim();
-    const authorName = String(formData.get("authorName") || "").trim() || undefined;
+    'use server';
+    const body = String(formData.get('body') || '').trim();
+    const authorName =
+      String(formData.get('authorName') || '').trim() || undefined;
     if (!body) return;
-    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/api/posts/${postId}/comments`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ body, authorName }),
-    });
+    await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/posts/${postId}/comments`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ body, authorName }),
+      }
+    );
   }
 
   return (
     <form action={action} className="space-y-3">
       <div>
         <label className="block text-sm font-medium mb-1">Comment</label>
-        <Textarea name="body" placeholder="Share your thoughts" required maxLength={10000} />
+        <Textarea
+          name="body"
+          placeholder="Share your thoughts"
+          required
+          maxLength={10000}
+        />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Name (optional)</label>
+        <label className="block text-sm font-medium mb-1">
+          Name (optional)
+        </label>
         <Input name="authorName" placeholder="Your name" maxLength={60} />
       </div>
       <div className="flex justify-end">
@@ -70,5 +90,3 @@ function CommentForm({ postId }: { postId: string }) {
     </form>
   );
 }
-
-
