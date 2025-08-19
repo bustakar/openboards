@@ -1,13 +1,28 @@
-import { BoardsList, type BoardItem } from "@/components/boards/BoardsList";
-import { PostsList, type PostItem } from "@/components/posts/PostsList";
+import { BoardsList, type BoardItem } from '@/components/boards/BoardsList';
+import { PostsList, type PostItem } from '@/components/posts/PostsList';
 
 async function fetchBoards(): Promise<BoardItem[]> {
   // Prefer SSR: fetch from API route which will be wired later; fallback to empty
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/api/boards`, { cache: "no-store" });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/boards`,
+      { cache: 'no-store' }
+    );
     if (!res.ok) return [];
-    const data = (await res.json()) as Array<{ id: string; name: string; slug: string; description?: string | null; posts?: number }>;
-    return data.map((b) => ({ id: b.id, name: b.name, slug: b.slug, description: b.description ?? null, posts: b.posts }));
+    const data = (await res.json()) as Array<{
+      id: string;
+      name: string;
+      slug: string;
+      description?: string | null;
+      posts?: number;
+    }>;
+    return data.map((b) => ({
+      id: b.id,
+      name: b.name,
+      slug: b.slug,
+      description: b.description ?? null,
+      posts: b.posts,
+    }));
   } catch {
     return [];
   }

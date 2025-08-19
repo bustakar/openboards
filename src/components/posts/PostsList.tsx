@@ -1,7 +1,7 @@
-import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PostCard, type PostItem } from "@/components/posts/PostCard";
-export type { PostItem } from "@/components/posts/PostCard";
+import { PostCard, type PostItem } from '@/components/posts/PostCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import * as React from 'react';
+export type { PostItem } from '@/components/posts/PostCard';
 
 export function PostsList({ posts }: { posts: PostItem[] }) {
   return (
@@ -19,5 +19,3 @@ export function PostsList({ posts }: { posts: PostItem[] }) {
     </Card>
   );
 }
-
-
