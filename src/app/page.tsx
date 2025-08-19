@@ -1,4 +1,5 @@
 import { BoardsList, type BoardItem } from "@/components/boards/BoardsList";
+import { PostsList, type PostItem } from "@/components/posts/PostsList";
 
 async function fetchBoards(): Promise<BoardItem[]> {
   // Prefer SSR: fetch from API route which will be wired later; fallback to empty
@@ -14,6 +15,7 @@ async function fetchBoards(): Promise<BoardItem[]> {
 
 export default async function Home() {
   const boards = await fetchBoards();
+  const posts: PostItem[] = [];
   return (
     <main className="container mx-auto p-6">
       <div className="grid grid-cols-12 gap-6">
@@ -21,8 +23,7 @@ export default async function Home() {
           <BoardsList boards={boards} />
         </div>
         <div className="col-span-12 md:col-span-8">
-          {/* Placeholder for posts list (will implement in feature/posts-list) */}
-          <div className="rounded-lg border p-6 text-sm text-muted-foreground">Posts will appear here.</div>
+          <PostsList posts={posts} />
         </div>
       </div>
     </main>
