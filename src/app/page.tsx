@@ -1,33 +1,30 @@
-// Home page lists boards from the database when available
-import { listBoardsWithStats } from "@/server/repos/boards";
+import { BoardsList, type BoardItem } from "@/components/boards/BoardsList";
+
+async function fetchBoards(): Promise<BoardItem[]> {
+  // Prefer SSR: fetch from API route which will be wired later; fallback to empty
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/api/boards`, { cache: "no-store" });
+    if (!res.ok) return [];
+    const data = (await res.json()) as Array<{ id: string; name: string; slug: string; description?: string | null; posts?: number }>;
+    return data.map((b) => ({ id: b.id, name: b.name, slug: b.slug, description: b.description ?? null, posts: b.posts }));
+  } catch {
+    return [];
+  }
+}
 
 export default async function Home() {
-  let data: Awaited<ReturnType<typeof listBoardsWithStats>> = [];
-  try {
-    data = await listBoardsWithStats();
-  } catch {
-    // ignore if DB not configured yet
-  }
+  const boards = await fetchBoards();
   return (
-    <main className="p-10">
-      <h1 className="text-2xl font-semibold mb-6">Boards</h1>
-      {data.length === 0 ? (
-        <p className="text-sm opacity-70">No boards yet. Configure DATABASE_URL and run migrations.</p>
-      ) : (
-        <ul className="space-y-3">
-          {data.map((b) => (
-            <li key={b.id} className="rounded border p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{b.name}</div>
-                  {b.description && <div className="text-sm opacity-70">{b.description}</div>}
-                </div>
-                <div className="text-sm opacity-70">{b.posts} posts</div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+    <main className="container mx-auto p-6">
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-12 md:col-span-4">
+          <BoardsList boards={boards} />
+        </div>
+        <div className="col-span-12 md:col-span-8">
+          {/* Placeholder for posts list (will implement in feature/posts-list) */}
+          <div className="rounded-lg border p-6 text-sm text-muted-foreground">Posts will appear here.</div>
+        </div>
+      </div>
     </main>
   );
 }
