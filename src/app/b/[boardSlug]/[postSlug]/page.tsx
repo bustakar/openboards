@@ -5,6 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VoteButton } from "@/components/posts/VoteButton";
+import { Comments } from "@/components/posts/Comments";
 
 function statusInfo(status: string): { label: string; variant: "warning" | "secondary" | "success" | "destructive" | "outline" } {
   switch (status) {
@@ -64,7 +65,7 @@ export default async function PostPage(props: { params: Promise<{ boardSlug: str
             </article>
           </CardContent>
         </Card>
-        {/* Comments list + form would go here in a follow-up */}
+        <Comments postId={post.id} />
       </div>
     </main>
   );
