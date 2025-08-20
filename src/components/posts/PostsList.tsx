@@ -4,12 +4,18 @@ import Link from 'next/link';
 import * as React from 'react';
 export type { PostItem } from '@/components/posts/PostCard';
 
+type ItemWithBoard = PostItem & { boardSlug?: string };
+
 export function PostsList({
   posts,
+  basePath,
   boardSlug,
+  linkFor,
 }: {
-  posts: PostItem[];
-  boardSlug: string;
+  posts: ItemWithBoard[];
+  basePath: string;
+  boardSlug?: string;
+  linkFor?: (p: ItemWithBoard) => string;
 }) {
   // Read sort from current URL and reflect in heading
   let heading = 'Trending';
@@ -27,17 +33,17 @@ export function PostsList({
           <CardTitle>{heading}</CardTitle>
           <div className="flex items-center gap-2 text-sm">
             <Link
-              href={`/b/${boardSlug}?sort=trending`}
+              href={`${basePath}?sort=trending`}
               className="hover:underline"
             >
               Top
             </Link>
             <span className="text-muted-foreground">/</span>
-            <Link href={`/b/${boardSlug}?sort=new`} className="hover:underline">
+            <Link href={`${basePath}?sort=new`} className="hover:underline">
               New
             </Link>
             <span className="text-muted-foreground">/</span>
-            <Link href={`/b/${boardSlug}?sort=top`} className="hover:underline">
+            <Link href={`${basePath}?sort=top`} className="hover:underline">
               Trending
             </Link>
           </div>
@@ -47,9 +53,16 @@ export function PostsList({
         {posts.length === 0 ? (
           <div className="text-sm text-muted-foreground">No posts yet.</div>
         ) : (
-          posts.map((p) => (
-            <PostCard key={p.id} post={p} href={`/b/${boardSlug}/${p.slug}`} />
-          ))
+          posts.map((p) => {
+            const href = linkFor
+              ? linkFor(p)
+              : boardSlug
+              ? `/b/${boardSlug}/${p.slug}`
+              : p.boardSlug
+              ? `/b/${p.boardSlug}/${p.slug}`
+              : undefined;
+            return <PostCard key={p.id} post={p} href={href} />;
+          })
         )}
       </CardContent>
     </Card>

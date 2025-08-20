@@ -29,16 +29,20 @@ export function BoardsList({
             <li>
               <Link
                 href={`/`}
-                aria-current={selectedSlug ? undefined : "page"}
+                aria-current={selectedSlug ? undefined : 'page'}
                 className={
                   `block rounded-md border p-3 transition-colors ` +
-                  (!selectedSlug ? "bg-muted/70 border-foreground/30" : "hover:bg-muted/60")
+                  (!selectedSlug
+                    ? 'bg-muted/70 border-foreground/30'
+                    : 'hover:bg-muted/60')
                 }
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">All posts</div>
-                    <div className="text-xs text-muted-foreground">Across all boards</div>
+                    <div className="text-xs text-muted-foreground">
+                      Across all boards
+                    </div>
                   </div>
                 </div>
               </Link>

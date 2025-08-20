@@ -46,7 +46,7 @@ export default async function BoardPage(props: {
               <Button>New post</Button>
             </Link>
           </div>
-          <PostsList posts={data.items} boardSlug={board.slug} />
+          <PostsList posts={data.items} basePath={`/b/${board.slug}`} boardSlug={board.slug} />
         </div>
       </div>
     </main>
