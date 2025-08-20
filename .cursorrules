@@ -1,0 +1,88 @@
+### Project overview
+- Build a simple, self-hostable feedback boards app (open-source Canny/Featurebase alternative). MVP has public boards, posts, votes, comments, and a global roadmap. No auth, no admin portal, no payments.
+- Dual licensing: AGPLv3 for core; `ee/` can contain enterprise code under commercial license.
+
+### Tech stack
+- Next.js 15 App Router (SSR-first) with TypeScript (strict), React 19.
+- Postgres + Drizzle ORM (postgres-js driver). Migrations via drizzle-kit, programmatic runner in `src/db/migrate.ts`.
+- Styling: Tailwind CSS v4, `next/font` (Geist), and shadcn-style UI primitives in `src/components/ui/*`.
+- Validation: Zod.
+- Anonymous sessions: `visitorId` cookie via `src/middleware.ts`.
+
+### Architecture
+- App Router pages in `src/app/**`.
+  - Home `/` shows boards list (left) and posts list (right) across all boards.
+  - Board `/b/[boardSlug]` shows same two-column layout with selected board highlighted.
+  - Post detail `/b/[boardSlug]/[postSlug]` shows status, body, votes, and comments.
+  - API routes live under `src/app/api/**`.
+- Data access in repository modules under `src/server/repos/*` (boards, posts, votes, comments). Prefer calling repos from pages/handlers over direct DB queries.
+- DB singleton in `src/server/db.ts` (drizzle + postgres.js).
+- Schema in `src/db/schema/index.ts` with enums, indexes, denormalized counts, FTS vector (managed in SQL in `src/db/schema/fts.sql`).
+- Rate limiting in `src/server/rateLimit.ts` (disabled in development; enabled in production).
+
+### Data model
+- `boards`: name, slug, description, position, timestamps.
+- `posts`: boardId, title, body, slug, status enum: `backlog | planned | in_progress | completed | closed`, `isArchived`, `pinned`, counts, timestamps, FTS vector.
+- `votes`: unique per `(postId, visitorId)`.
+- `comments`: postId, body, optional authorName, visitorId, `isArchived`, createdAt.
+- Roadmap is global (not per-board). Status changes are done via DB tools for now.
+
+### Routing and server
+- Route Handlers use Next.js 15 conventions. When params are inconvenient, parse from `request.nextUrl.pathname` reliably.
+- Anonymous identity comes from `visitorId` middleware cookie; use it for votes/comments.
+- Apply basic rate limiting on write endpoints; keep it off in dev.
+
+### UI and design
+- Use shadcn-style primitives found in `src/components/ui/`: `Card`, `Button`, `Badge`, `Input`, `Textarea`, `ScrollArea`.
+- Modern, clean, readable UI. Prioritize clarity over flash.
+- Two-column layout parity: home and board pages share the same left (boards) / right (posts) layout. Highlight selected board. Always include an “All posts” item.
+- Posts list supports sort filters: `Trending`, `New`, `Top`. The title must reflect the selected sort.
+- Vote buttons are interactive (toggle add/remove). Post titles link to details.
+- Comments form posts via API and then refreshes to show the new comment.
+- Accessibility: label interactive elements (`aria-label`), use semantic headings, ensure focus-visible styles.
+
+### Coding style
+- TypeScript strict: avoid `any`. Explicitly type exports and public APIs.
+- Use path alias `@/*` for imports.
+- Keep views small and composable. Prefer SSR; only mark components "use client" when needed.
+- Clear, descriptive names. No TODOs or placeholders. Favor readability over micro-optimizations.
+- Prefer repos over ad-hoc SQL in pages/components. If a repo doesn’t exist for a query, add it there.
+
+### Content and security
+- Sanitize user-submitted content (body) before rendering to prevent XSS. Prefer server-side sanitization prior to storage or before render.
+- Basic anti-abuse: rate limiting already provided; honeypot or minimal heuristics acceptable for MVP.
+
+### Conventions
+- Sorting keys: `trending | new | top`. Use `basePath` to build filter links (`/?sort=...` or `/b/[slug]?sort=...`).
+- Use `visitorId` from cookie or IP fallback for all anonymous actions.
+- Use `@/server/repos/*` and `@/server/db` rather than importing Drizzle schema directly in UI.
+
+### Before you write code
+- Confirm whether logic belongs in repo (server), route handler (API), or page (SSR). Keep client components minimal.
+- Reuse UI primitives. Do not pull in additional component libraries without explicit need.
+
+### Build and quality gates (required before commit & PR)
+- Run lints and build locally and fix all issues:
+  - `npm run lint`
+  - `npm run build`
+- Run the dev server and exercise changed pages; there must be no errors in:
+  - Terminal logs (server)
+  - Browser console (client)
+- Only commit when all of the above are clean. Push feature branches and open PRs with focused scope and descriptive titles.
+
+### Branching & PRs
+- Create a new feature branch per logical task (e.g., `feature/boards-list`, `feature/posts-list`).
+- Keep PRs small, self-contained, and passing local gates. Include a short summary and acceptance criteria.
+
+### When adding data features
+- Extend the Drizzle schema in `src/db/schema/index.ts` and generate/migrate.
+- Implement repo methods in `src/server/repos/*` and wire into route handlers.
+- Keep API payloads validated with Zod in `src/server/validation.ts` (add schemas as needed).
+
+### When adding UI features
+- Prefer SSR data loading from repos. If you need to hydrate after a write, refresh the page.
+- Keep consistent spacing, typographic scale, and statuses (`Badge` variants). Ensure filter headings reflect state.
+
+### Do / Don’t
+- Do: small, composable components; clear naming; strict types; SSR-first; shadcn primitives; consistent left/right layout.
+- Don’t: introduce auth/admin/test suites for MVP; add Docker; bypass repos for DB access; ship TODOs; commit with console errors.
