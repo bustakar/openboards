@@ -1,5 +1,4 @@
 import { PostCard, type PostItem } from '@/components/posts/PostCard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import * as React from 'react';
 export type { PostItem } from '@/components/posts/PostCard';
@@ -23,31 +22,37 @@ export function PostsList({
   const heading =
     currentSort === 'new' ? 'New' : currentSort === 'top' ? 'Top' : 'Trending';
   return (
-    <Card className="h-full">
-      <CardHeader>
+    <div className="h-full">
+      <div className="mb-6">
         <div className="flex items-center justify-between">
-          <CardTitle>{heading}</CardTitle>
+          <h2 className="text-xl font-semibold">{heading}</h2>
           <div className="flex items-center gap-2 text-sm">
             <Link
               href={`${basePath}?sort=trending`}
-              className="hover:underline"
+              className="hover:underline px-3 py-1 rounded-md hover:bg-muted/50 transition-colors"
             >
               Top
             </Link>
-            <span className="text-muted-foreground">/</span>
-            <Link href={`${basePath}?sort=new`} className="hover:underline">
+            <Link 
+              href={`${basePath}?sort=new`} 
+              className="hover:underline px-3 py-1 rounded-md hover:bg-muted/50 transition-colors"
+            >
               New
             </Link>
-            <span className="text-muted-foreground">/</span>
-            <Link href={`${basePath}?sort=top`} className="hover:underline">
+            <Link 
+              href={`${basePath}?sort=top`} 
+              className="hover:underline px-3 py-1 rounded-md hover:bg-muted/50 transition-colors"
+            >
               Trending
             </Link>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+      </div>
+      <div>
         {posts.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No posts yet.</div>
+          <div className="text-sm text-muted-foreground py-8 text-center">
+            No posts yet.
+          </div>
         ) : (
           posts.map((p) => {
             const href = linkFor
@@ -60,7 +65,7 @@ export function PostsList({
             return <PostCard key={p.id} post={p} href={href} />;
           })
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -45,6 +45,12 @@ export default async function BoardPage(props: {
 
   const boards = await fetchBoards();
 
+  // Format the posts data to include createdAt as ISO string
+  const formattedPosts = data.items.map((post) => ({
+    ...post,
+    createdAt: post.createdAt.toISOString(),
+  }));
+
   return (
     <main className="container mx-auto p-6">
       <div className="grid grid-cols-12 gap-6">
@@ -59,7 +65,7 @@ export default async function BoardPage(props: {
             </Link>
           </div>
           <PostsList
-            posts={data.items}
+            posts={formattedPosts}
             basePath={`/b/${board.slug}`}
             boardSlug={board.slug}
             currentSort={sort}

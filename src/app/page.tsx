@@ -31,6 +31,7 @@ export default async function Home() {
       voteCount: posts.voteCount,
       commentCount: posts.commentCount,
       lastActivityAt: posts.lastActivityAt,
+      createdAt: posts.createdAt,
       isArchived: posts.isArchived,
       boardId: posts.boardId,
     })
@@ -49,6 +50,7 @@ export default async function Home() {
     status: r.status as PostItem['status'],
     voteCount: r.voteCount,
     commentCount: r.commentCount,
+    createdAt: r.createdAt.toISOString(),
     boardSlug: boards.find((b) => b.id === r.boardId)?.slug,
   }));
   return (
