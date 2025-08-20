@@ -10,6 +10,7 @@ export async function listBoardsWithStats() {
       name: boards.name,
       slug: boards.slug,
       description: boards.description,
+      icon: boards.icon,
       position: boards.position,
       posts: sql<number>`count(*) FILTER (WHERE ${posts.isArchived} = false)`.as("posts"),
       open: sql<number>`count(*) FILTER (WHERE ${posts.status} IN ('backlog','planned','in_progress') AND ${posts.isArchived} = false)`.as(

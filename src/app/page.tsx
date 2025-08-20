@@ -13,6 +13,7 @@ async function fetchBoards(): Promise<BoardItem[]> {
     name: b.name,
     slug: b.slug,
     description: b.description ?? null,
+    icon: b.icon ?? null,
     posts: Number(b.posts ?? 0),
   }));
 }

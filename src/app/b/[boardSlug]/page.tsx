@@ -69,6 +69,7 @@ async function BoardsFetcher({ selectedSlug }: { selectedSlug?: string }) {
     name: string;
     slug: string;
     description?: string | null;
+    icon?: string | null;
     posts?: number;
   }> = res.ok ? await res.json() : [];
   return <BoardsList boards={boards} selectedSlug={selectedSlug} />;
