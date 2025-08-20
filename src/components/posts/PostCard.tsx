@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -29,9 +30,9 @@ function statusVariant(status: PostItem["status"]) {
 export function PostCard({ post, href }: { post: PostItem; href?: string }) {
   const st = statusVariant(post.status);
   return (
-    <Card className="hover:bg-muted/50 transition">
+    <Card className="hover:bg-muted/60 transition-colors">
       <CardContent className="p-4 flex items-start gap-4">
-        <div className="w-12 shrink-0 rounded-md border text-center py-2 text-sm font-medium">
+        <div className="w-14 shrink-0 rounded-md border text-center py-2 text-sm font-semibold bg-background">
           {post.voteCount}
         </div>
         <div className="flex-1 min-w-0">
@@ -39,9 +40,9 @@ export function PostCard({ post, href }: { post: PostItem; href?: string }) {
             <Badge variant={st.variant}>{st.label}</Badge>
           </div>
           {href ? (
-            <a href={href} className="font-medium mt-1 line-clamp-2 hover:underline">
+            <Link href={href} className="font-medium mt-1 line-clamp-2 hover:underline">
               {post.title}
-            </a>
+            </Link>
           ) : (
             <div className="font-medium mt-1 line-clamp-2">{post.title}</div>
           )}

@@ -30,7 +30,19 @@ async function fetchBoards(): Promise<BoardItem[]> {
 
 export default async function Home() {
   const boards = await fetchBoards();
-  const posts: PostItem[] = [];
+  const primaryBoardSlug = boards[0]?.slug ?? 'features';
+  let posts: PostItem[] = [];
+  // Fetch a small set of trending posts for the first board
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/boards/${encodeURIComponent(primaryBoardSlug)}/posts?sort=trending&limit=6`,
+      { cache: 'no-store' },
+    );
+    if (res.ok) {
+      const data = (await res.json()) as { items: PostItem[] };
+      posts = data.items ?? [];
+    }
+  } catch {}
   return (
     <main className="container mx-auto p-6">
       <div className="grid grid-cols-12 gap-6">
@@ -38,7 +50,7 @@ export default async function Home() {
           <BoardsList boards={boards} />
         </div>
         <div className="col-span-12 md:col-span-8">
-          <PostsList posts={posts} boardSlug={boards[0]?.slug ?? 'features'} />
+          <PostsList posts={posts} boardSlug={primaryBoardSlug} />
         </div>
       </div>
     </main>

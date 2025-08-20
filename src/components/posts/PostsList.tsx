@@ -1,5 +1,6 @@
 import { PostCard, type PostItem } from '@/components/posts/PostCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 import * as React from 'react';
 export type { PostItem } from '@/components/posts/PostCard';
 
@@ -7,7 +8,16 @@ export function PostsList({ posts, boardSlug }: { posts: PostItem[]; boardSlug: 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Trending</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Trending</CardTitle>
+          <div className="flex items-center gap-2 text-sm">
+            <Link href={`/b/${boardSlug}?sort=trending`} className="hover:underline">Top</Link>
+            <span className="text-muted-foreground">/</span>
+            <Link href={`/b/${boardSlug}?sort=new`} className="hover:underline">New</Link>
+            <span className="text-muted-foreground">/</span>
+            <Link href={`/b/${boardSlug}?sort=top`} className="hover:underline">Trending</Link>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {posts.length === 0 ? (
