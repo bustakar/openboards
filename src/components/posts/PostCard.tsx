@@ -1,6 +1,6 @@
+import { VoteButton } from '@/components/posts/VoteButton';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { VoteButton } from '@/components/posts/VoteButton';
 import Link from 'next/link';
 import * as React from 'react';
 
@@ -33,7 +33,11 @@ export function PostCard({ post, href }: { post: PostItem; href?: string }) {
   return (
     <Card className="hover:bg-muted/60 transition-colors">
       <CardContent className="p-4 flex items-start gap-4">
-        <VoteButton postId={post.id} initialCount={post.voteCount} className="w-14 justify-center" />
+        <VoteButton
+          postId={post.id}
+          initialCount={post.voteCount}
+          className="w-14 justify-center"
+        />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <Badge variant={st.variant}>{st.label}</Badge>

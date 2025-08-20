@@ -57,7 +57,12 @@ export default async function Home() {
         <div className="col-span-12 md:col-span-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">All posts</h2>
-            <Link href={`/b/${primaryBoardSlug}/new`} className="text-sm hover:underline">New post</Link>
+            <Link
+              href={`/b/${primaryBoardSlug}/new`}
+              className="text-sm hover:underline"
+            >
+              New post
+            </Link>
           </div>
           <PostsList posts={posts} boardSlug={primaryBoardSlug} />
         </div>

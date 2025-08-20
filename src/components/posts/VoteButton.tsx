@@ -1,6 +1,6 @@
-"use client";
-import * as React from "react";
-import { Button } from "@/components/ui/button";
+'use client';
+import { Button } from '@/components/ui/button';
+import * as React from 'react';
 
 export function VoteButton({
   postId,
@@ -19,7 +19,7 @@ export function VoteButton({
   React.useEffect(() => {
     try {
       const raw = localStorage.getItem(storageKey);
-      setVoted(raw === "true");
+      setVoted(raw === 'true');
     } catch {}
   }, [storageKey]);
 
@@ -27,7 +27,7 @@ export function VoteButton({
     if (loading) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/posts/${postId}/vote`, { method: "POST" });
+      const res = await fetch(`/api/posts/${postId}/vote`, { method: 'POST' });
       if (!res.ok) return;
       const data = (await res.json()) as { voted: boolean; voteCount: number };
       setVoted(data.voted);
@@ -42,16 +42,14 @@ export function VoteButton({
 
   return (
     <Button
-      variant={voted ? "secondary" : "outline"}
+      variant={voted ? 'secondary' : 'outline'}
       onClick={toggle}
       disabled={loading}
       aria-pressed={voted}
       className={className}
-      aria-label={voted ? "Remove vote" : "Add vote"}
+      aria-label={voted ? 'Remove vote' : 'Add vote'}
     >
       ▲ {count}
     </Button>
   );
 }
-
-

@@ -11,7 +11,13 @@ export type BoardItem = {
   posts?: number;
 };
 
-export function BoardsList({ boards, selectedSlug }: { boards: BoardItem[]; selectedSlug?: string }) {
+export function BoardsList({
+  boards,
+  selectedSlug,
+}: {
+  boards: BoardItem[];
+  selectedSlug?: string;
+}) {
   return (
     <Card className="h-full">
       <CardHeader>
@@ -24,10 +30,12 @@ export function BoardsList({ boards, selectedSlug }: { boards: BoardItem[]; sele
               <li key={b.id}>
                 <Link
                   href={`/b/${b.slug}`}
-                  aria-current={selectedSlug === b.slug ? "page" : undefined}
+                  aria-current={selectedSlug === b.slug ? 'page' : undefined}
                   className={
                     `block rounded-md border p-3 transition-colors ` +
-                    (selectedSlug === b.slug ? "bg-muted/70 border-foreground/30" : "hover:bg-muted/60")
+                    (selectedSlug === b.slug
+                      ? 'bg-muted/70 border-foreground/30'
+                      : 'hover:bg-muted/60')
                   }
                 >
                   <div className="flex items-center justify-between">

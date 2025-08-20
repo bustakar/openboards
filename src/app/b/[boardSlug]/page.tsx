@@ -54,8 +54,16 @@ export default async function BoardPage(props: {
 }
 
 async function BoardsFetcher({ selectedSlug }: { selectedSlug?: string }) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/boards`, { cache: 'no-store' });
-  const boards: Array<{ id: string; name: string; slug: string; description?: string | null; posts?: number }> =
-    res.ok ? await res.json() : [];
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/boards`,
+    { cache: 'no-store' }
+  );
+  const boards: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    description?: string | null;
+    posts?: number;
+  }> = res.ok ? await res.json() : [];
   return <BoardsList boards={boards} selectedSlug={selectedSlug} />;
 }
