@@ -1,6 +1,9 @@
 import { BoardsList, type BoardItem } from '@/components/boards/BoardsList';
 import { PostsList, type PostItem } from '@/components/posts/PostsList';
 import Link from 'next/link';
+import { getDatabase } from '@/server/db';
+import { posts } from '@/db/schema';
+import { desc, eq, sql } from 'drizzle-orm';
 
 async function fetchBoards(): Promise<BoardItem[]> {
   // Prefer SSR: fetch from API route which will be wired later; fallback to empty
@@ -31,23 +34,32 @@ async function fetchBoards(): Promise<BoardItem[]> {
 
 export default async function Home() {
   const boards = await fetchBoards();
-  const primaryBoardSlug = boards[0]?.slug ?? 'features';
-  let posts: PostItem[] = [];
-  // Fetch a small set of trending posts for the first board
-  try {
-    const res = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_BASE_URL ?? ''
-      }/api/boards/${encodeURIComponent(
-        primaryBoardSlug
-      )}/posts?sort=trending&limit=6`,
-      { cache: 'no-store' }
-    );
-    if (res.ok) {
-      const data = (await res.json()) as { items: PostItem[] };
-      posts = data.items ?? [];
-    }
-  } catch {}
+  const { db } = getDatabase();
+  const rows = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      status: posts.status,
+      voteCount: posts.voteCount,
+      commentCount: posts.commentCount,
+      lastActivityAt: posts.lastActivityAt,
+      isArchived: posts.isArchived,
+    })
+    .from(posts)
+    .where(eq(posts.isArchived, false))
+    .orderBy(
+      desc(sql`(${posts.voteCount} * 1.0) + (extract(epoch from ${posts.lastActivityAt}) / 100000)`)
+    )
+    .limit(10);
+  const allPosts: PostItem[] = rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    slug: r.slug,
+    status: r.status as PostItem['status'],
+    voteCount: r.voteCount,
+    commentCount: r.commentCount,
+  }));
   return (
     <main className="container mx-auto p-6">
       <div className="grid grid-cols-12 gap-6">
@@ -57,14 +69,17 @@ export default async function Home() {
         <div className="col-span-12 md:col-span-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">All posts</h2>
-            <Link
-              href={`/b/${primaryBoardSlug}/new`}
-              className="text-sm hover:underline"
-            >
-              New post
-            </Link>
+            {boards[0]?.slug ? (
+              <Link
+                href={`/b/${boards[0].slug}/new`}
+                className="text-sm hover:underline"
+              >
+                New post
+              </Link>
+            ) : null}
           </div>
-          <PostsList posts={posts} boardSlug={primaryBoardSlug} />
+          {/* Link targets will be resolved on detail by slug; board context provided by route */}
+          <PostsList posts={allPosts} boardSlug={boards[0]?.slug ?? 'features'} />
         </div>
       </div>
     </main>

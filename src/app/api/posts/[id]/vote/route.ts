@@ -21,10 +21,18 @@ export async function POST(request: NextRequest) {
   if (!burst.allowed || !sustained.allowed)
     return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
 
-  // Path: /api/posts/[id]/vote -> ['', 'api', 'posts', '[id]', 'vote']
   const id = decodeURIComponent(request.nextUrl.pathname.split('/')[3] ?? '');
-  const result = await toggleVote(id, visitorId);
-  return NextResponse.json(result);
+  try {
+    const result = await toggleVote(id, visitorId);
+    return NextResponse.json(result);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('vote toggle failed', message);
+    return NextResponse.json(
+      { error: 'internal_error', message },
+      { status: 500 }
+    );
+  }
 }
 
 function parseCookie(header: string, name: string) {

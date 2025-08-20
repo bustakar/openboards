@@ -4,7 +4,6 @@ import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  // Path: /api/posts/[id] -> ['', 'api', 'posts', '[id]']
   const id = decodeURIComponent(request.nextUrl.pathname.split('/')[3] ?? '');
   const { db } = getDatabase();
   const [row] = await db
