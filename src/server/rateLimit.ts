@@ -17,11 +17,19 @@ function getWindow(key: string): Window {
   return w;
 }
 
-export function checkAndRecordLimit(key: string, limit: number, windowMs: number): {
+export function checkAndRecordLimit(
+  key: string,
+  limit: number,
+  windowMs: number
+): {
   allowed: boolean;
   remaining: number;
   resetMs: number;
 } {
+  // Disable rate limiting in development for easier local testing
+  if (process.env.NODE_ENV !== 'production') {
+    return { allowed: true, remaining: limit, resetMs: 0 };
+  }
   const now = Date.now();
   const w = getWindow(key);
   // drop old
@@ -31,7 +39,9 @@ export function checkAndRecordLimit(key: string, limit: number, windowMs: number
     return { allowed: false, remaining: 0, resetMs };
   }
   w.hits.push(now);
-  return { allowed: true, remaining: Math.max(0, limit - w.hits.length), resetMs: windowMs };
+  return {
+    allowed: true,
+    remaining: Math.max(0, limit - w.hits.length),
+    resetMs: windowMs,
+  };
 }
-
-
