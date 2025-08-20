@@ -11,21 +11,17 @@ export function PostsList({
   basePath,
   boardSlug,
   linkFor,
+  currentSort,
 }: {
   posts: ItemWithBoard[];
   basePath: string;
   boardSlug?: string;
   linkFor?: (p: ItemWithBoard) => string;
+  currentSort?: 'trending' | 'new' | 'top';
 }) {
   // Read sort from current URL and reflect in heading
-  let heading = 'Trending';
-  if (typeof window !== 'undefined') {
-    const sp = new URLSearchParams(window.location.search);
-    const sort = sp.get('sort');
-    if (sort === 'new') heading = 'New';
-    if (sort === 'top') heading = 'Top';
-    if (sort === 'trending') heading = 'Trending';
-  }
+  const heading =
+    currentSort === 'new' ? 'New' : currentSort === 'top' ? 'Top' : 'Trending';
   return (
     <Card className="h-full">
       <CardHeader>

@@ -21,10 +21,11 @@ export default async function BoardPage(props: {
 
   const page = 1;
   const limit = 20;
+  const sort = sp.sort ?? 'trending';
   const data = await listPosts({
     boardId: board.id,
     status: sp.status,
-    sort: sp.sort ?? 'trending',
+    sort,
     query: sp.q,
     page,
     limit,
@@ -46,7 +47,12 @@ export default async function BoardPage(props: {
               <Button>New post</Button>
             </Link>
           </div>
-          <PostsList posts={data.items} basePath={`/b/${board.slug}`} boardSlug={board.slug} />
+          <PostsList
+            posts={data.items}
+            basePath={`/b/${board.slug}`}
+            boardSlug={board.slug}
+            currentSort={sort}
+          />
         </div>
       </div>
     </main>

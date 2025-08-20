@@ -19,6 +19,7 @@ async function fetchBoards(): Promise<BoardItem[]> {
 
 export default async function Home() {
   const boards = await fetchBoards();
+  const sort: 'trending' | 'new' | 'top' = 'trending';
   const { db } = getDatabase();
   const rows = await db
     .select({
@@ -67,7 +68,7 @@ export default async function Home() {
               </Link>
             ) : null}
           </div>
-          <PostsList posts={allPosts} basePath="/" />
+          <PostsList posts={allPosts} basePath="/" currentSort={sort} />
         </div>
       </div>
     </main>
