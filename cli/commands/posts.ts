@@ -1,11 +1,17 @@
-import { Command } from 'commander';
-import chalk from 'chalk';
-import inquirer from 'inquirer';
+import { boards, posts } from '@/db/schema';
 import { getDatabase } from '@/server/db';
-import { posts, boards } from '@/db/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import chalk from 'chalk';
+import { Command } from 'commander';
+import { and, desc, eq } from 'drizzle-orm';
+import inquirer from 'inquirer';
 
-const POST_STATUSES = ['backlog', 'planned', 'in_progress', 'completed', 'closed'] as const;
+const POST_STATUSES = [
+  'backlog',
+  'planned',
+  'in_progress',
+  'completed',
+  'closed',
+] as const;
 
 export const postsCommand = new Command('posts')
   .description('Manage posts')
@@ -16,7 +22,7 @@ export const postsCommand = new Command('posts')
       .option('-s, --status <status>', 'Filter by status')
       .action(async (options) => {
         const { db } = getDatabase();
-        
+
         const query = db
           .select({
             id: posts.id,
@@ -34,18 +40,20 @@ export const postsCommand = new Command('posts')
           .leftJoin(boards, eq(posts.boardId, boards.id));
 
         const conditions = [];
-        
+
         if (options.board) {
           conditions.push(eq(boards.slug, options.board));
         }
-        
+
         if (options.status) {
           conditions.push(eq(posts.status, options.status));
         }
 
         let allPosts;
         if (conditions.length > 0) {
-          allPosts = await query.where(and(...conditions)).orderBy(desc(posts.createdAt));
+          allPosts = await query
+            .where(and(...conditions))
+            .orderBy(desc(posts.createdAt));
         } else {
           allPosts = await query.orderBy(desc(posts.createdAt));
         }
@@ -57,24 +65,35 @@ export const postsCommand = new Command('posts')
 
         console.log(chalk.blue('\n📝 Posts:'));
         console.log('─'.repeat(100));
-        
+
         allPosts.forEach((post, index) => {
-          const statusColor = {
-            backlog: chalk.gray,
-            planned: chalk.yellow,
-            in_progress: chalk.blue,
-            completed: chalk.green,
-            closed: chalk.red,
-          }[post.status] || chalk.gray;
+          const statusColor =
+            {
+              backlog: chalk.gray,
+              planned: chalk.yellow,
+              in_progress: chalk.blue,
+              completed: chalk.green,
+              closed: chalk.red,
+            }[post.status] || chalk.gray;
 
           console.log(
             `${chalk.cyan(`${index + 1}.`)} ${chalk.bold(post.title)}`
           );
-          console.log(`   Board: ${chalk.gray(post.boardName || 'Unknown')} (${post.boardSlug})`);
+          console.log(
+            `   Board: ${chalk.gray(post.boardName || 'Unknown')} (${
+              post.boardSlug
+            })`
+          );
           console.log(`   Status: ${statusColor(post.status)}`);
-          console.log(`   Votes: ${chalk.gray(post.voteCount)} | Comments: ${chalk.gray(post.commentCount)}`);
+          console.log(
+            `   Votes: ${chalk.gray(post.voteCount)} | Comments: ${chalk.gray(
+              post.commentCount
+            )}`
+          );
           console.log(`   Slug: ${chalk.gray(post.slug)}`);
-          console.log(`   Created: ${chalk.gray(post.createdAt.toLocaleDateString())}`);
+          console.log(
+            `   Created: ${chalk.gray(post.createdAt.toLocaleDateString())}`
+          );
           if (post.isArchived) {
             console.log(`   ${chalk.red('📁 Archived')}`);
           }
@@ -144,27 +163,34 @@ export const postsCommand = new Command('posts')
           return;
         }
 
-        const statusColor = {
-          backlog: chalk.gray,
-          planned: chalk.yellow,
-          in_progress: chalk.blue,
-          completed: chalk.green,
-          closed: chalk.red,
-        }[post.status] || chalk.gray;
+        const statusColor =
+          {
+            backlog: chalk.gray,
+            planned: chalk.yellow,
+            in_progress: chalk.blue,
+            completed: chalk.green,
+            closed: chalk.red,
+          }[post.status] || chalk.gray;
 
         console.log(chalk.blue('\n📝 Post Details:'));
         console.log('─'.repeat(80));
         console.log(chalk.bold(`Title: ${post.title}`));
         console.log(`Board: ${chalk.gray(post.boardName)} (${post.boardSlug})`);
         console.log(`Status: ${statusColor(post.status)}`);
-        console.log(`Votes: ${chalk.gray(post.voteCount)} | Comments: ${chalk.gray(post.commentCount)}`);
+        console.log(
+          `Votes: ${chalk.gray(post.voteCount)} | Comments: ${chalk.gray(
+            post.commentCount
+          )}`
+        );
         console.log(`Slug: ${chalk.gray(post.slug)}`);
-        console.log(`Created: ${chalk.gray(post.createdAt.toLocaleDateString())}`);
+        console.log(
+          `Created: ${chalk.gray(post.createdAt.toLocaleDateString())}`
+        );
         if (post.isArchived) {
           console.log(`${chalk.red('📁 Archived')}`);
         }
         console.log('');
-        
+
         if (post.body) {
           console.log(chalk.blue('Content:'));
           console.log('─'.repeat(40));
@@ -285,7 +311,9 @@ export const postsCommand = new Command('posts')
               name: 'selectedSlug',
               message: 'Select a post:',
               choices: allPosts.map((p) => ({
-                name: `${p.title} (${p.boardName}) ${p.isArchived ? '📁 Archived' : '📄 Active'}`,
+                name: `${p.title} (${p.boardName}) ${
+                  p.isArchived ? '📁 Archived' : '📄 Active'
+                }`,
                 value: p.slug,
               })),
             },

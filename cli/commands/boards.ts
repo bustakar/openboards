@@ -1,110 +1,112 @@
-import { Command } from 'commander';
-import chalk from 'chalk';
-import inquirer from 'inquirer';
-import { getDatabase } from '@/server/db';
 import { boards } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { getDatabase } from '@/server/db';
+import chalk from 'chalk';
+import { Command } from 'commander';
+import { desc, eq } from 'drizzle-orm';
+import inquirer from 'inquirer';
 
 export const boardsCommand = new Command('boards')
   .description('Manage boards')
   .addCommand(
-    new Command('list')
-      .description('List all boards')
-      .action(async () => {
-        const { db } = getDatabase();
-        const allBoards = await db
-          .select({
-            id: boards.id,
-            name: boards.name,
-            slug: boards.slug,
-            description: boards.description,
-            icon: boards.icon,
-            position: boards.position,
-            createdAt: boards.createdAt,
-          })
-          .from(boards)
-          .orderBy(desc(boards.position), desc(boards.createdAt));
+    new Command('list').description('List all boards').action(async () => {
+      const { db } = getDatabase();
+      const allBoards = await db
+        .select({
+          id: boards.id,
+          name: boards.name,
+          slug: boards.slug,
+          description: boards.description,
+          icon: boards.icon,
+          position: boards.position,
+          createdAt: boards.createdAt,
+        })
+        .from(boards)
+        .orderBy(desc(boards.position), desc(boards.createdAt));
 
-        if (allBoards.length === 0) {
-          console.log(chalk.yellow('No boards found.'));
-          return;
+      if (allBoards.length === 0) {
+        console.log(chalk.yellow('No boards found.'));
+        return;
+      }
+
+      console.log(chalk.blue('\n📋 Boards:'));
+      console.log('─'.repeat(80));
+
+      allBoards.forEach((board, index) => {
+        console.log(
+          `${chalk.cyan(`${index + 1}.`)} ${board.icon || '📋'} ${chalk.bold(
+            board.name
+          )}`
+        );
+        console.log(`   Slug: ${chalk.gray(board.slug)}`);
+        if (board.description) {
+          console.log(`   Description: ${chalk.gray(board.description)}`);
         }
-
-        console.log(chalk.blue('\n📋 Boards:'));
-        console.log('─'.repeat(80));
-        
-        allBoards.forEach((board, index) => {
-          console.log(
-            `${chalk.cyan(`${index + 1}.`)} ${board.icon || '📋'} ${chalk.bold(board.name)}`
-          );
-          console.log(`   Slug: ${chalk.gray(board.slug)}`);
-          if (board.description) {
-            console.log(`   Description: ${chalk.gray(board.description)}`);
-          }
-          console.log(`   Position: ${chalk.gray(board.position)}`);
-          console.log(`   Created: ${chalk.gray(board.createdAt.toLocaleDateString())}`);
-          console.log('');
-        });
-      })
+        console.log(`   Position: ${chalk.gray(board.position)}`);
+        console.log(
+          `   Created: ${chalk.gray(board.createdAt.toLocaleDateString())}`
+        );
+        console.log('');
+      });
+    })
   )
   .addCommand(
-    new Command('create')
-      .description('Create a new board')
-      .action(async () => {
-        const answers = await inquirer.prompt([
-          {
-            type: 'input',
-            name: 'name',
-            message: 'Board name:',
-            validate: (input) => input.trim().length > 0 || 'Name is required',
-          },
-          {
-            type: 'input',
-            name: 'slug',
-            message: 'Board slug (leave empty for auto-generation):',
-            default: (answers: { name?: string }) => answers.name?.toLowerCase().replace(/\s+/g, '-'),
-          },
-          {
-            type: 'input',
-            name: 'description',
-            message: 'Board description (optional):',
-          },
-          {
-            type: 'input',
-            name: 'icon',
-            message: 'Board icon (emoji, optional):',
-            default: '📋',
-          },
-          {
-            type: 'number',
-            name: 'position',
-            message: 'Board position (optional):',
-            default: 0,
-          },
-        ]);
+    new Command('create').description('Create a new board').action(async () => {
+      const answers = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'name',
+          message: 'Board name:',
+          validate: (input) => input.trim().length > 0 || 'Name is required',
+        },
+        {
+          type: 'input',
+          name: 'slug',
+          message: 'Board slug (leave empty for auto-generation):',
+          default: (answers: { name?: string }) =>
+            answers.name?.toLowerCase().replace(/\s+/g, '-'),
+        },
+        {
+          type: 'input',
+          name: 'description',
+          message: 'Board description (optional):',
+        },
+        {
+          type: 'input',
+          name: 'icon',
+          message: 'Board icon (emoji, optional):',
+          default: '📋',
+        },
+        {
+          type: 'number',
+          name: 'position',
+          message: 'Board position (optional):',
+          default: 0,
+        },
+      ]);
 
-        const { db } = getDatabase();
-        const slug = answers.slug || answers.name.toLowerCase().replace(/\s+/g, '-');
+      const { db } = getDatabase();
+      const slug =
+        answers.slug || answers.name.toLowerCase().replace(/\s+/g, '-');
 
-        try {
-          const [newBoard] = await db
-            .insert(boards)
-            .values({
-              name: answers.name.trim(),
-              slug: slug.trim(),
-              description: answers.description?.trim() || null,
-              icon: answers.icon?.trim() || '📋',
-              position: answers.position || 0,
-            })
-            .returning();
+      try {
+        const [newBoard] = await db
+          .insert(boards)
+          .values({
+            name: answers.name.trim(),
+            slug: slug.trim(),
+            description: answers.description?.trim() || null,
+            icon: answers.icon?.trim() || '📋',
+            position: answers.position || 0,
+          })
+          .returning();
 
-          console.log(chalk.green('\n✅ Board created successfully!'));
-          console.log(chalk.blue(`Name: ${newBoard.name}`));
-          console.log(chalk.blue(`Slug: ${newBoard.slug}`));
-        } catch (error) {
-          console.error(chalk.red('❌ Error creating board:'), error);
-        }
-      })
+        console.log(chalk.green('\n✅ Board created successfully!'));
+        console.log(chalk.blue(`Name: ${newBoard.name}`));
+        console.log(chalk.blue(`Slug: ${newBoard.slug}`));
+      } catch (error) {
+        console.error(chalk.red('❌ Error creating board:'), error);
+      }
+    })
   )
   .addCommand(
     new Command('update')

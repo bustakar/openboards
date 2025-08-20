@@ -1,9 +1,9 @@
-import { Command } from 'commander';
-import chalk from 'chalk';
-import inquirer from 'inquirer';
+import { boards, comments, posts } from '@/db/schema';
 import { getDatabase } from '@/server/db';
-import { comments, posts, boards } from '@/db/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import chalk from 'chalk';
+import { Command } from 'commander';
+import { and, desc, eq } from 'drizzle-orm';
+import inquirer from 'inquirer';
 
 export const commentsCommand = new Command('comments')
   .description('Manage comments')
@@ -14,7 +14,7 @@ export const commentsCommand = new Command('comments')
       .option('-a, --author <name>', 'Filter by author name')
       .action(async (options) => {
         const { db } = getDatabase();
-        
+
         const query = db
           .select({
             id: comments.id,
@@ -31,18 +31,20 @@ export const commentsCommand = new Command('comments')
           .leftJoin(boards, eq(posts.boardId, boards.id));
 
         const conditions = [];
-        
+
         if (options.post) {
           conditions.push(eq(posts.slug, options.post));
         }
-        
+
         if (options.author) {
           conditions.push(eq(comments.authorName, options.author));
         }
 
         let allComments;
         if (conditions.length > 0) {
-          allComments = await query.where(and(...conditions)).orderBy(desc(comments.createdAt));
+          allComments = await query
+            .where(and(...conditions))
+            .orderBy(desc(comments.createdAt));
         } else {
           allComments = await query.orderBy(desc(comments.createdAt));
         }
@@ -54,15 +56,27 @@ export const commentsCommand = new Command('comments')
 
         console.log(chalk.blue('\n💬 Comments:'));
         console.log('─'.repeat(100));
-        
+
         allComments.forEach((comment, index) => {
           console.log(
-            `${chalk.cyan(`${index + 1}.`)} ${chalk.bold(comment.authorName || 'Anonymous')}`
+            `${chalk.cyan(`${index + 1}.`)} ${chalk.bold(
+              comment.authorName || 'Anonymous'
+            )}`
           );
-          console.log(`   Post: ${chalk.gray(comment.postTitle)} (${comment.postSlug})`);
-          console.log(`   Board: ${chalk.gray(comment.boardName || 'Unknown')}`);
-          console.log(`   Content: ${chalk.gray(comment.body.substring(0, 100))}${comment.body.length > 100 ? '...' : ''}`);
-          console.log(`   Created: ${chalk.gray(comment.createdAt.toLocaleDateString())}`);
+          console.log(
+            `   Post: ${chalk.gray(comment.postTitle)} (${comment.postSlug})`
+          );
+          console.log(
+            `   Board: ${chalk.gray(comment.boardName || 'Unknown')}`
+          );
+          console.log(
+            `   Content: ${chalk.gray(comment.body.substring(0, 100))}${
+              comment.body.length > 100 ? '...' : ''
+            }`
+          );
+          console.log(
+            `   Created: ${chalk.gray(comment.createdAt.toLocaleDateString())}`
+          );
           if (comment.isArchived) {
             console.log(`   ${chalk.red('📁 Archived')}`);
           }
@@ -134,14 +148,18 @@ export const commentsCommand = new Command('comments')
         console.log(chalk.blue('\n💬 Comment Details:'));
         console.log('─'.repeat(80));
         console.log(chalk.bold(`Author: ${comment.authorName || 'Anonymous'}`));
-        console.log(`Post: ${chalk.gray(comment.postTitle)} (${comment.postSlug})`);
+        console.log(
+          `Post: ${chalk.gray(comment.postTitle)} (${comment.postSlug})`
+        );
         console.log(`Board: ${chalk.gray(comment.boardName || 'Unknown')}`);
-        console.log(`Created: ${chalk.gray(comment.createdAt.toLocaleDateString())}`);
+        console.log(
+          `Created: ${chalk.gray(comment.createdAt.toLocaleDateString())}`
+        );
         if (comment.isArchived) {
           console.log(`${chalk.red('📁 Archived')}`);
         }
         console.log('');
-        
+
         console.log(chalk.blue('Content:'));
         console.log('─'.repeat(40));
         console.log(comment.body);
@@ -188,7 +206,8 @@ export const commentsCommand = new Command('comments')
             type: 'input',
             name: 'body',
             message: 'Comment content:',
-            validate: (input) => input.trim().length > 0 || 'Comment content is required',
+            validate: (input) =>
+              input.trim().length > 0 || 'Comment content is required',
           },
           {
             type: 'input',
@@ -209,8 +228,16 @@ export const commentsCommand = new Command('comments')
             .returning();
 
           console.log(chalk.green('\n✅ Comment created successfully!'));
-          console.log(chalk.blue(`Author: ${newComment.authorName || 'Anonymous'}`));
-          console.log(chalk.blue(`Content: ${newComment.body.substring(0, 50)}${newComment.body.length > 50 ? '...' : ''}`));
+          console.log(
+            chalk.blue(`Author: ${newComment.authorName || 'Anonymous'}`)
+          );
+          console.log(
+            chalk.blue(
+              `Content: ${newComment.body.substring(0, 50)}${
+                newComment.body.length > 50 ? '...' : ''
+              }`
+            )
+          );
         } catch (error) {
           console.error(chalk.red('❌ Error creating comment:'), error);
         }
@@ -276,7 +303,8 @@ export const commentsCommand = new Command('comments')
             name: 'body',
             message: 'Comment content:',
             default: comment.body,
-            validate: (input) => input.trim().length > 0 || 'Comment content is required',
+            validate: (input) =>
+              input.trim().length > 0 || 'Comment content is required',
           },
           {
             type: 'input',
@@ -297,8 +325,16 @@ export const commentsCommand = new Command('comments')
             .returning();
 
           console.log(chalk.green('\n✅ Comment updated successfully!'));
-          console.log(chalk.blue(`Author: ${updatedComment.authorName || 'Anonymous'}`));
-          console.log(chalk.blue(`Content: ${updatedComment.body.substring(0, 50)}${updatedComment.body.length > 50 ? '...' : ''}`));
+          console.log(
+            chalk.blue(`Author: ${updatedComment.authorName || 'Anonymous'}`)
+          );
+          console.log(
+            chalk.blue(
+              `Content: ${updatedComment.body.substring(0, 50)}${
+                updatedComment.body.length > 50 ? '...' : ''
+              }`
+            )
+          );
         } catch (error) {
           console.error(chalk.red('❌ Error updating comment:'), error);
         }
@@ -336,7 +372,9 @@ export const commentsCommand = new Command('comments')
               name: 'selectedId',
               message: 'Select a comment:',
               choices: allComments.map((c) => ({
-                name: `${c.authorName || 'Anonymous'} on "${c.postTitle}" ${c.isArchived ? '📁 Archived' : '💬 Active'}`,
+                name: `${c.authorName || 'Anonymous'} on "${c.postTitle}" ${
+                  c.isArchived ? '📁 Archived' : '💬 Active'
+                }`,
                 value: c.id,
               })),
             },
@@ -365,7 +403,9 @@ export const commentsCommand = new Command('comments')
           {
             type: 'confirm',
             name: 'confirm',
-            message: `Are you sure you want to ${action} comment by "${comment.authorName || 'Anonymous'}"?`,
+            message: `Are you sure you want to ${action} comment by "${
+              comment.authorName || 'Anonymous'
+            }"?`,
             default: false,
           },
         ]);
@@ -383,7 +423,9 @@ export const commentsCommand = new Command('comments')
             .returning();
 
           console.log(chalk.green(`\n✅ Comment ${action}d successfully!`));
-          console.log(chalk.blue(`Author: ${updatedComment.authorName || 'Anonymous'}`));
+          console.log(
+            chalk.blue(`Author: ${updatedComment.authorName || 'Anonymous'}`)
+          );
           console.log(chalk.blue(`Archived: ${updatedComment.isArchived}`));
         } catch (error) {
           console.error(chalk.red(`❌ Error ${action}ing comment:`), error);
@@ -448,7 +490,9 @@ export const commentsCommand = new Command('comments')
           {
             type: 'confirm',
             name: 'confirm',
-            message: `Are you sure you want to delete comment by "${comment.authorName || 'Anonymous'}"? This action cannot be undone.`,
+            message: `Are you sure you want to delete comment by "${
+              comment.authorName || 'Anonymous'
+            }"? This action cannot be undone.`,
             default: false,
           },
         ]);
