@@ -18,7 +18,8 @@ export async function POST(request: NextRequest) {
   if (parsed.data._hpt) return NextResponse.json({ ok: true }, { status: 204 });
 
   const body = sanitizeBody(parsed.data.body);
-  const id = decodeURIComponent(request.nextUrl.pathname.split("/")[4] ?? "");
+  // Path: /api/posts/[id]/comments -> ['', 'api', 'posts', '[id]', 'comments']
+  const id = decodeURIComponent(request.nextUrl.pathname.split("/")[3] ?? "");
   const created = await createComment({ postId: id, visitorId, authorName: parsed.data.authorName, body });
   return NextResponse.json(created, { status: 201 });
 }

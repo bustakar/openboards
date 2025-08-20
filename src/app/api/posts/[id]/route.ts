@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getDatabase } from "@/server/db";
-import { posts } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { posts } from '@/db/schema';
+import { getDatabase } from '@/server/db';
+import { eq } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const id = decodeURIComponent(request.nextUrl.pathname.split("/")[4] ?? "");
+  // Path: /api/posts/[id] -> ['', 'api', 'posts', '[id]']
+  const id = decodeURIComponent(request.nextUrl.pathname.split('/')[3] ?? '');
   const { db } = getDatabase();
   const [row] = await db
     .select({
@@ -25,8 +26,6 @@ export async function GET(request: NextRequest) {
     .from(posts)
     .where(eq(posts.id, id))
     .limit(1);
-  if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(row);
 }
-
-
