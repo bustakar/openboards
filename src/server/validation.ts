@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const createPostSchema = z.object({
+  boardId: z.string().uuid(),
   title: z.string().min(3).max(120),
   body: z.string().max(10_000).optional().or(z.literal("")),
   _hpt: z.string().optional(),

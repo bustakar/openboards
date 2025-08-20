@@ -43,7 +43,7 @@ export default async function BoardPage(props: {
         <div className="col-span-12 md:col-span-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">{board.name}</h2>
-            <Link href={`/b/${board.slug}/new`}>
+            <Link href="/new">
               <Button>New post</Button>
             </Link>
           </div>
