@@ -1,9 +1,11 @@
-import { and, eq, sql } from "drizzle-orm";
-import { getDatabase } from "@/server/db";
-import { votes, posts } from "@/db/schema";
+import { posts, votes } from '@/db/schema';
+import { getDatabase } from '@/server/db';
+import { and, eq, sql } from 'drizzle-orm';
 
 export async function toggleVote(postId: string, visitorId: string) {
   const { db } = getDatabase();
+  if (!postId) throw new Error('missing_post_id');
+  if (!visitorId) throw new Error('missing_visitor');
   const existing = await db
     .select({ id: votes.id })
     .from(votes)
@@ -14,7 +16,10 @@ export async function toggleVote(postId: string, visitorId: string) {
     await db.delete(votes).where(eq(votes.id, existing[0].id));
     const [row] = await db
       .update(posts)
-      .set({ voteCount: sql`${posts.voteCount} - 1`, lastActivityAt: sql`now()` })
+      .set({
+        voteCount: sql`${posts.voteCount} - 1`,
+        lastActivityAt: sql`now()`,
+      })
       .where(eq(posts.id, postId))
       .returning({ voteCount: posts.voteCount });
     return { voted: false, voteCount: row?.voteCount ?? 0 } as const;
@@ -28,5 +33,3 @@ export async function toggleVote(postId: string, visitorId: string) {
     .returning({ voteCount: posts.voteCount });
   return { voted: true, voteCount: row?.voteCount ?? 0 } as const;
 }
-
-

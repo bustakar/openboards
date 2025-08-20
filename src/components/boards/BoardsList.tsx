@@ -1,6 +1,7 @@
-import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import Link from 'next/link';
+import * as React from 'react';
 
 export type BoardItem = {
   id: string;
@@ -10,7 +11,13 @@ export type BoardItem = {
   posts?: number;
 };
 
-export function BoardsList({ boards }: { boards: BoardItem[] }) {
+export function BoardsList({
+  boards,
+  selectedSlug,
+}: {
+  boards: BoardItem[];
+  selectedSlug?: string;
+}) {
   return (
     <Card className="h-full">
       <CardHeader>
@@ -19,19 +26,55 @@ export function BoardsList({ boards }: { boards: BoardItem[] }) {
       <CardContent>
         <ScrollArea className="max-h-[70vh]">
           <ul className="space-y-2">
-            {boards.map((b) => (
-              <li key={b.id} className="rounded-md border p-3 hover:bg-muted/50 transition">
+            <li>
+              <Link
+                href={`/`}
+                aria-current={selectedSlug ? undefined : 'page'}
+                className={
+                  `block rounded-md border p-3 transition-colors ` +
+                  (!selectedSlug
+                    ? 'bg-muted/70 border-foreground/30'
+                    : 'hover:bg-muted/60')
+                }
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium">{b.name}</div>
-                    {b.description ? (
-                      <div className="text-xs text-muted-foreground line-clamp-2">{b.description}</div>
+                    <div className="font-medium">All posts</div>
+                    <div className="text-xs text-muted-foreground">
+                      Across all boards
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </li>
+            {boards.map((b) => (
+              <li key={b.id}>
+                <Link
+                  href={`/b/${b.slug}`}
+                  aria-current={selectedSlug === b.slug ? 'page' : undefined}
+                  className={
+                    `block rounded-md border p-3 transition-colors ` +
+                    (selectedSlug === b.slug
+                      ? 'bg-muted/70 border-foreground/30'
+                      : 'hover:bg-muted/60')
+                  }
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium">{b.name}</div>
+                      {b.description ? (
+                        <div className="text-xs text-muted-foreground line-clamp-2">
+                          {b.description}
+                        </div>
+                      ) : null}
+                    </div>
+                    {typeof b.posts === 'number' ? (
+                      <div className="text-xs text-muted-foreground">
+                        {b.posts} posts
+                      </div>
                     ) : null}
                   </div>
-                  {typeof b.posts === "number" ? (
-                    <div className="text-xs text-muted-foreground">{b.posts} posts</div>
-                  ) : null}
-                </div>
+                </Link>
               </li>
             ))}
           </ul>
@@ -40,5 +83,3 @@ export function BoardsList({ boards }: { boards: BoardItem[] }) {
     </Card>
   );
 }
-
-

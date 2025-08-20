@@ -5,6 +5,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ### 1. Configure environment
 
 Copy the example env file and edit values as needed:
+
 ```bash
 cp .env.example .env.local
 ```
@@ -12,11 +13,13 @@ cp .env.example .env.local
 Ensure `DATABASE_URL` points to a Postgres database and `NEXT_PUBLIC_BASE_URL` matches your local URL.
 
 ### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Run migrations and seed
+
 ```bash
 npm run drizzle:generate
 npm run drizzle:migrate
@@ -24,6 +27,7 @@ npm run seed
 ```
 
 ### 4. Start the dev server
+
 ```bash
 npm run dev
 ```
