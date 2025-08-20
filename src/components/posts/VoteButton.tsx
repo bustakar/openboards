@@ -42,11 +42,15 @@ export function VoteButton({
 
   return (
     <Button
-      variant={voted ? 'secondary' : 'outline'}
+      variant="outline"
       onClick={toggle}
       disabled={loading}
       aria-pressed={voted}
-      className={className}
+      className={`${className} ${
+        voted
+          ? 'bg-pink-500 text-white border-pink-500 shadow-sm'
+          : 'border-gray-300 hover:bg-gray-100'
+      }`}
       aria-label={voted ? 'Remove vote' : 'Add vote'}
     >
       ▲ {count}

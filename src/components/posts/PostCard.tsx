@@ -33,7 +33,7 @@ function formatTimeAgo(dateString: string): string {
   const now = new Date();
   const diffInMs = now.getTime() - date.getTime();
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-  
+
   if (diffInDays === 0) return 'today';
   if (diffInDays === 1) return 'yesterday';
   if (diffInDays < 7) return `${diffInDays} days ago`;
@@ -45,28 +45,31 @@ function formatTimeAgo(dateString: string): string {
 export function PostCard({ post, href }: { post: PostItem; href?: string }) {
   const st = statusVariant(post.status);
   return (
-    <div className="py-4 hover:bg-muted/30 transition-colors border-b border-border/50 last:border-b-0">
+    <div className="px-6 py-6 hover:bg-gray-100/50 transition-colors border-b border-gray-200/50 last:border-b-0 bg-white">
       <div className="flex items-start gap-4">
         <div className="flex-1 min-w-0">
-          {/* Status badge and title row */}
-          <div className="flex items-start gap-3 mb-2">
-            <Badge variant={st.variant} className="text-xs px-2 py-1">
-              {st.label}
-            </Badge>
+          {/* Title and status badge row */}
+          <div className="flex items-center gap-3 mb-2">
             {href ? (
               <Link
                 href={href}
-                className="font-semibold text-base hover:underline line-clamp-2 flex-1"
+                className="font-semibold text-base hover:underline line-clamp-2"
               >
                 {post.title}
               </Link>
             ) : (
-              <div className="font-semibold text-base line-clamp-2 flex-1">
+              <div className="font-semibold text-base line-clamp-2">
                 {post.title}
               </div>
             )}
+            <Badge
+              variant={st.variant}
+              className="text-xs px-2 py-1 flex-shrink-0"
+            >
+              {st.label}
+            </Badge>
           </div>
-          
+
           {/* Metadata line */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
@@ -82,7 +85,7 @@ export function PostCard({ post, href }: { post: PostItem; href?: string }) {
             </div>
           </div>
         </div>
-        
+
         {/* Vote count on the right */}
         <div className="flex-shrink-0">
           <VoteButton

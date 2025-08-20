@@ -1,13 +1,11 @@
 import { BoardsList, type BoardItem } from '@/components/boards/BoardsList';
 import { PostsList } from '@/components/posts/PostsList';
-import { Button } from '@/components/ui/button';
 import { getBoardBySlug, listBoardsWithStats } from '@/server/repos/boards';
 import {
   listPosts,
   type PostSort,
   type PostStatus,
 } from '@/server/repos/posts';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 async function fetchBoards(): Promise<BoardItem[]> {
@@ -58,17 +56,12 @@ export default async function BoardPage(props: {
           <BoardsList boards={boards} selectedSlug={board.slug} />
         </div>
         <div className="col-span-12 md:col-span-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">{board.name}</h2>
-            <Link href="/new">
-              <Button>New post</Button>
-            </Link>
-          </div>
           <PostsList
             posts={formattedPosts}
             basePath={`/b/${board.slug}`}
             boardSlug={board.slug}
             currentSort={sort}
+            boardName={board.name}
           />
         </div>
       </div>
