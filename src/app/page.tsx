@@ -59,14 +59,12 @@ export default async function Home() {
         <div className="col-span-12 md:col-span-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">All posts</h2>
-            {boards[0]?.slug ? (
-              <Link
-                href={`/b/${boards[0].slug}/new`}
-                className="text-sm hover:underline"
-              >
-                New post
-              </Link>
-            ) : null}
+            <Link
+              href="/new"
+              className="text-sm hover:underline"
+            >
+              New post
+            </Link>
           </div>
           <PostsList posts={allPosts} basePath="/" currentSort={sort} />
         </div>

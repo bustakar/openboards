@@ -1,10 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormClient } from './FormClient';
 
-export default async function NewPostPage(props: {
-  params: Promise<{ boardSlug: string }>;
-}) {
-  const params = await props.params;
+export default async function NewPostPage() {
   return (
     <main className="container mx-auto p-6">
       <div className="max-w-2xl mx-auto">
@@ -13,7 +10,7 @@ export default async function NewPostPage(props: {
             <CardTitle>Submit new feature/bug</CardTitle>
           </CardHeader>
           <CardContent>
-            <FormClient boardSlug={params.boardSlug} />
+            <FormClient />
           </CardContent>
         </Card>
       </div>
