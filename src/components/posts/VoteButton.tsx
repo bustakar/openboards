@@ -2,7 +2,15 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 
-export function VoteButton({ postId, initialCount }: { postId: string; initialCount: number }) {
+export function VoteButton({
+  postId,
+  initialCount,
+  className,
+}: {
+  postId: string;
+  initialCount: number;
+  className?: string;
+}) {
   const storageKey = `voted:${postId}`;
   const [count, setCount] = React.useState(initialCount);
   const [voted, setVoted] = React.useState<boolean>(false);
@@ -33,7 +41,14 @@ export function VoteButton({ postId, initialCount }: { postId: string; initialCo
   }
 
   return (
-    <Button variant={voted ? "secondary" : "outline"} onClick={toggle} disabled={loading} aria-pressed={voted}>
+    <Button
+      variant={voted ? "secondary" : "outline"}
+      onClick={toggle}
+      disabled={loading}
+      aria-pressed={voted}
+      className={className}
+      aria-label={voted ? "Remove vote" : "Add vote"}
+    >
       ▲ {count}
     </Button>
   );

@@ -65,6 +65,11 @@ function CommentForm({ postId }: { postId: string }) {
         body: JSON.stringify({ body, authorName }),
       }
     );
+    // Best-effort revalidation for pages under /b
+    try {
+      const { revalidatePath } = await import('next/cache');
+      revalidatePath('/b');
+    } catch {}
   }
 
   return (

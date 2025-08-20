@@ -1,6 +1,6 @@
+import { BoardsList } from '@/components/boards/BoardsList';
 import { PostsList } from '@/components/posts/PostsList';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getBoardBySlug } from '@/server/repos/boards';
 import {
   listPosts,
@@ -32,24 +32,30 @@ export default async function BoardPage(props: {
 
   return (
     <main className="container mx-auto p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between gap-4">
-              <CardTitle>{board.name}</CardTitle>
-              <Link href={`/b/${board.slug}/new`}>
-                <Button>New post</Button>
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {board.description ?? ''}
-            </p>
-          </CardContent>
-        </Card>
-        <PostsList posts={data.items} boardSlug={board.slug} />
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-12 md:col-span-4">
+          {/* Highlight selected board on the left */}
+          {/* We need boards to render; fetch via API for SSR parity */}
+          {/* Using clientless SSR fetch keeps layout consistent with home */}
+          <BoardsFetcher selectedSlug={board.slug} />
+        </div>
+        <div className="col-span-12 md:col-span-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">{board.name}</h2>
+            <Link href={`/b/${board.slug}/new`}>
+              <Button>New post</Button>
+            </Link>
+          </div>
+          <PostsList posts={data.items} boardSlug={board.slug} />
+        </div>
       </div>
     </main>
   );
+}
+
+async function BoardsFetcher({ selectedSlug }: { selectedSlug?: string }) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/boards`, { cache: 'no-store' });
+  const boards: Array<{ id: string; name: string; slug: string; description?: string | null; posts?: number }> =
+    res.ok ? await res.json() : [];
+  return <BoardsList boards={boards} selectedSlug={selectedSlug} />;
 }
