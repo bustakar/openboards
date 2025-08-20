@@ -1,7 +1,8 @@
 import { PostCard, type PostItem } from '@/components/posts/PostCard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import * as React from 'react';
+import { Button } from '../ui/button';
+
 export type { PostItem } from '@/components/posts/PostCard';
 
 type ItemWithBoard = PostItem & { boardSlug?: string };
@@ -12,42 +13,72 @@ export function PostsList({
   boardSlug,
   linkFor,
   currentSort,
+  boardName,
 }: {
   posts: ItemWithBoard[];
   basePath: string;
   boardSlug?: string;
   linkFor?: (p: ItemWithBoard) => string;
   currentSort?: 'trending' | 'new' | 'top';
+  boardName?: string;
 }) {
   // Read sort from current URL and reflect in heading
   const heading =
-    currentSort === 'new' ? 'New' : currentSort === 'top' ? 'Top' : 'Trending';
+    boardName ||
+    (currentSort === 'new'
+      ? 'New'
+      : currentSort === 'top'
+      ? 'Top'
+      : 'Trending');
   return (
-    <Card className="h-full">
-      <CardHeader>
+    <div className="h-full">
+      <div className="mb-6">
         <div className="flex items-center justify-between">
-          <CardTitle>{heading}</CardTitle>
-          <div className="flex items-center gap-2 text-sm">
-            <Link
-              href={`${basePath}?sort=trending`}
-              className="hover:underline"
-            >
-              Top
-            </Link>
-            <span className="text-muted-foreground">/</span>
-            <Link href={`${basePath}?sort=new`} className="hover:underline">
-              New
-            </Link>
-            <span className="text-muted-foreground">/</span>
-            <Link href={`${basePath}?sort=top`} className="hover:underline">
-              Trending
-            </Link>
+          <div className="flex items-center gap-6">
+            <h2 className="text-xl font-semibold">{heading}</h2>
+            <div className="inline-flex h-9 items-center justify-center rounded-lg bg-gray-100 p-1">
+              <Link
+                href={`${basePath}?sort=trending`}
+                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+                  currentSort === 'trending'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Top
+              </Link>
+              <Link
+                href={`${basePath}?sort=new`}
+                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+                  currentSort === 'new'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                New
+              </Link>
+              <Link
+                href={`${basePath}?sort=top`}
+                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+                  currentSort === 'top'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-900 hover:text-gray-900'
+                }`}
+              >
+                Trending
+              </Link>
+            </div>
           </div>
+          <Button asChild size="sm">
+            <Link href="/new">New post</Link>
+          </Button>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+      </div>
+      <div className="bg-gray-50 border border-gray-200 rounded-lg">
         {posts.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No posts yet.</div>
+          <div className="text-sm text-muted-foreground py-8 text-center">
+            No posts yet.
+          </div>
         ) : (
           posts.map((p) => {
             const href = linkFor
@@ -60,7 +91,7 @@ export function PostsList({
             return <PostCard key={p.id} post={p} href={href} />;
           })
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

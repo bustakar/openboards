@@ -21,6 +21,7 @@ async function seed() {
         name: 'Features',
         slug: 'features',
         description: 'Feature requests',
+        icon: '💡',
         position: 1,
       })
       .returning({ id: boards.id });
@@ -39,6 +40,7 @@ async function seed() {
         name: 'Bugs',
         slug: 'bugs',
         description: 'Bug reports',
+        icon: '🐛',
         position: 2,
       })
       .returning({ id: boards.id });

@@ -1,14 +1,24 @@
-import { BoardsList } from '@/components/boards/BoardsList';
+import { BoardsList, type BoardItem } from '@/components/boards/BoardsList';
 import { PostsList } from '@/components/posts/PostsList';
-import { Button } from '@/components/ui/button';
-import { getBoardBySlug } from '@/server/repos/boards';
+import { getBoardBySlug, listBoardsWithStats } from '@/server/repos/boards';
 import {
   listPosts,
   type PostSort,
   type PostStatus,
 } from '@/server/repos/posts';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+async function fetchBoards(): Promise<BoardItem[]> {
+  const data = await listBoardsWithStats();
+  return data.map((b) => ({
+    id: b.id,
+    name: b.name,
+    slug: b.slug,
+    description: b.description ?? null,
+    icon: b.icon ?? null,
+    posts: Number(b.posts ?? 0),
+  }));
+}
 
 export default async function BoardPage(props: {
   params: Promise<{ boardSlug: string }>;
@@ -31,45 +41,30 @@ export default async function BoardPage(props: {
     limit,
   });
 
+  const boards = await fetchBoards();
+
+  // Format the posts data to include createdAt as ISO string
+  const formattedPosts = data.items.map((post) => ({
+    ...post,
+    createdAt: post.createdAt.toISOString(),
+  }));
+
   return (
     <main className="container mx-auto p-6">
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 md:col-span-4">
-          {/* Highlight selected board on the left */}
-          {/* We need boards to render; fetch via API for SSR parity */}
-          {/* Using clientless SSR fetch keeps layout consistent with home */}
-          <BoardsFetcher selectedSlug={board.slug} />
+          <BoardsList boards={boards} selectedSlug={board.slug} />
         </div>
         <div className="col-span-12 md:col-span-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">{board.name}</h2>
-            <Link href="/new">
-              <Button>New post</Button>
-            </Link>
-          </div>
           <PostsList
-            posts={data.items}
+            posts={formattedPosts}
             basePath={`/b/${board.slug}`}
             boardSlug={board.slug}
             currentSort={sort}
+            boardName={board.name}
           />
         </div>
       </div>
     </main>
   );
-}
-
-async function BoardsFetcher({ selectedSlug }: { selectedSlug?: string }) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/boards`,
-    { cache: 'no-store' }
-  );
-  const boards: Array<{
-    id: string;
-    name: string;
-    slug: string;
-    description?: string | null;
-    posts?: number;
-  }> = res.ok ? await res.json() : [];
-  return <BoardsList boards={boards} selectedSlug={selectedSlug} />;
 }

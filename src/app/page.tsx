@@ -1,10 +1,7 @@
 import { BoardsList, type BoardItem } from '@/components/boards/BoardsList';
-import { PostsList, type PostItem } from '@/components/posts/PostsList';
-import { posts } from '@/db/schema';
-import { getDatabase } from '@/server/db';
+import { PostsList } from '@/components/posts/PostsList';
 import { listBoardsWithStats } from '@/server/repos/boards';
-import { desc, eq, sql } from 'drizzle-orm';
-import Link from 'next/link';
+import { listPosts } from '@/server/repos/posts';
 
 async function fetchBoards(): Promise<BoardItem[]> {
   const data = await listBoardsWithStats();
@@ -13,43 +10,55 @@ async function fetchBoards(): Promise<BoardItem[]> {
     name: b.name,
     slug: b.slug,
     description: b.description ?? null,
+    icon: b.icon ?? null,
     posts: Number(b.posts ?? 0),
   }));
 }
 
-export default async function Home() {
+export default async function Home(props: {
+  searchParams?: Promise<{ sort?: 'trending' | 'new' | 'top' }>;
+}) {
   const boards = await fetchBoards();
-  const sort: 'trending' | 'new' | 'top' = 'trending';
-  const { db } = getDatabase();
-  const rows = await db
-    .select({
-      id: posts.id,
-      title: posts.title,
-      slug: posts.slug,
-      status: posts.status,
-      voteCount: posts.voteCount,
-      commentCount: posts.commentCount,
-      lastActivityAt: posts.lastActivityAt,
-      isArchived: posts.isArchived,
-      boardId: posts.boardId,
+  const sp = (await props.searchParams) ?? {};
+  const sort = sp.sort ?? 'trending';
+  // Get all posts across all boards
+  const allBoardsData = await Promise.all(
+    boards.map(async (board) => {
+      const data = await listPosts({
+        boardId: board.id,
+        sort,
+        limit: 10,
+      });
+      return data.items.map((post) => ({
+        ...post,
+        createdAt: post.createdAt.toISOString(),
+        boardSlug: board.slug,
+      }));
     })
-    .from(posts)
-    .where(eq(posts.isArchived, false))
-    .orderBy(
-      desc(
-        sql`(${posts.voteCount} * 1.0) + (extract(epoch from ${posts.lastActivityAt}) / 100000)`
-      )
-    )
-    .limit(10);
-  const allPosts = rows.map((r) => ({
-    id: r.id,
-    title: r.title,
-    slug: r.slug,
-    status: r.status as PostItem['status'],
-    voteCount: r.voteCount,
-    commentCount: r.commentCount,
-    boardSlug: boards.find((b) => b.id === r.boardId)?.slug,
-  }));
+  );
+
+  // Flatten and sort by the specified sort order
+  const allPosts = allBoardsData
+    .flat()
+    .sort((a, b) => {
+      switch (sort) {
+        case 'new':
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        case 'top':
+          return b.voteCount - a.voteCount;
+        case 'trending':
+        default:
+          // Simple trending score: votes + recency factor
+          const aScore =
+            a.voteCount + new Date(a.createdAt).getTime() / 1000000;
+          const bScore =
+            b.voteCount + new Date(b.createdAt).getTime() / 1000000;
+          return bScore - aScore;
+      }
+    })
+    .slice(0, 10);
   return (
     <main className="container mx-auto p-6">
       <div className="grid grid-cols-12 gap-6">
@@ -57,16 +66,12 @@ export default async function Home() {
           <BoardsList boards={boards} selectedSlug={undefined} />
         </div>
         <div className="col-span-12 md:col-span-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">All posts</h2>
-            <Link
-              href="/new"
-              className="text-sm hover:underline"
-            >
-              New post
-            </Link>
-          </div>
-          <PostsList posts={allPosts} basePath="/" currentSort={sort} />
+          <PostsList
+            posts={allPosts}
+            basePath="/"
+            currentSort={sort}
+            boardName="All posts"
+          />
         </div>
       </div>
     </main>

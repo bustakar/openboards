@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Link from 'next/link';
 import * as React from 'react';
@@ -8,6 +7,7 @@ export type BoardItem = {
   name: string;
   slug: string;
   description?: string | null;
+  icon?: string | null;
   posts?: number;
 };
 
@@ -19,67 +19,48 @@ export function BoardsList({
   selectedSlug?: string;
 }) {
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle>Boards</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="max-h-[70vh]">
-          <ul className="space-y-2">
-            <li>
+    <div className="h-full">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Boards
+        </h3>
+      </div>
+      <ScrollArea className="max-h-[70vh]">
+        <ul className="space-y-1">
+          <li>
+            <Link
+              href="/"
+              aria-current={selectedSlug ? undefined : 'page'}
+              className={
+                `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ` +
+                (!selectedSlug
+                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50')
+              }
+            >
+              <span className="text-lg">📋</span>
+              <span className="font-medium">View all posts</span>
+            </Link>
+          </li>
+          {boards.map((b) => (
+            <li key={b.id}>
               <Link
-                href={`/`}
-                aria-current={selectedSlug ? undefined : 'page'}
+                href={`/b/${b.slug}`}
+                aria-current={selectedSlug === b.slug ? 'page' : undefined}
                 className={
-                  `block rounded-md border p-3 transition-colors ` +
-                  (!selectedSlug
-                    ? 'bg-muted/70 border-foreground/30'
-                    : 'hover:bg-muted/60')
+                  `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ` +
+                  (selectedSlug === b.slug
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50')
                 }
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">All posts</div>
-                    <div className="text-xs text-muted-foreground">
-                      Across all boards
-                    </div>
-                  </div>
-                </div>
+                <span className="text-lg">{b.icon || '📄'}</span>
+                <span className="font-medium">{b.name}</span>
               </Link>
             </li>
-            {boards.map((b) => (
-              <li key={b.id}>
-                <Link
-                  href={`/b/${b.slug}`}
-                  aria-current={selectedSlug === b.slug ? 'page' : undefined}
-                  className={
-                    `block rounded-md border p-3 transition-colors ` +
-                    (selectedSlug === b.slug
-                      ? 'bg-muted/70 border-foreground/30'
-                      : 'hover:bg-muted/60')
-                  }
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">{b.name}</div>
-                      {b.description ? (
-                        <div className="text-xs text-muted-foreground line-clamp-2">
-                          {b.description}
-                        </div>
-                      ) : null}
-                    </div>
-                    {typeof b.posts === 'number' ? (
-                      <div className="text-xs text-muted-foreground">
-                        {b.posts} posts
-                      </div>
-                    ) : null}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+          ))}
+        </ul>
+      </ScrollArea>
+    </div>
   );
 }
