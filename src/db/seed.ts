@@ -9,20 +9,13 @@ dotenv.config({ path: '.env.local' });
 async function seed() {
   const { db } = getDatabase();
 
-  // Ensure a default project exists
-  const existingProject = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.subdomain, 'demo'))
-    .limit(1);
-  let projectId = existingProject[0]?.id;
-  if (!projectId) {
-    const [proj] = await db
-      .insert(projects)
-      .values({ name: 'Demo Project', subdomain: 'demo', description: 'Default demo project' })
-      .returning({ id: projects.id });
-    projectId = proj.id;
+  // Skip creating a default project; expect users to create their own projects
+  const [maybeProject] = await db.select().from(projects).limit(1);
+  if (!maybeProject) {
+    console.log('No projects found. Seed will not create a default project.');
+    return;
   }
+  const projectId = maybeProject.id as string;
 
   const existingFeatures = await db
     .select()

@@ -1,9 +1,9 @@
 import { BoardsList, type BoardItem } from '@/components/boards/BoardsList';
 import { PostsList } from '@/components/posts/PostsList';
+import { SelectProjectClient } from '@/components/projects/SelectProjectClient';
 import { listBoardsWithStats } from '@/server/repos/boards';
 import { listPosts } from '@/server/repos/posts';
 import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
-import { SelectProjectClient } from '@/components/projects/SelectProjectClient';
 
 async function fetchBoards(): Promise<BoardItem[]> {
   const data = await listBoardsWithStats();
@@ -28,7 +28,11 @@ export default async function Home(props: {
     const { asc } = await import('drizzle-orm');
     const { db } = getDatabase();
     const rows = await db
-      .select({ id: projects.id, name: projects.name, subdomain: projects.subdomain })
+      .select({
+        id: projects.id,
+        name: projects.name,
+        subdomain: projects.subdomain,
+      })
       .from(projects)
       .orderBy(asc(projects.subdomain));
     return (

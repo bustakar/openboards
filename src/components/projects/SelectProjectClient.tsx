@@ -5,11 +5,24 @@ import { useMemo, useState } from 'react';
 
 export type ProjectOption = { id: string; name: string; subdomain: string };
 
-export function SelectProjectClient({ projects }: { projects: ProjectOption[] }) {
-  const [selected, setSelected] = useState<string>(projects[0]?.subdomain ?? '');
+export function SelectProjectClient({
+  projects,
+}: {
+  projects: ProjectOption[];
+}) {
+  const [selected, setSelected] = useState<string>(
+    projects[0]?.subdomain ?? ''
+  );
 
   const hasProjects = projects.length > 0;
-  const options = useMemo(() => projects.map((p) => ({ label: `${p.name} (${p.subdomain})`, value: p.subdomain })), [projects]);
+  const options = useMemo(
+    () =>
+      projects.map((p) => ({
+        label: `${p.name} (${p.subdomain})`,
+        value: p.subdomain,
+      })),
+    [projects]
+  );
 
   function goToProject() {
     if (!selected) return;
@@ -34,7 +47,10 @@ export function SelectProjectClient({ projects }: { projects: ProjectOption[] })
     <div className="container mx-auto p-6">
       <div className="max-w-xl mx-auto bg-white border border-gray-200 rounded-lg p-6">
         <h1 className="text-xl font-semibold mb-2">Select a project</h1>
-        <p className="text-sm text-gray-600 mb-4">Choose which project to view. You can manage projects in the admin app.</p>
+        <p className="text-sm text-gray-600 mb-4">
+          Choose which project to view. You can manage projects in the admin
+          app.
+        </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <select
             value={selected}
@@ -62,5 +78,3 @@ export function SelectProjectClient({ projects }: { projects: ProjectOption[] })
     </div>
   );
 }
-
-
