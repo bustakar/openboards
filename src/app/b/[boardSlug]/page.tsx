@@ -1,24 +1,11 @@
-import { BoardsList, type BoardItem } from '@/components/boards/BoardsList';
 import { PostsList } from '@/components/posts/PostsList';
-import { getBoardBySlug, listBoardsWithStats } from '@/server/repos/boards';
+import { getBoardBySlug } from '@/server/repos/boards';
 import {
   listPosts,
   type PostSort,
   type PostStatus,
 } from '@/server/repos/posts';
 import { notFound } from 'next/navigation';
-
-async function fetchBoards(): Promise<BoardItem[]> {
-  const data = await listBoardsWithStats();
-  return data.map((b) => ({
-    id: b.id,
-    name: b.name,
-    slug: b.slug,
-    description: b.description ?? null,
-    icon: b.icon ?? null,
-    posts: Number(b.posts ?? 0),
-  }));
-}
 
 export default async function BoardPage(props: {
   params: Promise<{ boardSlug: string }>;
@@ -41,8 +28,6 @@ export default async function BoardPage(props: {
     limit,
   });
 
-  const boards = await fetchBoards();
-
   // Format the posts data to include createdAt as ISO string
   const formattedPosts = data.items.map((post) => ({
     ...post,
@@ -50,21 +35,12 @@ export default async function BoardPage(props: {
   }));
 
   return (
-    <main className="container mx-auto p-6">
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 md:col-span-4">
-          <BoardsList boards={boards} selectedSlug={board.slug} />
-        </div>
-        <div className="col-span-12 md:col-span-8">
-          <PostsList
-            posts={formattedPosts}
-            basePath={`/b/${board.slug}`}
-            boardSlug={board.slug}
-            currentSort={sort}
-            boardName={board.name}
-          />
-        </div>
-      </div>
-    </main>
+    <PostsList
+      posts={formattedPosts}
+      basePath={`/b/${board.slug}`}
+      boardSlug={board.slug}
+      currentSort={sort}
+      boardName={board.name}
+    />
   );
 }

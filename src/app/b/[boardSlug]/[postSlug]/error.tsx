@@ -21,8 +21,8 @@ export default function PostError({
         <div className="text-6xl mb-4">📝</div>
         <h2 className="text-2xl font-semibold text-gray-900">Post not found</h2>
         <p className="text-gray-600 max-w-md">
-          The post you&apos;re looking for doesn&apos;t exist or there was an error
-          loading it.
+          The post you&apos;re looking for doesn&apos;t exist or there was an
+          error loading it.
         </p>
         <div className="flex gap-3 justify-center">
           <Button onClick={() => reset()} variant="default">

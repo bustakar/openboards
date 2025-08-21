@@ -78,82 +78,84 @@ export default async function RoadmapPage() {
   return (
     <main className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Roadmap</h1>
-      
+
       {totalItems === 0 ? (
         <EmptyState
           icon="🗺️"
           title="No roadmap items yet"
           description="Create posts and move them through different statuses to build your roadmap."
           action={{
-            label: "Create your first post",
-            href: "/new"
+            label: 'Create your first post',
+            href: '/new',
           }}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {columns.map((status) => {
-          const meta = statusMeta(status);
-          const list = grouped[status] ?? [];
-          return (
-            <section
-              key={status}
-              className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex flex-col"
-            >
-              <header className="mb-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-700">
-                    {meta.label}
-                  </span>
-                </div>
-                <span className="text-xs text-gray-500">{list.length}</span>
-              </header>
-              <div className="space-y-2">
-                {list.length === 0 ? (
-                  <div className="bg-white border border-gray-200 rounded-md p-4">
-                    <EmptyState
-                      icon="📋"
-                      title={`No ${meta.label.toLowerCase()} items`}
-                      description={`No items in ${meta.label.toLowerCase()} yet.`}
-                    />
+          {columns.map((status) => {
+            const meta = statusMeta(status);
+            const list = grouped[status] ?? [];
+            return (
+              <section
+                key={status}
+                className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex flex-col"
+              >
+                <header className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-700">
+                      {meta.label}
+                    </span>
                   </div>
-                ) : (
-                  list.map((p) => (
-                    <div
-                      key={p.id}
-                      className="bg-white border border-gray-200 rounded-md p-3 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <Link
-                            href={
-                              p.boardSlug ? `/b/${p.boardSlug}/${p.slug}` : '#'
-                            }
-                            className="font-medium text-sm hover:underline line-clamp-2"
-                          >
-                            {p.title}
-                          </Link>
-                          <div className="mt-1 text-xs text-gray-500 flex items-center gap-3">
-                            <span className="inline-flex items-center gap-1">
-                              <span>💬</span>
-                              <span>{p.commentCount}</span>
-                            </span>
+                  <span className="text-xs text-gray-500">{list.length}</span>
+                </header>
+                <div className="space-y-2">
+                  {list.length === 0 ? (
+                    <div className="bg-white border border-gray-200 rounded-md p-4">
+                      <EmptyState
+                        icon="📋"
+                        title={`No ${meta.label.toLowerCase()} items`}
+                        description={`No items in ${meta.label.toLowerCase()} yet.`}
+                      />
+                    </div>
+                  ) : (
+                    list.map((p) => (
+                      <div
+                        key={p.id}
+                        className="bg-white border border-gray-200 rounded-md p-3 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1 min-w-0">
+                            <Link
+                              href={
+                                p.boardSlug
+                                  ? `/b/${p.boardSlug}/${p.slug}`
+                                  : '#'
+                              }
+                              className="font-medium text-sm hover:underline line-clamp-2"
+                            >
+                              {p.title}
+                            </Link>
+                            <div className="mt-1 text-xs text-gray-500 flex items-center gap-3">
+                              <span className="inline-flex items-center gap-1">
+                                <span>💬</span>
+                                <span>{p.commentCount}</span>
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <VoteButton
+                              postId={p.id}
+                              initialCount={p.voteCount}
+                              className="flex flex-col items-center gap-0.5 text-sm font-semibold"
+                            />
                           </div>
                         </div>
-                        <div className="flex-shrink-0">
-                          <VoteButton
-                            postId={p.id}
-                            initialCount={p.voteCount}
-                            className="flex flex-col items-center gap-0.5 text-sm font-semibold"
-                          />
-                        </div>
                       </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-          );
-        })}
+                    ))
+                  )}
+                </div>
+              </section>
+            );
+          })}
         </div>
       )}
     </main>

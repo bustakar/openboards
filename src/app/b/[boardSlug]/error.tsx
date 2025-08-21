@@ -23,8 +23,8 @@ export default function BoardError({
           Board not found
         </h2>
         <p className="text-gray-600 max-w-md">
-          The board you&apos;re looking for doesn&apos;t exist or there was an error
-          loading it.
+          The board you&apos;re looking for doesn&apos;t exist or there was an
+          error loading it.
         </p>
         <div className="flex gap-3 justify-center">
           <Button onClick={() => reset()} variant="default">

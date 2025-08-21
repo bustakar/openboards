@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
 
 export default function Error({
   error,
@@ -23,13 +23,17 @@ export default function Error({
           Something went wrong!
         </h2>
         <p className="text-gray-600 max-w-md">
-          We encountered an unexpected error. Please try again or contact support if the problem persists.
+          We encountered an unexpected error. Please try again or contact
+          support if the problem persists.
         </p>
         <div className="flex gap-3 justify-center">
           <Button onClick={() => reset()} variant="default">
             Try again
           </Button>
-          <Button onClick={() => window.location.href = '/'} variant="outline">
+          <Button
+            onClick={() => (window.location.href = '/')}
+            variant="outline"
+          >
             Go home
           </Button>
         </div>

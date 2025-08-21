@@ -1,5 +1,5 @@
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import Link from 'next/link';
 import * as React from 'react';
 
@@ -62,15 +62,15 @@ export function BoardsList({
           ))}
         </ul>
       </ScrollArea>
-      
+
       {boards.length === 0 && (
         <EmptyState
           icon="📋"
           title="No boards yet"
           description="Create your first board to start organizing feedback and ideas."
           action={{
-            label: "Create board",
-            href: "/new"
+            label: 'Create board',
+            href: '/new',
           }}
         />
       )}

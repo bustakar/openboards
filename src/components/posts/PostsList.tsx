@@ -80,13 +80,14 @@ export function PostsList({
           <EmptyState
             icon="📝"
             title="No posts yet"
-            description={boardName 
-              ? `No posts in ${boardName} yet. Be the first to share feedback or ideas!`
-              : "No posts yet. Be the first to share feedback or ideas!"
+            description={
+              boardName
+                ? `No posts in ${boardName} yet. Be the first to share feedback or ideas!`
+                : 'No posts yet. Be the first to share feedback or ideas!'
             }
             action={{
-              label: "Create post",
-              href: "/new"
+              label: 'Create post',
+              href: '/new',
             }}
           />
         ) : (

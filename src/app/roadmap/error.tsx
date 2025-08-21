@@ -23,8 +23,8 @@ export default function RoadmapError({
           Roadmap unavailable
         </h2>
         <p className="text-gray-600 max-w-md">
-          We&apos;re having trouble loading the roadmap. Please try again or check
-          back later.
+          We&apos;re having trouble loading the roadmap. Please try again or
+          check back later.
         </p>
         <div className="flex gap-3 justify-center">
           <Button onClick={() => reset()} variant="default">
