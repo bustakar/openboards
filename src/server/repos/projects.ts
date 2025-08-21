@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { projects } from "@/db/schema";
 import { getDatabase } from "@/server/db";
