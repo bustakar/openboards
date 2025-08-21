@@ -36,6 +36,53 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
 
+## CLI Tool
+
+OpenBoards includes a comprehensive command-line interface for database management. This serves as a temporary admin solution until a proper admin dashboard is built.
+
+### Quick Start
+
+```bash
+# View all available commands
+npm run cli -- --help
+
+# List all boards
+npm run cli boards list
+
+# List all posts
+npm run cli posts list
+
+# Update a post status
+npm run cli posts update-status mobile-app
+```
+
+### Key Features
+
+- **Boards Management**: Create, update, delete, and list boards
+- **Posts Management**: View, update status, archive, and delete posts
+- **Comments Management**: Manage comments across all posts
+- **Interactive Mode**: Most commands support interactive selection
+- **Filtering**: Filter posts by board/status, comments by post/author
+- **Safety Features**: Confirmation prompts for destructive operations
+
+### Common Operations
+
+```bash
+# Update board icon
+npm run cli boards update features
+
+# Change post status to "in progress"
+npm run cli posts update-status mobile-app
+
+# List posts with specific status
+npm run cli posts list --status planned
+
+# View comments on a specific post
+npm run cli comments list --post mobile-app
+```
+
+For detailed CLI documentation, see [`cli/README.md`](cli/README.md).
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

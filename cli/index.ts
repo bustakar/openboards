@@ -15,7 +15,17 @@ const program = new Command();
 program
   .name('openboards-cli')
   .description('CLI tool for managing OpenBoards database')
-  .version('1.0.0');
+  .version('1.0.0')
+  .addHelpText('after', `
+
+Examples:
+  $ npm run cli boards list                    List all boards
+  $ npm run cli posts list --status planned    List posts with planned status
+  $ npm run cli posts update-status mobile-app Update post status
+  $ npm run cli comments list --post mobile-app List comments on a post
+
+For detailed documentation, see: cli/README.md
+  `);
 
 // Add commands
 program.addCommand(boardsCommand);

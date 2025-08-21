@@ -15,6 +15,17 @@ const POST_STATUSES = [
 
 export const postsCommand = new Command('posts')
   .description('Manage posts')
+  .addHelpText('after', `
+
+Examples:
+  $ npm run cli posts list                      List all posts
+  $ npm run cli posts list --status planned     List posts with planned status
+  $ npm run cli posts list --board features     List posts in features board
+  $ npm run cli posts view mobile-app           View a specific post
+  $ npm run cli posts update-status mobile-app  Update post status
+  $ npm run cli posts archive mobile-app        Archive/unarchive a post
+  $ npm run cli posts delete mobile-app         Delete a post
+  `)
   .addCommand(
     new Command('list')
       .description('List posts')

@@ -7,6 +7,18 @@ import inquirer from 'inquirer';
 
 export const commentsCommand = new Command('comments')
   .description('Manage comments')
+  .addHelpText('after', `
+
+Examples:
+  $ npm run cli comments list                    List all comments
+  $ npm run cli comments list --post mobile-app  List comments on a specific post
+  $ npm run cli comments list --author "John"    List comments by a specific author
+  $ npm run cli comments view 123               View a specific comment
+  $ npm run cli comments create                 Create a new comment interactively
+  $ npm run cli comments update 123             Update a comment
+  $ npm run cli comments archive 123            Archive/unarchive a comment
+  $ npm run cli comments delete 123             Delete a comment
+  `)
   .addCommand(
     new Command('list')
       .description('List comments')

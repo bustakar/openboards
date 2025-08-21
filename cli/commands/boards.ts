@@ -7,6 +7,14 @@ import inquirer from 'inquirer';
 
 export const boardsCommand = new Command('boards')
   .description('Manage boards')
+  .addHelpText('after', `
+
+Examples:
+  $ npm run cli boards list                    List all boards
+  $ npm run cli boards create                  Create a new board interactively
+  $ npm run cli boards update features         Update the features board
+  $ npm run cli boards delete bugs             Delete the bugs board
+  `)
   .addCommand(
     new Command('list').description('List all boards').action(async () => {
       const { db } = getDatabase();
