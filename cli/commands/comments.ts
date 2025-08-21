@@ -1,4 +1,4 @@
-import { boards, comments, posts } from '@/db/schema';
+import { boards, comments, posts, projects } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import chalk from 'chalk';
 import { Command } from 'commander';
@@ -194,6 +194,7 @@ Examples:
             title: posts.title,
             slug: posts.slug,
             boardName: boards.name,
+            projectId: boards.projectId,
           })
           .from(posts)
           .leftJoin(boards, eq(posts.boardId, boards.id))
@@ -232,9 +233,26 @@ Examples:
         ]);
 
         try {
+          const [p] = allPosts.filter((p) => p.id === postId);
+          // Fallback: fetch projectId if not present
+          let projectId = p?.projectId as string | undefined;
+          if (!projectId) {
+            const [row] = await db
+              .select({ projectId: boards.projectId })
+              .from(posts)
+              .leftJoin(boards, eq(posts.boardId, boards.id))
+              .where(eq(posts.id, postId))
+              .limit(1);
+            projectId = row?.projectId as string | undefined;
+          }
+          if (!projectId) {
+            console.log(chalk.red('Could not resolve project for the selected post.'));
+            return;
+          }
           const [newComment] = await db
             .insert(comments)
             .values({
+              projectId,
               postId,
               body: answers.body.trim(),
               authorName: answers.authorName?.trim() || null,

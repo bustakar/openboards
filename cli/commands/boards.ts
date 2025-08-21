@@ -1,8 +1,8 @@
-import { boards } from '@/db/schema';
+import { boards, projects } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import chalk from 'chalk';
 import { Command } from 'commander';
-import { desc, eq } from 'drizzle-orm';
+import { asc, desc, eq } from 'drizzle-orm';
 import inquirer from 'inquirer';
 
 export const boardsCommand = new Command('boards')
@@ -30,9 +30,11 @@ Examples:
           icon: boards.icon,
           position: boards.position,
           createdAt: boards.createdAt,
+          projectSubdomain: projects.subdomain,
         })
         .from(boards)
-        .orderBy(desc(boards.position), desc(boards.createdAt));
+        .leftJoin(projects, eq(boards.projectId, projects.id))
+        .orderBy(asc(projects.subdomain), desc(boards.position), desc(boards.createdAt));
 
       if (allBoards.length === 0) {
         console.log(chalk.yellow('No boards found.'));
@@ -43,11 +45,7 @@ Examples:
       console.log('─'.repeat(80));
 
       allBoards.forEach((board, index) => {
-        console.log(
-          `${chalk.cyan(`${index + 1}.`)} ${board.icon || '📋'} ${chalk.bold(
-            board.name
-          )}`
-        );
+        console.log(`${chalk.cyan(`${index + 1}.`)} ${board.icon || '📋'} ${chalk.bold(board.name)} ${chalk.gray(`(${board.projectSubdomain})`)}`);
         console.log(`   Slug: ${chalk.gray(board.slug)}`);
         if (board.description) {
           console.log(`   Description: ${chalk.gray(board.description)}`);
@@ -62,6 +60,23 @@ Examples:
   )
   .addCommand(
     new Command('create').description('Create a new board').action(async () => {
+      const { db } = getDatabase();
+      const projs = await db
+        .select({ id: projects.id, name: projects.name, subdomain: projects.subdomain })
+        .from(projects)
+        .orderBy(asc(projects.subdomain));
+      if (projs.length === 0) {
+        console.log(chalk.red('No projects found. Create a project first: npm run cli projects create'));
+        return;
+      }
+      const { projectId } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'projectId',
+          message: 'Select project:',
+          choices: projs.map((p) => ({ name: `${p.name} (${p.subdomain})`, value: p.id })),
+        },
+      ]);
       const answers = await inquirer.prompt([
         {
           type: 'input',
@@ -95,7 +110,6 @@ Examples:
         },
       ]);
 
-      const { db } = getDatabase();
       const slug =
         answers.slug || answers.name.toLowerCase().replace(/\s+/g, '-');
 
@@ -108,6 +122,7 @@ Examples:
             description: answers.description?.trim() || null,
             icon: answers.icon?.trim() || '📋',
             position: answers.position || 0,
+            projectId,
           })
           .returning();
 
@@ -122,17 +137,18 @@ Examples:
   .addCommand(
     new Command('update')
       .description('Update a board')
-      .argument('[slug]', 'Board slug')
-      .action(async (slug) => {
+      .argument('[id]', 'Board id')
+      .action(async (id) => {
         const { db } = getDatabase();
 
-        // If no slug provided, show list to select from
-        let boardSlug = slug;
-        if (!boardSlug) {
+        // If no id provided, show list to select from
+        let boardId = id;
+        if (!boardId) {
           const allBoards = await db
-            .select({ slug: boards.slug, name: boards.name })
+            .select({ id: boards.id, slug: boards.slug, name: boards.name, sub: projects.subdomain })
             .from(boards)
-            .orderBy(desc(boards.position));
+            .leftJoin(projects, eq(boards.projectId, projects.id))
+            .orderBy(asc(projects.subdomain), desc(boards.position));
 
           if (allBoards.length === 0) {
             console.log(chalk.yellow('No boards found.'));
@@ -145,22 +161,18 @@ Examples:
               name: 'selectedSlug',
               message: 'Select a board to update:',
               choices: allBoards.map((b) => ({
-                name: `${b.name} (${b.slug})`,
-                value: b.slug,
+                name: `${b.name} (${b.slug}) — ${b.sub}`,
+                value: b.id,
               })),
             },
           ]);
-          boardSlug = selectedSlug;
+          boardId = selectedSlug;
         }
 
-        const [board] = await db
-          .select()
-          .from(boards)
-          .where(eq(boards.slug, boardSlug))
-          .limit(1);
+        const [board] = await db.select().from(boards).where(eq(boards.id, boardId)).limit(1);
 
         if (!board) {
-          console.log(chalk.red(`Board with slug "${boardSlug}" not found.`));
+          console.log(chalk.red(`Board not found.`));
           return;
         }
 
@@ -215,17 +227,18 @@ Examples:
   .addCommand(
     new Command('delete')
       .description('Delete a board')
-      .argument('[slug]', 'Board slug')
-      .action(async (slug) => {
+      .argument('[id]', 'Board id')
+      .action(async (id) => {
         const { db } = getDatabase();
 
-        // If no slug provided, show list to select from
-        let boardSlug = slug;
-        if (!boardSlug) {
+        // If no id provided, show list to select from
+        let boardId = id;
+        if (!boardId) {
           const allBoards = await db
-            .select({ slug: boards.slug, name: boards.name })
+            .select({ id: boards.id, slug: boards.slug, name: boards.name, sub: projects.subdomain })
             .from(boards)
-            .orderBy(desc(boards.position));
+            .leftJoin(projects, eq(boards.projectId, projects.id))
+            .orderBy(asc(projects.subdomain), desc(boards.position));
 
           if (allBoards.length === 0) {
             console.log(chalk.yellow('No boards found.'));
@@ -238,22 +251,17 @@ Examples:
               name: 'selectedSlug',
               message: 'Select a board to delete:',
               choices: allBoards.map((b) => ({
-                name: `${b.name} (${b.slug})`,
-                value: b.slug,
+                name: `${b.name} (${b.slug}) — ${b.sub}`,
+                value: b.id,
               })),
             },
           ]);
-          boardSlug = selectedSlug;
+          boardId = selectedSlug;
         }
-
-        const [board] = await db
-          .select()
-          .from(boards)
-          .where(eq(boards.slug, boardSlug))
-          .limit(1);
+        const [board] = await db.select().from(boards).where(eq(boards.id, boardId)).limit(1);
 
         if (!board) {
-          console.log(chalk.red(`Board with slug "${boardSlug}" not found.`));
+          console.log(chalk.red(`Board not found.`));
           return;
         }
 

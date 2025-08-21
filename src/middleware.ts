@@ -37,6 +37,22 @@ export function middleware(request: NextRequest) {
     });
   }
 
+  // Subdomain detection (e.g., demo.openboards.co)
+  const host = request.headers.get("host") || "";
+  const withoutPort = host.split(":")[0] ?? host;
+  const root = process.env.ROOT_DOMAIN || "openboards.co";
+  const isApex = withoutPort === root || withoutPort === `www.${root}`;
+  const isLocal = withoutPort.endsWith(".localhost") || withoutPort === "localhost";
+  const subdomain = !isApex && !isLocal && withoutPort.endsWith(`.${root}`)
+    ? withoutPort.replace(`.${root}`, "")
+    : isLocal && withoutPort.includes(".")
+    ? withoutPort.split(".")[0]
+    : null;
+
+  if (subdomain) {
+    response.headers.set("x-openboards-subdomain", subdomain);
+  }
+
   return response;
 }
 

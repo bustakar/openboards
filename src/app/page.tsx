@@ -21,7 +21,7 @@ export default async function Home(props: {
   const boards = await fetchBoards();
   const sp = (await props.searchParams) ?? {};
   const sort = sp.sort ?? 'trending';
-  // Get all posts across all boards
+  // Get all posts across all boards within current project
   const allBoardsData = await Promise.all(
     boards.map(async (board) => {
       const data = await listPosts({

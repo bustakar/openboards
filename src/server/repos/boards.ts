@@ -1,10 +1,13 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { getDatabase } from "@/server/db";
-import { boards, posts } from "@/db/schema";
+import { boards, posts, projects } from "@/db/schema";
+import { getCurrentProjectFromHeaders } from "@/server/repos/projects";
 
 export async function listBoardsWithStats() {
   const { db } = getDatabase();
-  const result = await db
+  const project = await getCurrentProjectFromHeaders();
+  const where = project ? eq(boards.projectId, project.id) : undefined;
+  let query = db
     .select({
       id: boards.id,
       name: boards.name,
@@ -31,12 +34,33 @@ export async function listBoardsWithStats() {
     .groupBy(boards.id)
     .orderBy(desc(boards.position));
 
+  if (where) {
+    // @ts-expect-error drizzle chaining acceptable
+    query = query.where(where);
+  }
+
+  const result = await query;
+
   return result;
 }
 
 export async function getBoardBySlug(slugValue: string) {
   const { db } = getDatabase();
-  const [row] = await db.select().from(boards).where(eq(boards.slug, slugValue)).limit(1);
+  const project = await getCurrentProjectFromHeaders();
+  const [row] = await db
+    .select({
+      id: boards.id,
+      name: boards.name,
+      slug: boards.slug,
+      description: boards.description,
+      icon: boards.icon,
+      position: boards.position,
+      projectId: boards.projectId,
+    })
+    .from(boards)
+    .leftJoin(projects, eq(boards.projectId, projects.id))
+    .where(project ? and(eq(boards.slug, slugValue), eq(boards.projectId, project.id)) : eq(boards.slug, slugValue))
+    .limit(1);
   return row ?? null;
 }
 

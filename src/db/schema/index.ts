@@ -8,22 +8,39 @@ export const postStatusEnum = pgEnum("post_status", [
   "closed",
 ]);
 
-export const boards = pgTable("boards", {
+export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
+  subdomain: text("subdomain").notNull().unique(),
   description: text("description"),
-  icon: text("icon"),
-  position: integer("position").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const boards = pgTable(
+  "boards",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    description: text("description"),
+    icon: text("icon"),
+    position: integer("position").notNull().default(0),
+    projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    boardsProjectSlugUq: uniqueIndex("boards_project_slug_uq").on(t.projectId, t.slug),
+  })
+);
 
 export const posts = pgTable(
   "posts",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     boardId: uuid("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     body: text("body"),
     slug: text("slug").notNull(),
@@ -69,6 +86,7 @@ export const comments = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     postId: uuid("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
     body: text("body").notNull(),
     authorName: text("author_name"),
     visitorId: text("visitor_id").notNull(),
