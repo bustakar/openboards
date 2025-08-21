@@ -1,4 +1,5 @@
 import { Nav } from '@/components/Nav';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -18,17 +19,19 @@ export const metadata: Metadata = {
   description: 'Open source feedback boards',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const project = await getCurrentProjectFromHeaders();
+  const title = project?.name ?? 'OpenBoards';
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Nav />
+        <Nav title={title} />
         <main>{children}</main>
       </body>
     </html>

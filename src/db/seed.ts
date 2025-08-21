@@ -1,4 +1,4 @@
-import { boards, posts } from '@/db/schema';
+import { boards, posts, projects } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import * as dotenv from 'dotenv';
 import { eq } from 'drizzle-orm';
@@ -8,6 +8,14 @@ dotenv.config({ path: '.env.local' });
 
 async function seed() {
   const { db } = getDatabase();
+
+  // Skip creating a default project; expect users to create their own projects
+  const [maybeProject] = await db.select().from(projects).limit(1);
+  if (!maybeProject) {
+    console.log('No projects found. Seed will not create a default project.');
+    return;
+  }
+  const projectId = maybeProject.id as string;
 
   const existingFeatures = await db
     .select()
@@ -23,6 +31,7 @@ async function seed() {
         description: 'Feature requests',
         icon: '💡',
         position: 1,
+        projectId,
       })
       .returning({ id: boards.id });
     featuresId = inserted.id;
@@ -42,6 +51,7 @@ async function seed() {
         description: 'Bug reports',
         icon: '🐛',
         position: 2,
+        projectId,
       })
       .returning({ id: boards.id });
     bugsId = inserted.id;
@@ -83,7 +93,7 @@ async function upsertPost(
   if (existing.length > 0) return;
   await db
     .insert(posts)
-    .values({ boardId, title, body, slug, status: 'backlog' });
+    .values({ boardId, title, body, slug, status: 'backlog', projectId: (await db.select({ id: boards.projectId }).from(boards).where(eq(boards.id, boardId)).limit(1))[0].id });
 }
 
 function slugify(input: string) {

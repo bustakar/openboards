@@ -9,12 +9,12 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 
-export function Nav() {
+export function Nav({ title = 'OpenBoards' }: { title?: string }) {
   return (
     <header className="border-b border-gray-200 bg-white">
       <div className="container mx-auto flex items-center justify-between p-4">
         <Link href="/" className="font-semibold">
-          OpenBoards
+          {title}
         </Link>
         <NavigationMenu>
           <NavigationMenuList>

@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { boardsCommand } from './commands/boards';
 import { commentsCommand } from './commands/comments';
 import { postsCommand } from './commands/posts';
+import { projectsCommand } from './commands/projects';
 
 // Load environment variables
 dotenv.config({ path: '.env.local' });
@@ -34,6 +35,7 @@ For detailed documentation, see: cli/README.md
 program.addCommand(boardsCommand);
 program.addCommand(postsCommand);
 program.addCommand(commentsCommand);
+program.addCommand(projectsCommand);
 
 // Global error handler
 program.exitOverride();

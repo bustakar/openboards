@@ -1,7 +1,9 @@
 import { BoardsList, type BoardItem } from '@/components/boards/BoardsList';
 import { PostsList } from '@/components/posts/PostsList';
+import { SelectProjectClient } from '@/components/projects/SelectProjectClient';
 import { listBoardsWithStats } from '@/server/repos/boards';
 import { listPosts } from '@/server/repos/posts';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
 
 async function fetchBoards(): Promise<BoardItem[]> {
   const data = await listBoardsWithStats();
@@ -18,10 +20,31 @@ async function fetchBoards(): Promise<BoardItem[]> {
 export default async function Home(props: {
   searchParams?: Promise<{ sort?: 'trending' | 'new' | 'top' }>;
 }) {
+  const project = await getCurrentProjectFromHeaders();
+  if (!project) {
+    // Load available projects for the selector
+    const { getDatabase } = await import('@/server/db');
+    const { projects } = await import('@/db/schema');
+    const { asc } = await import('drizzle-orm');
+    const { db } = getDatabase();
+    const rows = await db
+      .select({
+        id: projects.id,
+        name: projects.name,
+        subdomain: projects.subdomain,
+      })
+      .from(projects)
+      .orderBy(asc(projects.subdomain));
+    return (
+      <main>
+        <SelectProjectClient projects={rows} />
+      </main>
+    );
+  }
   const boards = await fetchBoards();
   const sp = (await props.searchParams) ?? {};
   const sort = sp.sort ?? 'trending';
-  // Get all posts across all boards
+  // Get all posts across all boards within current project
   const allBoardsData = await Promise.all(
     boards.map(async (board) => {
       const data = await listPosts({

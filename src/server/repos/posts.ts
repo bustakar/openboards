@@ -1,6 +1,6 @@
 import { and, desc, eq, ilike, sql } from "drizzle-orm";
 import { getDatabase } from "@/server/db";
-import { posts } from "@/db/schema";
+import { boards, posts } from "@/db/schema";
 
 export type PostSort = "trending" | "new" | "top";
 export type PostStatus = "backlog" | "planned" | "in_progress" | "completed" | "closed";
@@ -85,11 +85,14 @@ export async function getPostBySlug(boardId: string, postSlug: string) {
 
 export async function createPost(params: { boardId: string; title: string; body?: string | null }) {
   const { db } = getDatabase();
+  const [b] = await db.select({ projectId: boards.projectId }).from(boards).where(eq(boards.id, params.boardId)).limit(1);
+  if (!b) throw new Error("board_not_found");
   const slug = slugify(params.title);
   const [inserted] = await db
     .insert(posts)
     .values({
       boardId: params.boardId,
+      projectId: b.projectId,
       title: params.title,
       body: params.body ?? null,
       slug,
