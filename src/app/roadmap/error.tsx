@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 export default function RoadmapError({
   error,
@@ -23,16 +23,15 @@ export default function RoadmapError({
           Roadmap unavailable
         </h2>
         <p className="text-gray-600 max-w-md">
-          We're having trouble loading the roadmap. Please try again or check back later.
+          We&apos;re having trouble loading the roadmap. Please try again or check
+          back later.
         </p>
         <div className="flex gap-3 justify-center">
           <Button onClick={() => reset()} variant="default">
             Try again
           </Button>
           <Link href="/">
-            <Button variant="outline">
-              Go home
-            </Button>
+            <Button variant="outline">Go home</Button>
           </Link>
         </div>
       </div>

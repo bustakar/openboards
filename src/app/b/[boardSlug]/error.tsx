@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 export default function BoardError({
   error,
@@ -23,16 +23,15 @@ export default function BoardError({
           Board not found
         </h2>
         <p className="text-gray-600 max-w-md">
-          The board you're looking for doesn't exist or there was an error loading it.
+          The board you&apos;re looking for doesn&apos;t exist or there was an error
+          loading it.
         </p>
         <div className="flex gap-3 justify-center">
           <Button onClick={() => reset()} variant="default">
             Try again
           </Button>
           <Link href="/">
-            <Button variant="outline">
-              Browse all boards
-            </Button>
+            <Button variant="outline">Browse all boards</Button>
           </Link>
         </div>
       </div>

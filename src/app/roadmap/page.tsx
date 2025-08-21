@@ -2,7 +2,7 @@ import { VoteButton } from '@/components/posts/VoteButton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { boards, posts } from '@/db/schema';
 import { getDatabase } from '@/server/db';
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import Link from 'next/link';
 
 type GroupKey = 'backlog' | 'planned' | 'in_progress' | 'completed';

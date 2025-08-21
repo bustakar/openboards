@@ -10,7 +10,7 @@ export default function RoadmapLoading() {
 
         {/* Roadmap columns skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {['Backlog', 'Planned', 'In Progress', 'Completed'].map((status, i) => (
+          {['Backlog', 'Planned', 'In Progress', 'Completed'].map((status) => (
             <div key={status} className="space-y-4">
               <div className="text-center">
                 <div className="h-6 bg-gray-200 rounded w-24 mx-auto animate-pulse"></div>
