@@ -3,6 +3,7 @@ import { VoteButton } from '@/components/posts/VoteButton';
 import { Badge } from '@/components/ui/badge';
 import { boards, posts } from '@/db/schema';
 import { getDatabase } from '@/server/db';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
 import { and, eq } from 'drizzle-orm';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -28,6 +29,8 @@ function statusInfo(status: string): {
 export default async function PostPage(props: {
   params: Promise<{ boardSlug: string; postSlug: string }>;
 }) {
+  const project = await getCurrentProjectFromHeaders();
+  if (!project) return notFound();
   const params = await props.params;
   const { db } = getDatabase();
   const [board] = await db

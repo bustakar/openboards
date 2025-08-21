@@ -6,6 +6,7 @@ import {
   type PostSort,
   type PostStatus,
 } from '@/server/repos/posts';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
 import { notFound } from 'next/navigation';
 
 async function fetchBoards(): Promise<BoardItem[]> {
@@ -24,6 +25,8 @@ export default async function BoardPage(props: {
   params: Promise<{ boardSlug: string }>;
   searchParams?: Promise<{ status?: PostStatus; sort?: PostSort; q?: string }>;
 }) {
+  const project = await getCurrentProjectFromHeaders();
+  if (!project) return notFound();
   const params = await props.params;
   const sp = (await props.searchParams) ?? {};
   const board = await getBoardBySlug(params.boardSlug);

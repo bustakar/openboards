@@ -1,7 +1,8 @@
 import { VoteButton } from '@/components/posts/VoteButton';
 import { boards, posts } from '@/db/schema';
 import { getDatabase } from '@/server/db';
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import Link from 'next/link';
 
 type GroupKey = 'backlog' | 'planned' | 'in_progress' | 'completed';
@@ -21,6 +22,10 @@ function statusMeta(status: GroupKey): { label: string } {
 
 export default async function RoadmapPage() {
   const { db } = getDatabase();
+  const project = await getCurrentProjectFromHeaders();
+  if (!project) {
+    return <main className="container mx-auto p-6"></main>;
+  }
 
   const where = and(
     eq(posts.isArchived, false),
@@ -46,7 +51,7 @@ export default async function RoadmapPage() {
     })
     .from(posts)
     .leftJoin(boards, eq(posts.boardId, boards.id))
-    .where(where)
+    .where(and(where, eq(posts.projectId, project.id)))
     .orderBy(
       desc(posts.pinned),
       desc(posts.voteCount),
