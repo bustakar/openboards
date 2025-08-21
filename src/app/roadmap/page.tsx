@@ -1,4 +1,5 @@
 import { VoteButton } from '@/components/posts/VoteButton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { boards, posts } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
@@ -72,10 +73,24 @@ export default async function RoadmapPage() {
     'completed',
   ];
 
+  const totalItems = items.length;
+
   return (
     <main className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Roadmap</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      
+      {totalItems === 0 ? (
+        <EmptyState
+          icon="🗺️"
+          title="No roadmap items yet"
+          description="Create posts and move them through different statuses to build your roadmap."
+          action={{
+            label: "Create your first post",
+            href: "/new"
+          }}
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {columns.map((status) => {
           const meta = statusMeta(status);
           const list = grouped[status] ?? [];
@@ -94,8 +109,12 @@ export default async function RoadmapPage() {
               </header>
               <div className="space-y-2">
                 {list.length === 0 ? (
-                  <div className="text-sm text-muted-foreground py-6 text-center bg-white border border-gray-200 rounded-md">
-                    No items
+                  <div className="bg-white border border-gray-200 rounded-md p-4">
+                    <EmptyState
+                      icon="📋"
+                      title={`No ${meta.label.toLowerCase()} items`}
+                      description={`No items in ${meta.label.toLowerCase()} yet.`}
+                    />
                   </div>
                 ) : (
                   list.map((p) => (
@@ -135,7 +154,8 @@ export default async function RoadmapPage() {
             </section>
           );
         })}
-      </div>
+        </div>
+      )}
     </main>
   );
 }

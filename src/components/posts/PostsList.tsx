@@ -1,4 +1,5 @@
 import { PostCard, type PostItem } from '@/components/posts/PostCard';
+import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
 import * as React from 'react';
 import { Button } from '../ui/button';
@@ -76,9 +77,18 @@ export function PostsList({
       </div>
       <div className="bg-gray-50 border border-gray-200 rounded-lg">
         {posts.length === 0 ? (
-          <div className="text-sm text-muted-foreground py-8 text-center">
-            No posts yet.
-          </div>
+          <EmptyState
+            icon="📝"
+            title="No posts yet"
+            description={boardName 
+              ? `No posts in ${boardName} yet. Be the first to share feedback or ideas!`
+              : "No posts yet. Be the first to share feedback or ideas!"
+            }
+            action={{
+              label: "Create post",
+              href: "/new"
+            }}
+          />
         ) : (
           posts.map((p) => {
             const href = linkFor

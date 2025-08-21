@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { listComments } from '@/server/repos/comments';
@@ -32,11 +33,11 @@ export async function Comments({ postId }: { postId: string }) {
       {/* Comments list */}
       <div className="space-y-4">
         {items.length === 0 ? (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-            <div className="text-sm text-gray-500">
-              No comments yet. Be the first to share your thoughts!
-            </div>
-          </div>
+          <EmptyState
+            icon="💬"
+            title="No comments yet"
+            description="Be the first to share your thoughts on this post!"
+          />
         ) : (
           <div className="space-y-4">
             {items.map((c) => (
