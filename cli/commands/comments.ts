@@ -7,7 +7,9 @@ import inquirer from 'inquirer';
 
 export const commentsCommand = new Command('comments')
   .description('Manage comments')
-  .addHelpText('after', `
+  .addHelpText(
+    'after',
+    `
 
 Examples:
   $ npm run cli comments list                    List all comments
@@ -18,7 +20,8 @@ Examples:
   $ npm run cli comments update 123             Update a comment
   $ npm run cli comments archive 123            Archive/unarchive a comment
   $ npm run cli comments delete 123             Delete a comment
-  `)
+  `
+  )
   .addCommand(
     new Command('list')
       .description('List comments')
