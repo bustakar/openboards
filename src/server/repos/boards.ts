@@ -1,59 +1,27 @@
-import { boards, posts, projects } from '@/db/schema';
+import { and, eq, sql } from 'drizzle-orm';
 import { getDatabase } from '@/server/db';
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { boards } from '@/db/schema';
 
-export async function listBoardsWithStats() {
+export async function listBoardsWithStats(userId?: string) {
   const { db } = getDatabase();
-  const project = await getCurrentProjectFromHeaders();
-  if (!project) return [];
-  const where = eq(boards.projectId, project.id);
-  let query = db
-    .select({
-      id: boards.id,
-      name: boards.name,
-      slug: boards.slug,
-      description: boards.description,
-      icon: boards.icon,
-      position: boards.position,
-      posts:
-        sql<number>`count(*) FILTER (WHERE ${posts.isArchived} = false)`.as(
-          'posts'
-        ),
-      open: sql<number>`count(*) FILTER (WHERE ${posts.status} IN ('backlog','planned','in_progress') AND ${posts.isArchived} = false)`.as(
-        'open'
-      ),
-      inProgress:
-        sql<number>`count(*) FILTER (WHERE ${posts.status} = 'in_progress' AND ${posts.isArchived} = false)`.as(
-          'inProgress'
-        ),
-      planned:
-        sql<number>`count(*) FILTER (WHERE ${posts.status} = 'planned' AND ${posts.isArchived} = false)`.as(
-          'planned'
-        ),
-      completed:
-        sql<number>`count(*) FILTER (WHERE ${posts.status} = 'completed' AND ${posts.isArchived} = false)`.as(
-          'completed'
-        ),
-    })
-    .from(boards)
-    .leftJoin(posts, eq(posts.boardId, boards.id))
-    .groupBy(boards.id)
-    .orderBy(desc(boards.position));
+  
+  if (!userId) {
+    return [];
+  }
 
-  // @ts-expect-error drizzle chaining acceptable
-  query = query.where(where);
+  // Get user's projects first
+  const userProjects = await db
+    .select({ id: sql<string>`projects.id` })
+    .from(sql`projects`)
+    .where(eq(sql`projects.user_id`, userId));
 
-  const result = await query;
+  if (userProjects.length === 0) {
+    return [];
+  }
 
-  return result;
-}
+  const projectIds = userProjects.map(p => p.id);
 
-export async function getBoardBySlug(slugValue: string) {
-  const { db } = getDatabase();
-  const project = await getCurrentProjectFromHeaders();
-  if (!project) return null;
-  const [row] = await db
+  return await db
     .select({
       id: boards.id,
       name: boards.name,
@@ -62,10 +30,51 @@ export async function getBoardBySlug(slugValue: string) {
       icon: boards.icon,
       position: boards.position,
       projectId: boards.projectId,
+      createdAt: boards.createdAt,
+      updatedAt: boards.updatedAt,
+      postCount: sql<number>`COALESCE(post_counts.count, 0)`,
     })
     .from(boards)
-    .leftJoin(projects, eq(boards.projectId, projects.id))
-    .where(and(eq(boards.slug, slugValue), eq(boards.projectId, project.id)))
-    .limit(1);
-  return row ?? null;
+    .leftJoin(
+      sql`(
+        SELECT board_id, COUNT(*) as count 
+        FROM posts 
+        WHERE project_id = ANY(${projectIds})
+        GROUP BY board_id
+      ) as post_counts`,
+      eq(boards.id, sql`post_counts.board_id`)
+    )
+    .where(sql`boards.project_id = ANY(${projectIds})`)
+    .orderBy(boards.position, boards.createdAt);
+}
+
+export async function getBoardBySlug(slug: string, userId?: string) {
+  const { db } = getDatabase();
+  
+  if (!userId) {
+    return null;
+  }
+
+  // Get user's projects first
+  const userProjects = await db
+    .select({ id: sql<string>`projects.id` })
+    .from(sql`projects`)
+    .where(eq(sql`projects.user_id`, userId));
+
+  if (userProjects.length === 0) {
+    return null;
+  }
+
+  const projectIds = userProjects.map(p => p.id);
+
+  const [row] = await db
+    .select()
+    .from(boards)
+    .where(
+      and(
+        eq(boards.slug, slug),
+        sql`boards.project_id = ANY(${projectIds})`
+      )
+    );
+  return row;
 }

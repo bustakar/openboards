@@ -1,45 +1,60 @@
-import { projects } from '@/db/schema';
-import { getDatabase } from '@/server/db';
 import { eq } from 'drizzle-orm';
-import { headers } from 'next/headers';
+import { getDatabase } from '@/server/db';
+import { projects } from '@/db/schema';
+import { and } from 'drizzle-orm';
 
 export async function listProjects() {
   const { db } = getDatabase();
-  return db.select().from(projects).orderBy(projects.createdAt);
+  return await db.select().from(projects).orderBy(projects.createdAt);
+}
+
+export async function listProjectsByUser(userId: string) {
+  const { db } = getDatabase();
+  return await db
+    .select()
+    .from(projects)
+    .where(eq(projects.userId, userId))
+    .orderBy(projects.createdAt);
 }
 
 export async function getProjectById(id: string) {
   const { db } = getDatabase();
-  const [row] = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.id, id))
-    .limit(1);
-  return row ?? null;
+  const [row] = await db.select().from(projects).where(eq(projects.id, id));
+  return row;
 }
 
-export async function getProjectBySubdomain(sub: string) {
+export async function getProjectBySubdomain(subdomain: string) {
   const { db } = getDatabase();
   const [row] = await db
     .select()
     .from(projects)
-    .where(eq(projects.subdomain, sub))
-    .limit(1);
-  return row ?? null;
+    .where(eq(projects.subdomain, subdomain));
+  return row;
 }
 
-export async function createProject(params: {
+export async function getProjectBySubdomainAndUser(subdomain: string, userId: string) {
+  const { db } = getDatabase();
+  const [row] = await db
+    .select()
+    .from(projects)
+    .where(and(eq(projects.subdomain, subdomain), eq(projects.userId, userId)));
+  return row;
+}
+
+export async function createProject(data: {
   name: string;
   subdomain: string;
-  description?: string | null;
+  description?: string;
+  userId: string;
 }) {
   const { db } = getDatabase();
   const [row] = await db
     .insert(projects)
     .values({
-      name: params.name,
-      subdomain: params.subdomain,
-      description: params.description ?? null,
+      name: data.name,
+      subdomain: data.subdomain,
+      description: data.description,
+      userId: data.userId,
     })
     .returning();
   return row;
@@ -47,49 +62,54 @@ export async function createProject(params: {
 
 export async function updateProject(
   id: string,
-  params: { name?: string; subdomain?: string; description?: string | null }
+  data: Partial<{
+    name: string;
+    subdomain: string;
+    description: string;
+  }>
 ) {
   const { db } = getDatabase();
   const [row] = await db
     .update(projects)
-    .set(params)
+    .set({
+      ...data,
+      updatedAt: new Date(),
+    })
     .where(eq(projects.id, id))
     .returning();
-  return row ?? null;
+  return row;
 }
 
 export async function deleteProject(id: string) {
   const { db } = getDatabase();
-  await db.delete(projects).where(eq(projects.id, id));
+  const [row] = await db
+    .delete(projects)
+    .where(eq(projects.id, id))
+    .returning();
+  return row;
 }
 
-export function extractSubdomain(host: string): string | null {
-  if (!host) return null;
-  const withoutPort = host.split(':')[0] ?? host;
-  // Local dev patterns: sub.localhost, sub.lvh.me
-  if (withoutPort.endsWith('.localhost')) {
-    const parts = withoutPort.split('.');
-    if (parts.length >= 2) return parts[0];
-    return null;
+export function extractSubdomain(hostname: string): string | null {
+  const parts = hostname.split('.');
+  if (parts.length < 2) return null;
+  
+  // Handle localhost development
+  if (hostname.includes('localhost')) {
+    if (parts.length === 2) return null; // localhost:3000
+    if (parts.length === 3) return parts[0]; // demo.localhost:3000
   }
-  if (withoutPort.endsWith('.lvh.me')) {
-    const parts = withoutPort.split('.');
-    if (parts.length >= 3) return parts[0];
-    return null;
-  }
-  const root = process.env.ROOT_DOMAIN || 'openboards.co';
-  if (withoutPort === root || withoutPort === `www.${root}`) return null;
-  if (withoutPort.endsWith(`.${root}`)) {
-    const parts = withoutPort.split('.');
-    if (parts.length >= 3) return parts[0];
-  }
+  
+  // Handle production domains
+  if (parts.length === 3) return parts[0]; // demo.openboards.co
   return null;
 }
 
-export async function getCurrentProjectFromHeaders() {
-  const h = await headers();
-  const host = h.get?.('host') ?? '';
-  const sub = extractSubdomain(host);
-  if (!sub) return null;
-  return getProjectBySubdomain(sub);
+export async function getCurrentProjectFromHeaders(headers: Headers) {
+  const host = headers.get('host');
+  if (!host) return null;
+  
+  const subdomain = extractSubdomain(host);
+  if (!subdomain) return null;
+  
+  return await getProjectBySubdomain(subdomain);
 }

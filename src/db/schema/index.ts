@@ -24,6 +24,9 @@ export const projects = pgTable('projects', {
   name: text('name').notNull(),
   subdomain: text('subdomain').notNull().unique(),
   description: text('description'),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),

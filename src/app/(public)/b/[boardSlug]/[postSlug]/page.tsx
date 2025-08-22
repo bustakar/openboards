@@ -1,12 +1,13 @@
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { getBoardBySlug } from '@/server/repos/boards';
+import { getPostBySlug } from '@/server/repos/posts';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Comments } from '@/components/posts/Comments';
 import { VoteButton } from '@/components/posts/VoteButton';
-import { Badge } from '@/components/ui/badge';
-import { boards, posts } from '@/db/schema';
-import { getDatabase } from '@/server/db';
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
-import { and, eq } from 'drizzle-orm';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 
 function statusInfo(status: string): {
   label: string;
@@ -29,31 +30,14 @@ function statusInfo(status: string): {
 export default async function PostPage(props: {
   params: Promise<{ boardSlug: string; postSlug: string }>;
 }) {
-  const project = await getCurrentProjectFromHeaders();
+  const headersList = await headers();
+  const project = await getCurrentProjectFromHeaders(headersList);
   if (!project) return notFound();
   const params = await props.params;
-  const { db } = getDatabase();
-  const [board] = await db
-    .select({ id: boards.id, name: boards.name })
-    .from(boards)
-    .where(eq(boards.slug, params.boardSlug))
-    .limit(1);
+  const board = await getBoardBySlug(params.boardSlug);
   if (!board) return notFound();
-
-  const [post] = await db
-    .select({
-      id: posts.id,
-      title: posts.title,
-      body: posts.body,
-      status: posts.status,
-      voteCount: posts.voteCount,
-      commentCount: posts.commentCount,
-      isArchived: posts.isArchived,
-    })
-    .from(posts)
-    .where(and(eq(posts.boardId, board.id), eq(posts.slug, params.postSlug)))
-    .limit(1);
-  if (!post || post.isArchived) return notFound();
+  const post = await getPostBySlug(params.postSlug, board.id);
+  if (!post) return notFound();
 
   const info = statusInfo(post.status);
 

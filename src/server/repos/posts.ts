@@ -1,61 +1,55 @@
-import { and, desc, eq, ilike, sql } from "drizzle-orm";
-import { getDatabase } from "@/server/db";
-import { boards, posts } from "@/db/schema";
-import { getCurrentProjectFromHeaders } from "./projects";
+import { and, desc, eq, sql } from 'drizzle-orm';
+import { getDatabase } from '@/server/db';
+import { boards, posts } from '@/db/schema';
 
-export type PostSort = "trending" | "new" | "top";
-export type PostStatus = "backlog" | "planned" | "in_progress" | "completed" | "closed";
-
-function buildSearchWhere(boardId: string | undefined, opts: { status?: PostStatus; query?: string }) {
-  const conditions = [eq(posts.isArchived, false)];
-  if (boardId) conditions.push(eq(posts.boardId, boardId));
-  if (opts.status) conditions.push(eq(posts.status, opts.status));
-  if (opts.query && opts.query.trim().length > 0) {
-    const q = `%${opts.query.trim()}%`;
-    conditions.push(ilike(posts.title, q));
-  }
-  return and(...conditions);
-}
-
-function orderBy(sort: PostSort) {
-  switch (sort) {
-    case "new":
-      return [desc(posts.createdAt)];
-    case "top":
-      return [desc(posts.voteCount), desc(posts.lastActivityAt)];
-    case "trending":
-    default:
-      return [
-        // simple hot score approximation: voteCount weight + recency
-        desc(sql`(${posts.voteCount} * 1.0) + (extract(epoch from ${posts.lastActivityAt}) / 100000)`),
-      ];
-  }
-}
-
-export async function listPosts(params: {
+export async function listPosts({
+  boardId,
+  sort = 'trending',
+  limit = 50,
+  userId,
+}: {
   boardId?: string;
-  status?: PostStatus;
-  query?: string;
-  sort?: PostSort;
-  page?: number;
+  sort?: 'trending' | 'new' | 'top';
   limit?: number;
+  userId?: string;
 }) {
   const { db } = getDatabase();
-  const page = Math.max(1, params.page ?? 1);
-  const limit = Math.min(50, Math.max(1, params.limit ?? 20));
-  const offset = (page - 1) * limit;
-  const sort = params.sort ?? "trending";
 
-  // Get current project to filter posts
-  const project = await getCurrentProjectFromHeaders();
-  if (!project) {
-    return { items: [], page, limit, total: 0, hasMore: false };
+  if (!userId) {
+    return { items: [], total: 0, hasMore: false };
   }
 
-  const where = and(
-    buildSearchWhere(params.boardId, { status: params.status, query: params.query }),
-    eq(posts.projectId, project.id)
-  );
+  // Get user's projects first
+  const userProjects = await db
+    .select({ id: sql<string>`projects.id` })
+    .from(sql`projects`)
+    .where(eq(sql`projects.user_id`, userId));
+
+  if (userProjects.length === 0) {
+    return { items: [], total: 0, hasMore: false };
+  }
+
+  const projectIds = userProjects.map(p => p.id);
+
+  let orderBy;
+  switch (sort) {
+    case 'new':
+      orderBy = desc(posts.createdAt);
+      break;
+    case 'top':
+      orderBy = desc(posts.voteCount);
+      break;
+    case 'trending':
+    default:
+      orderBy = desc(posts.lastActivityAt);
+      break;
+  }
+
+  const whereConditions = [sql`posts.project_id = ANY(${projectIds})`];
+  
+  if (boardId) {
+    whereConditions.push(eq(posts.boardId, boardId));
+  }
 
   const items = await db
     .select({
@@ -65,9 +59,6 @@ export async function listPosts(params: {
       status: posts.status,
       voteCount: posts.voteCount,
       commentCount: posts.commentCount,
-      pinned: posts.pinned,
-      isArchived: posts.isArchived,
-      lastActivityAt: posts.lastActivityAt,
       createdAt: posts.createdAt,
       board: {
         id: boards.id,
@@ -77,20 +68,49 @@ export async function listPosts(params: {
     })
     .from(posts)
     .leftJoin(boards, eq(posts.boardId, boards.id))
-    .where(where)
-    .orderBy(...orderBy(sort))
-    .limit(limit)
-    .offset(offset);
+    .where(and(...whereConditions))
+    .orderBy(orderBy)
+    .limit(limit + 1);
 
-  const [{ count }] = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(posts)
-    .where(where);
+  const hasMore = items.length > limit;
+  const result = hasMore ? items.slice(0, limit) : items;
 
-  const total = Number(count);
-  const hasMore = page * limit < total;
+  return {
+    items: result,
+    total: result.length,
+    hasMore,
+  };
+}
 
-  return { items, page, limit, total, hasMore };
+export async function createPost(data: {
+  boardId: string;
+  title: string;
+  body?: string;
+  slug: string;
+}) {
+  const { db } = getDatabase();
+  
+  // Get the project ID from the board
+  const [board] = await db
+    .select({ projectId: boards.projectId })
+    .from(boards)
+    .where(eq(boards.id, data.boardId));
+  
+  if (!board) {
+    throw new Error('Board not found');
+  }
+
+  const [row] = await db
+    .insert(posts)
+    .values({
+      boardId: data.boardId,
+      projectId: board.projectId,
+      title: data.title,
+      body: data.body,
+      slug: data.slug,
+    })
+    .returning();
+  return row;
 }
 
 export async function getPostBySlug(boardId: string, postSlug: string) {
@@ -101,25 +121,6 @@ export async function getPostBySlug(boardId: string, postSlug: string) {
     .where(and(eq(posts.boardId, boardId), eq(posts.slug, postSlug)))
     .limit(1);
   return row ?? null;
-}
-
-export async function createPost(params: { boardId: string; title: string; body?: string | null }) {
-  const { db } = getDatabase();
-  const [b] = await db.select({ projectId: boards.projectId }).from(boards).where(eq(boards.id, params.boardId)).limit(1);
-  if (!b) throw new Error("board_not_found");
-  const slug = slugify(params.title);
-  const [inserted] = await db
-    .insert(posts)
-    .values({
-      boardId: params.boardId,
-      projectId: b.projectId,
-      title: params.title,
-      body: params.body ?? null,
-      slug,
-      status: "backlog",
-    })
-    .returning();
-  return inserted;
 }
 
 export async function incrementVoteCount(postId: string, delta: number) {
@@ -155,16 +156,6 @@ export async function archivePost(postId: string) {
 export async function pinPost(postId: string, pinnedValue: boolean) {
   const { db } = getDatabase();
   await db.update(posts).set({ pinned: pinnedValue }).where(eq(posts.id, postId));
-}
-
-function slugify(input: string) {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80);
 }
 
 

@@ -1,4 +1,4 @@
-import { projects } from '@/db/schema';
+import { projects, users } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import chalk from 'chalk';
 import { Command } from 'commander';
@@ -27,6 +27,7 @@ Examples:
           name: projects.name,
           subdomain: projects.subdomain,
           description: projects.description,
+          userId: projects.userId,
           createdAt: projects.createdAt,
         })
         .from(projects)
@@ -42,6 +43,7 @@ Examples:
       for (const [index, p] of rows.entries()) {
         console.log(`${chalk.cyan(`${index + 1}.`)} ${chalk.bold(p.name)} (${chalk.gray(p.subdomain)})`);
         if (p.description) console.log(`   ${chalk.gray(p.description)}`);
+        console.log(`   User ID: ${chalk.gray(p.userId)}`);
         console.log(`   Created: ${chalk.gray(p.createdAt.toLocaleDateString())}`);
         console.log('');
       }
@@ -49,21 +51,46 @@ Examples:
   )
   .addCommand(
     new Command('create').description('Create a new project').action(async () => {
+      const { db } = getDatabase();
+      
+      // Get available users
+      const availableUsers = await db
+        .select({ id: users.id, email: users.email })
+        .from(users)
+        .orderBy(users.createdAt);
+
+      if (availableUsers.length === 0) {
+        console.log(chalk.red('❌ No users found. Please create a user first.'));
+        return;
+      }
+
       const answers = await inquirer.prompt([
         { type: 'input', name: 'name', message: 'Project name:', validate: (v) => v.trim().length > 0 || 'Name is required' },
         { type: 'input', name: 'subdomain', message: 'Subdomain (e.g. demo):', filter: (v) => String(v).toLowerCase().trim(), validate: (v) => /^[a-z0-9-]{2,50}$/.test(v) || 'Use lowercase letters, digits, dashes' },
         { type: 'input', name: 'description', message: 'Description (optional):' },
+        {
+          type: 'list',
+          name: 'userId',
+          message: 'Select user:',
+          choices: availableUsers.map(u => ({ name: u.email, value: u.id })),
+        },
       ]);
 
-      const { db } = getDatabase();
       try {
         const [row] = await db
           .insert(projects)
-          .values({ name: answers.name.trim(), subdomain: answers.subdomain.trim(), description: answers.description?.trim() || null })
+          .values({ 
+            name: answers.name.trim(), 
+            subdomain: answers.subdomain.trim(), 
+            description: answers.description?.trim() || null,
+            userId: answers.userId,
+          })
           .returning();
         console.log(chalk.green('\n✅ Project created successfully!'));
         console.log(chalk.blue(`Name: ${row.name}`));
         console.log(chalk.blue(`Subdomain: ${row.subdomain}`));
+        const userEmail = availableUsers.find(u => u.id === answers.userId)?.email;
+        console.log(chalk.blue(`User: ${userEmail}`));
       } catch (error) {
         console.error(chalk.red('❌ Error creating project:'), error);
       }

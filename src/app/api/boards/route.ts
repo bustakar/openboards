@@ -10,6 +10,12 @@ export async function GET() {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const data = await listBoardsWithStats();
+  // Get user ID from session
+  const userId = (session.user as { id?: string }).id;
+  if (!userId) {
+    return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
+  }
+
+  const data = await listBoardsWithStats(userId);
   return NextResponse.json(data);
 }

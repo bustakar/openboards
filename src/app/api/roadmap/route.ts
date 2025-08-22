@@ -1,61 +1,33 @@
-import { NextResponse } from "next/server";
-import { getDatabase } from "@/server/db";
-import { posts, boards } from "@/db/schema";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
-import { getCurrentProjectFromHeaders } from "@/server/repos/projects";
+import { NextRequest, NextResponse } from 'next/server';
+import { getDatabase } from '@/server/db';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { posts } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
+import { headers } from 'next/headers';
 
-type GroupKey = "backlog" | "planned" | "in_progress" | "completed";
-
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const boardSlug = searchParams.get("board");
-  const { db } = getDatabase();
-  const project = await getCurrentProjectFromHeaders();
-
-  let boardId: string | undefined = undefined;
-  if (boardSlug && boardSlug !== "all") {
-    const [b] = await db
-      .select({ id: boards.id })
-      .from(boards)
-      .where(project ? and(eq(boards.slug, boardSlug), eq(boards.projectId, project.id)) : eq(boards.slug, boardSlug))
-      .limit(1);
-    if (!b) return NextResponse.json({ error: "Board not found" }, { status: 404 });
-    boardId = b.id;
+export async function GET(request: NextRequest) {
+  const headersList = await headers();
+  const project = await getCurrentProjectFromHeaders(headersList);
+  if (!project) {
+    return NextResponse.json({ error: 'project_not_found' }, { status: 404 });
   }
 
-  const where = and(
-    eq(posts.isArchived, false),
-    boardId ? eq(posts.boardId, boardId) : sql`true`,
-    inArray(posts.status, ["backlog", "planned", "in_progress", "completed"] as const),
-  );
+  const { db } = getDatabase();
 
   const rows = await db
     .select({
       id: posts.id,
       title: posts.title,
-      slug: posts.slug,
-      boardId: posts.boardId,
       status: posts.status,
       voteCount: posts.voteCount,
-      pinned: posts.pinned,
+      commentCount: posts.commentCount,
+      createdAt: posts.createdAt,
     })
     .from(posts)
-    .where(project ? and(where, eq(posts.projectId, project.id)) : where)
-    .orderBy(desc(posts.pinned), desc(posts.voteCount), desc(posts.lastActivityAt));
+    .where(eq(posts.projectId, project.id))
+    .orderBy(desc(posts.voteCount), desc(posts.createdAt));
 
-  const grouped: Record<GroupKey, typeof rows> = {
-    backlog: [],
-    planned: [],
-    in_progress: [],
-    completed: [],
-  } as Record<GroupKey, typeof rows>;
-
-  for (const r of rows) {
-    if (r.status === "closed") continue;
-    grouped[r.status as GroupKey].push(r);
-  }
-
-  return NextResponse.json(grouped);
+  return NextResponse.json(rows);
 }
 
 

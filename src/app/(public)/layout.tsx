@@ -1,19 +1,21 @@
-import { Nav } from '@/components/Nav';
 import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { Nav } from '@/components/Nav';
+import { headers } from 'next/headers';
 
 export default async function PublicLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  const project = await getCurrentProjectFromHeaders();
-  const title = project?.name ?? 'OpenBoards';
+}) {
+  const headersList = await headers();
+  const project = await getCurrentProjectFromHeaders(headersList);
+  const title = project?.name || 'OpenBoards';
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <Nav title={title} />
       {children}
-    </>
+    </div>
   );
 }
 

@@ -1,12 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { IconSearch, IconPlus, IconMessageCircle } from '@tabler/icons-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { IconMessageCircle, IconPlus, IconSearch } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
 
 interface Board {
   id: string;
@@ -103,7 +110,7 @@ export function FeedbackContent() {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       day: 'numeric',
-      month: 'short'
+      month: 'short',
     });
   };
 
@@ -119,9 +126,7 @@ export function FeedbackContent() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="text-red-600 mb-4">{error}</div>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
           </div>
         </div>
       </div>
@@ -134,7 +139,7 @@ export function FeedbackContent() {
       <div className="w-80 border-r bg-gray-50/50">
         <div className="p-6">
           <h2 className="text-lg font-semibold mb-4">Boards</h2>
-          
+
           <ScrollArea className="h-[calc(100vh-120px)]">
             <div className="space-y-2">
               {/* All Posts Button */}
@@ -179,15 +184,13 @@ export function FeedbackContent() {
         {/* Header */}
         <div className="border-b p-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-semibold">
-              Posts ({posts.length})
-            </h1>
+            <h1 className="text-2xl font-semibold">Posts ({posts.length})</h1>
             <Button className="bg-blue-600 hover:bg-blue-700">
               <IconPlus className="w-4 h-4 mr-2" />
               Create Post
             </Button>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-md">
               <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -220,7 +223,10 @@ export function FeedbackContent() {
               </TableHeader>
               <TableBody>
                 {posts.map((post) => (
-                  <TableRow key={post.id} className="hover:bg-gray-50 cursor-pointer">
+                  <TableRow
+                    key={post.id}
+                    className="hover:bg-gray-50 cursor-pointer"
+                  >
                     <TableCell>
                       <div className="flex items-center gap-1 text-gray-600">
                         <IconMessageCircle className="w-4 h-4" />
@@ -228,7 +234,9 @@ export function FeedbackContent() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="font-medium text-gray-900">{post.title}</div>
+                      <div className="font-medium text-gray-900">
+                        {post.title}
+                      </div>
                     </TableCell>
                     <TableCell className="text-gray-500">
                       {formatDate(post.createdAt)}
@@ -237,7 +245,9 @@ export function FeedbackContent() {
                       {post.boardName}
                     </TableCell>
                     <TableCell>
-                      <Badge className={`text-white ${getStatusColor(post.status)}`}>
+                      <Badge
+                        className={`text-white ${getStatusColor(post.status)}`}
+                      >
                         {post.status.replace('_', ' ')}
                       </Badge>
                     </TableCell>
