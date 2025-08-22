@@ -47,18 +47,6 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
-  const userData = user
-    ? {
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar || '/avatars/user.jpg',
-      }
-    : {
-        name: 'OpenBoards User',
-        email: 'user@openboards.co',
-        avatar: '/avatars/user.jpg',
-      };
-
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -79,9 +67,6 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         <NavMain items={navData.navMain} />
         <NavSecondary items={navData.navSecondary} className="mt-auto" />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={userData} />
-      </SidebarFooter>
     </Sidebar>
   );
 }
