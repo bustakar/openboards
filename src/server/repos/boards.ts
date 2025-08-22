@@ -2,10 +2,7 @@ import { boards, projects } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import { and, eq, ilike } from 'drizzle-orm';
 
-export async function listBoardsWithStats(
-  userId: string,
-  projectId: string
-) {
+export async function listBoardsWithStats(userId: string, projectId: string) {
   const { db } = getDatabase();
 
   if (!userId || !projectId) {
