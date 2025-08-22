@@ -19,6 +19,10 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const projectId = searchParams.get('project');
 
+  if (!projectId) {
+    return NextResponse.json({ error: 'project_id_required' }, { status: 400 });
+  }
+
   const data = await listBoardsWithStats(userId, projectId);
   return NextResponse.json(data);
 }

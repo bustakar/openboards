@@ -1,6 +1,5 @@
-import { listBoardsWithStats, getBoardBySlug } from '../boards';
 import { getDatabase } from '@/server/db';
-
+import { getBoardBySlug, listBoardsForProject, listBoardsWithStats } from '../boards';
 
 // Mock the database module
 jest.mock('@/server/db');
@@ -43,41 +42,13 @@ describe('Boards Repository', () => {
       limit: mockLimit,
     };
 
-    mockGetDatabase.mockReturnValue({ 
-      db: mockDb as Record<string, jest.Mock>, 
-      sql: {} as Record<string, unknown>
+    mockGetDatabase.mockReturnValue({
+      db: mockDb as unknown as ReturnType<typeof getDatabase>['db'],
+      sql: {} as unknown as ReturnType<typeof getDatabase>['sql'],
     });
   });
 
   describe('listBoardsWithStats', () => {
-    it('should return empty array when no userId is provided', async () => {
-      const result = await listBoardsWithStats();
-
-      expect(result).toEqual([]);
-      expect(mockSelect).not.toHaveBeenCalled();
-    });
-
-    it('should return empty array when no projectId is provided', async () => {
-      const result = await listBoardsWithStats('user-123');
-
-      expect(result).toEqual([]);
-      expect(mockSelect).not.toHaveBeenCalled();
-    });
-
-    it('should return empty array when projectId is null', async () => {
-      const result = await listBoardsWithStats('user-123', null);
-
-      expect(result).toEqual([]);
-      expect(mockSelect).not.toHaveBeenCalled();
-    });
-
-    it('should return empty array when projectId is empty string', async () => {
-      const result = await listBoardsWithStats('user-123', '');
-
-      expect(result).toEqual([]);
-      expect(mockSelect).not.toHaveBeenCalled();
-    });
-
     it('should list boards for specific user and project', async () => {
       const userId = 'user-123';
       const projectId = 'project-1';
@@ -115,7 +86,7 @@ describe('Boards Repository', () => {
       expect(mockInnerJoin).toHaveBeenCalled();
       expect(mockWhere).toHaveBeenCalled();
       expect(mockOrderBy).toHaveBeenCalled();
-      
+
       // Should add post count to each board
       expect(result).toEqual([
         { ...mockBoards[0], postCount: 0 },
@@ -126,7 +97,7 @@ describe('Boards Repository', () => {
     it('should return empty array when user has no boards in project', async () => {
       const userId = 'user-123';
       const projectId = 'project-with-no-boards';
-      
+
       mockOrderBy.mockResolvedValue([]);
 
       const result = await listBoardsWithStats(userId, projectId);
@@ -145,8 +116,68 @@ describe('Boards Repository', () => {
       expect(mockWhere).toHaveBeenCalled();
       // Should ensure both user ownership and project filtering
     });
+  });
 
+  describe('listBoardsForProject', () => {
+    it('should list boards for specific project (public access)', async () => {
+      const projectId = 'project-1';
+      const mockBoards = [
+        {
+          id: 'board-1',
+          name: 'Board 1',
+          slug: 'board-1',
+          description: 'Description 1',
+          icon: 'icon-1',
+          position: 0,
+          projectId: 'project-1',
+          createdAt: new Date('2023-01-01'),
+          updatedAt: new Date('2023-01-01'),
+        },
+        {
+          id: 'board-2',
+          name: 'Board 2',
+          slug: 'board-2',
+          description: 'Description 2',
+          icon: 'icon-2',
+          position: 1,
+          projectId: 'project-1',
+          createdAt: new Date('2023-01-02'),
+          updatedAt: new Date('2023-01-02'),
+        },
+      ];
 
+      mockOrderBy.mockResolvedValue(mockBoards);
+
+      const result = await listBoardsForProject(projectId);
+
+      expect(mockSelect).toHaveBeenCalled();
+      expect(mockFrom).toHaveBeenCalled();
+      expect(mockWhere).toHaveBeenCalled();
+      expect(mockOrderBy).toHaveBeenCalled();
+
+      // Should add post count to each board
+      expect(result).toEqual([
+        { ...mockBoards[0], postCount: 0 },
+        { ...mockBoards[1], postCount: 0 },
+      ]);
+    });
+
+    it('should return empty array when project has no boards', async () => {
+      const projectId = 'project-with-no-boards';
+
+      mockOrderBy.mockResolvedValue([]);
+
+      const result = await listBoardsForProject(projectId);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array when projectId is empty', async () => {
+      const result = await listBoardsForProject('');
+
+      expect(result).toEqual([]);
+      expect(mockSelect).not.toHaveBeenCalled();
+    });
   });
 
   describe('getBoardBySlug', () => {

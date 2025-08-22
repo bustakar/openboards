@@ -1,12 +1,12 @@
 import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
-import { listBoardsWithStats } from '@/server/repos/boards';
+import { listBoardsForProject } from '@/server/repos/boards';
 import { listPosts } from '@/server/repos/posts';
 import { BoardsList } from '@/components/boards/BoardsList';
 import { PostsList } from '@/components/posts/PostsList';
 import { headers } from 'next/headers';
 
-async function fetchBoards() {
-  const data = await listBoardsWithStats();
+async function fetchBoards(projectId: string) {
+  const data = await listBoardsForProject(projectId);
   return data.map((b) => ({
     id: b.id,
     name: b.name,
@@ -28,7 +28,7 @@ export default async function HomePage(props: {
     return null;
   }
 
-  const boards = await fetchBoards();
+  const boards = await fetchBoards(project.id);
   const posts = await listPosts({});
 
   // Format the posts data to include createdAt as ISO string
