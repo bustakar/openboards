@@ -1,7 +1,7 @@
-import { eq, and } from 'drizzle-orm';
-import { getDatabase } from '@/server/db';
 import { projects } from '@/db/schema';
 import { extractSubdomain } from '@/lib/utils';
+import { getDatabase } from '@/server/db';
+import { and, eq } from 'drizzle-orm';
 
 export async function listProjectsByUser(userId: string) {
   const { db } = getDatabase();
@@ -32,7 +32,9 @@ export async function createProject(data: {
 
   // Validate subdomain format (lowercase letters and hyphens only)
   if (!/^[a-z0-9-]+$/.test(data.subdomain)) {
-    throw new Error('Subdomain must contain only lowercase letters, numbers, and hyphens');
+    throw new Error(
+      'Subdomain must contain only lowercase letters, numbers, and hyphens'
+    );
   }
 
   // Check if subdomain already exists
@@ -84,7 +86,9 @@ export async function updateProject(
   if (data.subdomain && data.subdomain !== existingProject.subdomain) {
     // Validate subdomain format
     if (!/^[a-z0-9-]+$/.test(data.subdomain)) {
-      throw new Error('Subdomain must contain only lowercase letters, numbers, and hyphens');
+      throw new Error(
+        'Subdomain must contain only lowercase letters, numbers, and hyphens'
+      );
     }
 
     // Check if new subdomain already exists
@@ -131,14 +135,14 @@ export async function deleteProject(id: string, userId: string) {
     .where(eq(projects.id, id))
     .returning();
   return row;
-  }
+}
 
-  export async function getCurrentProjectFromHeaders(headers: Headers) {
+export async function getCurrentProjectFromHeaders(headers: Headers) {
   const host = headers.get('host');
   if (!host) return null;
-  
+
   const subdomain = extractSubdomain(host);
   if (!subdomain) return null;
-  
+
   return await getProjectBySubdomain(subdomain);
 }

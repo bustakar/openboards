@@ -1,3 +1,4 @@
+import { projects } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import {
   createProject,
@@ -7,7 +8,6 @@ import {
   listProjectsByUser,
   updateProject,
 } from '../projects';
-import { projects } from '@/db/schema';
 
 // Mock the database module
 jest.mock('@/server/db');
@@ -316,7 +316,9 @@ describe('Projects Repository', () => {
       // Mock existing project found
       mockLimit.mockResolvedValueOnce([{ id: 'existing-project' }]);
 
-      await expect(createProject(data)).rejects.toThrow('Subdomain already exists');
+      await expect(createProject(data)).rejects.toThrow(
+        'Subdomain already exists'
+      );
 
       expect(mockDb.insert).not.toHaveBeenCalled();
     });
@@ -409,9 +411,9 @@ describe('Projects Repository', () => {
       // Mock no project found
       mockLimit.mockResolvedValueOnce([]);
 
-      await expect(updateProject(projectId, userId, updateData)).rejects.toThrow(
-        'Project not found or access denied'
-      );
+      await expect(
+        updateProject(projectId, userId, updateData)
+      ).rejects.toThrow('Project not found or access denied');
 
       expect(mockDb.update).not.toHaveBeenCalled();
     });
@@ -428,7 +430,9 @@ describe('Projects Repository', () => {
         { id: 'project-123', subdomain: 'old-subdomain' },
       ]);
 
-      await expect(updateProject(projectId, userId, updateData)).rejects.toThrow(
+      await expect(
+        updateProject(projectId, userId, updateData)
+      ).rejects.toThrow(
         'Subdomain must contain only lowercase letters, numbers, and hyphens'
       );
 
@@ -450,9 +454,9 @@ describe('Projects Repository', () => {
       // Mock existing subdomain found
       mockLimit.mockResolvedValueOnce([{ id: 'other-project' }]);
 
-      await expect(updateProject(projectId, userId, updateData)).rejects.toThrow(
-        'Subdomain already exists'
-      );
+      await expect(
+        updateProject(projectId, userId, updateData)
+      ).rejects.toThrow('Subdomain already exists');
 
       expect(mockDb.update).not.toHaveBeenCalled();
     });
