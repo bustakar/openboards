@@ -15,7 +15,7 @@ export default async function BoardPage(props: {
   const params = await props.params;
   const board = await getBoardBySlug(params.boardSlug);
   if (!board) return notFound();
-  const posts = await listPosts({ boardId: board.id });
+  const posts = await listPosts({ boardId: board.id, projectId: project.id });
 
   // Format the posts data to include createdAt as ISO string
   const formattedPosts = posts.items.map((post) => ({

@@ -23,6 +23,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'project_id_required' }, { status: 400 });
   }
 
-  const data = await listBoardsWithStats(userId, projectId);
+  const data = await listBoardsWithStats(projectId);
   return NextResponse.json(data);
 }

@@ -1,5 +1,9 @@
 import { getDatabase } from '@/server/db';
-import { getBoardBySlug, listBoardsForProject, listBoardsWithStats } from '../boards';
+import {
+  getBoardBySlug,
+  listBoardsForProject,
+  listBoardsWithStats,
+} from '../boards';
 
 // Mock the database module
 jest.mock('@/server/db');
@@ -49,8 +53,7 @@ describe('Boards Repository', () => {
   });
 
   describe('listBoardsWithStats', () => {
-    it('should list boards for specific user and project', async () => {
-      const userId = 'user-123';
+    it('should list boards for specific project', async () => {
       const projectId = 'project-1';
       const mockBoards = [
         {
@@ -79,11 +82,10 @@ describe('Boards Repository', () => {
 
       mockOrderBy.mockResolvedValue(mockBoards);
 
-      const result = await listBoardsWithStats(userId, projectId);
+      const result = await listBoardsWithStats(projectId);
 
       expect(mockSelect).toHaveBeenCalled();
       expect(mockFrom).toHaveBeenCalled();
-      expect(mockInnerJoin).toHaveBeenCalled();
       expect(mockWhere).toHaveBeenCalled();
       expect(mockOrderBy).toHaveBeenCalled();
 
@@ -100,21 +102,20 @@ describe('Boards Repository', () => {
 
       mockOrderBy.mockResolvedValue([]);
 
-      const result = await listBoardsWithStats(userId, projectId);
+      const result = await listBoardsWithStats(projectId);
 
       expect(result).toEqual([]);
     });
 
-    it('should filter by both user and project authorization', async () => {
-      const userId = 'user-123';
+    it('should filter by project', async () => {
       const projectId = 'project-1';
 
       mockOrderBy.mockResolvedValue([]);
 
-      await listBoardsWithStats(userId, projectId);
+      await listBoardsWithStats(projectId);
 
       expect(mockWhere).toHaveBeenCalled();
-      // Should ensure both user ownership and project filtering
+      // Should ensure project filtering
     });
   });
 

@@ -2,19 +2,16 @@ import { boards, projects } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import { and, eq, ilike } from 'drizzle-orm';
 
-export async function listBoardsWithStats(userId: string, projectId: string) {
+export async function listBoardsWithStats(projectId: string) {
   const { db } = getDatabase();
 
-  if (!userId || !projectId) {
+  if (!projectId) {
     return [];
   }
 
-  const whereCondition = and(
-    eq(projects.userId, userId),
-    eq(projects.id, projectId)
-  );
+  const whereCondition = eq(boards.projectId, projectId);
 
-  // Get boards directly for the user
+  // Get boards for the project
   const boardsData = await db
     .select({
       id: boards.id,
@@ -28,7 +25,6 @@ export async function listBoardsWithStats(userId: string, projectId: string) {
       updatedAt: boards.updatedAt,
     })
     .from(boards)
-    .innerJoin(projects, eq(boards.projectId, projects.id))
     .where(whereCondition)
     .orderBy(boards.position, boards.createdAt);
 

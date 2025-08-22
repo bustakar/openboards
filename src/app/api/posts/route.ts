@@ -1,9 +1,13 @@
+import { authOptions } from '@/server/auth/options';
 import { checkAndRecordLimit } from '@/server/rateLimit';
 import { createPost, listPosts } from '@/server/repos/posts';
-import { createPostSchema, sanitizeBody, sanitizeTitle } from '@/server/validation';
-import { NextRequest, NextResponse } from 'next/server';
+import {
+  createPostSchema,
+  sanitizeBody,
+  sanitizeTitle,
+} from '@/server/validation';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/server/auth/options';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   // Check if user is authenticated
@@ -25,43 +29,44 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') || 'trending';
   const limit = parseInt(searchParams.get('limit') || '50');
 
+  if (!projectId) {
+    return NextResponse.json({ error: 'project_id_required' }, { status: 400 });
+  }
+
   try {
     const data = await listPosts({
       boardId,
-      projectId: projectId || undefined,
+      projectId,
       sort: sort as 'trending' | 'new' | 'top',
       limit,
-      userId,
     });
 
     // Transform the data to include board name
-    const postsWithBoardName = data.items.map(post => ({
+    const postsWithBoardName = data.items.map((post) => ({
       ...post,
       createdAt: post.createdAt.toISOString(),
-      boardName: post.board?.name || 'Unknown Board'
+      boardName: post.board?.name || 'Unknown Board',
     }));
 
     return NextResponse.json({
       items: postsWithBoardName,
       total: data.total,
-      hasMore: data.hasMore
+      hasMore: data.hasMore,
     });
   } catch (error) {
     console.error('Error fetching posts:', error);
-    return NextResponse.json(
-      { error: 'internal_error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'internal_error' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
-  const ip = (
-    request.headers.get('x-forwarded-for') ||
-    request.headers.get('x-real-ip') ||
-    ''
-  ).split(',')[0] || 'unknown';
-  
+  const ip =
+    (
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      ''
+    ).split(',')[0] || 'unknown';
+
   const cookies = request.headers.get('cookie') || '';
   const visitorId = parseCookie(cookies, 'visitorId') || ip;
 
@@ -77,7 +82,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validated = createPostSchema.parse(body);
-    
+
     // Honeypot check
     if (validated._hpt) {
       return NextResponse.json({ error: 'spam_detected' }, { status: 400 });
@@ -90,7 +95,13 @@ export async function POST(request: NextRequest) {
       boardId: validated.boardId,
       title: sanitizedTitle,
       body: sanitizedBody || undefined,
-      slug: sanitizedTitle.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").replace(/-+/g, "-").slice(0, 80),
+      slug: sanitizedTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(0, 80),
     });
 
     return NextResponse.json({ slug: post.slug });
@@ -99,10 +110,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'validation_error' }, { status: 400 });
     }
     console.error('post creation failed', error);
-    return NextResponse.json(
-      { error: 'internal_error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'internal_error' }, { status: 500 });
   }
 }
 
