@@ -1,5 +1,5 @@
 import { authOptions } from '@/server/auth/options';
-import { checkAndRecordLimit } from '@/server/rateLimit';
+import { checkAndRecordLimit } from '@/lib/rateLimit';
 import { createPost, listPosts } from '@/server/repos/posts';
 import {
   createPostSchema,

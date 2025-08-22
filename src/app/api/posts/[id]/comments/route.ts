@@ -1,4 +1,4 @@
-import { checkAndRecordLimit } from '@/server/rateLimit';
+import { checkAndRecordLimit } from '@/lib/rateLimit';
 import { createComment } from '@/server/repos/comments';
 import { createCommentSchema, sanitizeBody } from '@/server/validation';
 import { NextRequest, NextResponse } from 'next/server';
