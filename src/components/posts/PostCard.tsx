@@ -20,7 +20,7 @@ function statusVariant(status: PostItem['status']) {
     case 'in_progress':
       return { label: 'In Progress', variant: 'default' as const };
     case 'completed':
-      return { label: 'Completed', variant: 'success' as const };
+      return { label: 'Completed', variant: 'secondary' as const };
     case 'closed':
       return { label: 'Closed', variant: 'destructive' as const };
     default:

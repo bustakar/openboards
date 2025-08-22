@@ -10,7 +10,7 @@ import { notFound } from 'next/navigation';
 
 function statusInfo(status: string): {
   label: string;
-  variant: 'secondary' | 'default' | 'success' | 'destructive' | 'outline';
+  variant: 'secondary' | 'default' | 'destructive' | 'outline';
 } {
   switch (status) {
     case 'planned':
@@ -18,7 +18,7 @@ function statusInfo(status: string): {
     case 'in_progress':
       return { label: 'In Progress', variant: 'default' };
     case 'completed':
-      return { label: 'Completed', variant: 'success' };
+      return { label: 'Completed', variant: 'secondary' };
     case 'closed':
       return { label: 'Closed', variant: 'destructive' };
     default:
