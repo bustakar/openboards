@@ -6,9 +6,9 @@ import {
   IconRoad,
   IconSettings,
 } from '@tabler/icons-react';
-import * as React from 'react';
-import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 
 import { NavMain } from '@/components/nav-main';
 import { NavSecondary } from '@/components/nav-secondary';
@@ -75,17 +75,17 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const projectId = searchParams.get('project');
-  
+
   const [selectedProject, setSelectedProject] = useState<Project | null>(() => {
     if (projectId) {
-      return projects.find(p => p.id === projectId) || null;
+      return projects.find((p) => p.id === projectId) || null;
     }
     return projects.length > 0 ? projects[0] : null;
   });
 
   useEffect(() => {
     if (projectId) {
-      const project = projects.find(p => p.id === projectId);
+      const project = projects.find((p) => p.id === projectId);
       if (project) {
         setSelectedProject(project);
       }
@@ -102,7 +102,9 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
   };
 
   const getNavData = () => {
-    const projectParam = selectedProject ? `?project=${selectedProject.id}` : '';
+    const projectParam = selectedProject
+      ? `?project=${selectedProject.id}`
+      : '';
     return {
       navMain: [
         {

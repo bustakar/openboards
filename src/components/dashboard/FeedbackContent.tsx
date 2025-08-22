@@ -13,8 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { IconMessageCircle, IconPlus, IconSearch } from '@tabler/icons-react';
-import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
 interface Board {
   id: string;
@@ -38,7 +38,7 @@ interface Post {
 export function FeedbackContent() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get('project');
-  
+
   const [boards, setBoards] = useState<Board[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
@@ -47,7 +47,9 @@ export function FeedbackContent() {
 
   const fetchBoards = useCallback(async () => {
     try {
-      const url = projectId ? `/api/boards?project=${projectId}` : '/api/boards';
+      const url = projectId
+        ? `/api/boards?project=${projectId}`
+        : '/api/boards';
       const response = await fetch(url);
       if (!response.ok) {
         if (response.status === 401) {
@@ -64,33 +66,36 @@ export function FeedbackContent() {
     }
   }, [projectId]);
 
-  const fetchPosts = useCallback(async (boardId?: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      let url = '/api/posts';
-      const params = new URLSearchParams();
-      if (projectId) params.append('project', projectId);
-      if (boardId) params.append('boardId', boardId);
-      if (params.toString()) url += `?${params.toString()}`;
-      
-      const response = await fetch(url);
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError('Authentication required. Please log in again.');
-          return;
+  const fetchPosts = useCallback(
+    async (boardId?: string) => {
+      try {
+        setLoading(true);
+        setError(null);
+        let url = '/api/posts';
+        const params = new URLSearchParams();
+        if (projectId) params.append('project', projectId);
+        if (boardId) params.append('boardId', boardId);
+        if (params.toString()) url += `?${params.toString()}`;
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          if (response.status === 401) {
+            setError('Authentication required. Please log in again.');
+            return;
+          }
+          throw new Error(`Failed to fetch posts: ${response.status}`);
         }
-        throw new Error(`Failed to fetch posts: ${response.status}`);
+        const data = await response.json();
+        setPosts(data.items || data);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        setError('Failed to load posts. Please try again.');
+      } finally {
+        setLoading(false);
       }
-      const data = await response.json();
-      setPosts(data.items || data);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-      setError('Failed to load posts. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
+    },
+    [projectId]
+  );
 
   useEffect(() => {
     if (projectId) {
