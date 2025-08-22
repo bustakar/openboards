@@ -1,12 +1,14 @@
 import { and, desc, eq, ilike, sql } from "drizzle-orm";
 import { getDatabase } from "@/server/db";
 import { boards, posts } from "@/db/schema";
+import { getCurrentProjectFromHeaders } from "./projects";
 
 export type PostSort = "trending" | "new" | "top";
 export type PostStatus = "backlog" | "planned" | "in_progress" | "completed" | "closed";
 
-function buildSearchWhere(boardId: string, opts: { status?: PostStatus; query?: string }) {
-  const conditions = [eq(posts.boardId, boardId), eq(posts.isArchived, false)];
+function buildSearchWhere(boardId: string | undefined, opts: { status?: PostStatus; query?: string }) {
+  const conditions = [eq(posts.isArchived, false)];
+  if (boardId) conditions.push(eq(posts.boardId, boardId));
   if (opts.status) conditions.push(eq(posts.status, opts.status));
   if (opts.query && opts.query.trim().length > 0) {
     const q = `%${opts.query.trim()}%`;
@@ -31,7 +33,7 @@ function orderBy(sort: PostSort) {
 }
 
 export async function listPosts(params: {
-  boardId: string;
+  boardId?: string;
   status?: PostStatus;
   query?: string;
   sort?: PostSort;
@@ -44,7 +46,16 @@ export async function listPosts(params: {
   const offset = (page - 1) * limit;
   const sort = params.sort ?? "trending";
 
-  const where = buildSearchWhere(params.boardId, { status: params.status, query: params.query });
+  // Get current project to filter posts
+  const project = await getCurrentProjectFromHeaders();
+  if (!project) {
+    return { items: [], page, limit, total: 0, hasMore: false };
+  }
+
+  const where = and(
+    buildSearchWhere(params.boardId, { status: params.status, query: params.query }),
+    eq(posts.projectId, project.id)
+  );
 
   const items = await db
     .select({
@@ -58,8 +69,14 @@ export async function listPosts(params: {
       isArchived: posts.isArchived,
       lastActivityAt: posts.lastActivityAt,
       createdAt: posts.createdAt,
+      board: {
+        id: boards.id,
+        name: boards.name,
+        slug: boards.slug,
+      },
     })
     .from(posts)
+    .leftJoin(boards, eq(posts.boardId, boards.id))
     .where(where)
     .orderBy(...orderBy(sort))
     .limit(limit)
@@ -70,7 +87,10 @@ export async function listPosts(params: {
     .from(posts)
     .where(where);
 
-  return { items, page, limit, total: Number(count) };
+  const total = Number(count);
+  const hasMore = page * limit < total;
+
+  return { items, page, limit, total, hasMore };
 }
 
 export async function getPostBySlug(boardId: string, postSlug: string) {

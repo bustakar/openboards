@@ -1,7 +1,49 @@
 import { checkAndRecordLimit } from '@/server/rateLimit';
-import { createPost } from '@/server/repos/posts';
+import { createPost, listPosts } from '@/server/repos/posts';
 import { createPostSchema, sanitizeBody, sanitizeTitle } from '@/server/validation';
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/server/auth/options';
+
+export async function GET(request: NextRequest) {
+  // Check if user is authenticated
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const boardId = searchParams.get('boardId');
+  const sort = searchParams.get('sort') || 'trending';
+  const limit = parseInt(searchParams.get('limit') || '50');
+
+  try {
+    const data = await listPosts({
+      boardId: boardId || undefined,
+      sort: sort as 'trending' | 'new' | 'top',
+      limit,
+    });
+
+    // Transform the data to include board name
+    const postsWithBoardName = data.items.map(post => ({
+      ...post,
+      createdAt: post.createdAt.toISOString(),
+      boardName: post.board?.name || 'Unknown Board'
+    }));
+
+    return NextResponse.json({
+      items: postsWithBoardName,
+      total: data.total,
+      hasMore: data.hasMore
+    });
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return NextResponse.json(
+      { error: 'internal_error' },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   const ip = (
