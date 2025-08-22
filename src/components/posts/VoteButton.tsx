@@ -1,5 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
+import { useVote } from '@/hooks/useVote';
 import * as React from 'react';
 
 export function VoteButton({
@@ -11,34 +12,7 @@ export function VoteButton({
   initialCount: number;
   className?: string;
 }) {
-  const storageKey = `voted:${postId}`;
-  const [count, setCount] = React.useState(initialCount);
-  const [voted, setVoted] = React.useState<boolean>(false);
-  const [loading, setLoading] = React.useState(false);
-
-  React.useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      setVoted(raw === 'true');
-    } catch {}
-  }, [storageKey]);
-
-  async function toggle() {
-    if (loading) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/posts/${postId}/vote`, { method: 'POST' });
-      if (!res.ok) return;
-      const data = (await res.json()) as { voted: boolean; voteCount: number };
-      setVoted(data.voted);
-      setCount(data.voteCount);
-      try {
-        localStorage.setItem(storageKey, String(data.voted));
-      } catch {}
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { count, voted, loading, toggle } = useVote(postId, initialCount);
 
   return (
     <Button
