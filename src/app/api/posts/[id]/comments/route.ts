@@ -1,6 +1,7 @@
 import { checkAndRecordLimit } from '@/lib/rateLimit';
-import { createComment } from '@/server/repos/comments';
-import { createCommentSchema, sanitizeBody } from '@/server/validation';
+import { createComment } from '@/server/repos/comments/comments';
+import { createCommentSchema } from '@/server/repos/comments/validation';
+import { sanitizeBody } from '@/server/repos/posts/validation';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {

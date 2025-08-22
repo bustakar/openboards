@@ -1,5 +1,5 @@
 import { authOptions } from '@/server/auth/options';
-import { listBoardsWithStats } from '@/server/repos/boards';
+import { listBoardsWithStats } from '@/server/repos/boards/boards';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 

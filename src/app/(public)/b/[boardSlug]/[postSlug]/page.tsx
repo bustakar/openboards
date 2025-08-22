@@ -1,13 +1,13 @@
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
-import { getBoardBySlug } from '@/server/repos/boards';
-import { getPostBySlug } from '@/server/repos/posts';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Comments } from '@/components/posts/Comments';
 import { VoteButton } from '@/components/posts/VoteButton';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getBoardBySlug } from '@/server/repos/boards/boards';
+import { getPostBySlug } from '@/server/repos/posts/posts';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { headers } from 'next/headers';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 function statusInfo(status: string): {
   label: string;

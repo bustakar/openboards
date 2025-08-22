@@ -1,7 +1,7 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { authOptions } from '@/server/auth/options';
-import { listProjectsByUser } from '@/server/repos/projects';
+import { listProjectsByUser } from '@/server/repos/projects/projects';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 

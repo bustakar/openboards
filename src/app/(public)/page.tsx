@@ -1,8 +1,8 @@
 import { BoardsList } from '@/components/boards/BoardsList';
 import { PostsList } from '@/components/posts/PostsList';
-import { listBoardsForProject } from '@/server/repos/boards';
-import { listPosts } from '@/server/repos/posts';
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { listBoardsForProject } from '@/server/repos/boards/boards';
+import { listPosts } from '@/server/repos/posts/posts';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { headers } from 'next/headers';
 
 async function fetchBoards(projectId: string) {

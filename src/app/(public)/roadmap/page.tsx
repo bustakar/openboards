@@ -1,7 +1,7 @@
 import { VoteButton } from '@/components/posts/VoteButton';
 import { boards, posts } from '@/db/schema';
 import { getDatabase } from '@/server/db';
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import Link from 'next/link';

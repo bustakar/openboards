@@ -1,7 +1,7 @@
 import { PostsList } from '@/components/posts/PostsList';
-import { getBoardBySlug } from '@/server/repos/boards';
-import { listPosts } from '@/server/repos/posts';
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { getBoardBySlug } from '@/server/repos/boards/boards';
+import { listPosts } from '@/server/repos/posts/posts';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 

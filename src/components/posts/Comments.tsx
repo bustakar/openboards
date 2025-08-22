@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { listComments } from '@/server/repos/comments';
+import { listComments } from '@/server/repos/comments/comments';
 import * as React from 'react';
 
 export type CommentItem = {

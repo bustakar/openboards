@@ -1,11 +1,11 @@
-import { authOptions } from '@/server/auth/options';
 import { checkAndRecordLimit } from '@/lib/rateLimit';
-import { createPost, listPosts } from '@/server/repos/posts';
+import { authOptions } from '@/server/auth/options';
+import { createPost, listPosts } from '@/server/repos/posts/posts';
 import {
   createPostSchema,
   sanitizeBody,
   sanitizeTitle,
-} from '@/server/validation';
+} from '@/server/repos/posts/validation';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 

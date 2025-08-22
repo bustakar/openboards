@@ -1,5 +1,5 @@
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
 import { Nav } from '@/components/Nav';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { headers } from 'next/headers';
 
 export default async function PublicLayout({
@@ -18,4 +18,3 @@ export default async function PublicLayout({
     </div>
   );
 }
-
