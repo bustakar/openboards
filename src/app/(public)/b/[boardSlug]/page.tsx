@@ -7,15 +7,30 @@ import { notFound } from 'next/navigation';
 
 export default async function BoardPage(props: {
   params: Promise<{ boardSlug: string }>;
-  searchParams?: Promise<{ status?: string; sort?: string; q?: string }>;
+  searchParams?: Promise<{ status?: string; sort?: 'trending' | 'new' | 'top'; q?: string }>;
 }) {
   const headersList = await headers();
   const project = await getCurrentProjectFromHeaders(headersList);
-  if (!project) return notFound();
+  
+  if (!project) {
+    notFound();
+  }
+
   const params = await props.params;
   const board = await getBoardBySlug(params.boardSlug);
-  if (!board) return notFound();
-  const posts = await listPosts({ boardId: board.id, projectId: project.id });
+  
+  if (!board) {
+    notFound();
+  }
+
+  const searchParams = await props.searchParams;
+  const sort = searchParams?.sort || 'trending';
+  
+  const posts = await listPosts({ 
+    boardId: board.id, 
+    projectId: project.id,
+    sort: sort
+  });
 
   // Format the posts data to include createdAt as ISO string
   const formattedPosts = posts.items.map((post) => ({
@@ -24,7 +39,7 @@ export default async function BoardPage(props: {
   }));
 
   return (
-    <main className="container mx-auto p-6">
+    <>
       <div className="mb-8">
         <h1 className="text-3xl font-bold">{board.name}</h1>
         {board.description && (
@@ -36,9 +51,9 @@ export default async function BoardPage(props: {
         posts={formattedPosts}
         basePath={`/b/${board.slug}`}
         boardSlug={board.slug}
-        currentSort="trending"
+        currentSort={sort}
         boardName={board.name}
       />
-    </main>
+    </>
   );
 }
