@@ -1,17 +1,11 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import {
-  IconMessageCircle,
-  IconRoad,
-  IconSettings,
-  IconUser,
-  IconInnerShadowTop,
-} from "@tabler/icons-react"
+import { IconMessageCircle, IconRoad, IconSettings } from '@tabler/icons-react';
+import * as React from 'react';
 
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from '@/components/nav-main';
+import { NavSecondary } from '@/components/nav-secondary';
+import { NavUser } from '@/components/nav-user';
 import {
   Sidebar,
   SidebarContent,
@@ -20,53 +14,50 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from '@/components/ui/sidebar';
 
 const navData = {
   navMain: [
     {
-      title: "Feedback",
-      url: "/dashboard/feedback",
+      title: 'Feedback',
+      url: '/dashboard/feedback',
       icon: IconMessageCircle,
     },
     {
-      title: "Roadmap",
-      url: "/dashboard/roadmap",
+      title: 'Roadmap',
+      url: '/dashboard/roadmap',
       icon: IconRoad,
     },
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "/dashboard/settings",
+      title: 'Settings',
+      url: '/dashboard/settings',
       icon: IconSettings,
     },
-    {
-      title: "Profile",
-      url: "/dashboard/profile",
-      icon: IconUser,
-    },
   ],
-}
+};
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user?: {
-    name: string
-    email: string
-    avatar?: string
-  }
+    name: string;
+    email: string;
+    avatar?: string;
+  };
 }
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
-  const userData = user ? {
-    name: user.name,
-    email: user.email,
-    avatar: user.avatar || "/avatars/user.jpg",
-  } : {
-    name: "OpenBoards User",
-    email: "user@openboards.co",
-    avatar: "/avatars/user.jpg",
-  }
+  const userData = user
+    ? {
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar || '/avatars/user.jpg',
+      }
+    : {
+        name: 'OpenBoards User',
+        email: 'user@openboards.co',
+        avatar: '/avatars/user.jpg',
+      };
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -78,7 +69,6 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="/dashboard">
-                <IconInnerShadowTop className="!size-5" />
                 <span className="text-base font-semibold">OpenBoards</span>
               </a>
             </SidebarMenuButton>
@@ -93,5 +83,5 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         <NavUser user={userData} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
