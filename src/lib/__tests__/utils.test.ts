@@ -1,4 +1,4 @@
-import { cn } from '../utils';
+import { cn, extractSubdomain } from '../utils';
 
 describe('cn utility function', () => {
   it('should combine multiple class strings', () => {
@@ -130,5 +130,41 @@ describe('cn utility function', () => {
     expect(result).toBe(
       'base-button admin-button active-button dark-theme always-present'
     );
+  });
+});
+
+describe('extractSubdomain utility function', () => {
+  it('should extract subdomain from production domain', () => {
+    expect(extractSubdomain('demo.openboards.co')).toBe('demo');
+    expect(extractSubdomain('my-project.openboards.co')).toBe('my-project');
+  });
+
+  it('should extract subdomain from localhost development', () => {
+    expect(extractSubdomain('demo.localhost:3000')).toBe('demo');
+    expect(extractSubdomain('test.localhost:3000')).toBe('test');
+  });
+
+  it('should return null for localhost without subdomain', () => {
+    expect(extractSubdomain('localhost:3000')).toBeNull();
+  });
+
+  it('should return null for root domain', () => {
+    expect(extractSubdomain('openboards.co')).toBeNull();
+  });
+
+  it('should return null for invalid hostnames', () => {
+    expect(extractSubdomain('invalid')).toBeNull();
+    expect(extractSubdomain('')).toBeNull();
+    expect(extractSubdomain('just.localhost')).toBe('just');
+  });
+
+  it('should return null for IP addresses', () => {
+    expect(extractSubdomain('192.168.1.1')).toBeNull();
+    expect(extractSubdomain('127.0.0.1:3000')).toBeNull();
+  });
+
+  it('should handle edge cases', () => {
+    expect(extractSubdomain('a.b.c')).toBe('a');
+    expect(extractSubdomain('a.b')).toBeNull();
   });
 });

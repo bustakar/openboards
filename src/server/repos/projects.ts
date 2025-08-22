@@ -1,12 +1,7 @@
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { getDatabase } from '@/server/db';
 import { projects } from '@/db/schema';
-import { and } from 'drizzle-orm';
-
-export async function listProjects() {
-  const { db } = getDatabase();
-  return await db.select().from(projects).orderBy(projects.createdAt);
-}
+import { extractSubdomain } from '@/lib/utils';
 
 export async function listProjectsByUser(userId: string) {
   const { db } = getDatabase();
@@ -17,28 +12,14 @@ export async function listProjectsByUser(userId: string) {
     .orderBy(projects.createdAt);
 }
 
-export async function getProjectById(id: string) {
-  const { db } = getDatabase();
-  const [row] = await db.select().from(projects).where(eq(projects.id, id));
-  return row;
-}
-
 export async function getProjectBySubdomain(subdomain: string) {
   const { db } = getDatabase();
   const [row] = await db
     .select()
     .from(projects)
-    .where(eq(projects.subdomain, subdomain));
-  return row;
-}
-
-export async function getProjectBySubdomainAndUser(subdomain: string, userId: string) {
-  const { db } = getDatabase();
-  const [row] = await db
-    .select()
-    .from(projects)
-    .where(and(eq(projects.subdomain, subdomain), eq(projects.userId, userId)));
-  return row;
+    .where(eq(projects.subdomain, subdomain))
+    .limit(1);
+  return row ?? null;
 }
 
 export async function createProject(data: {
@@ -48,6 +29,23 @@ export async function createProject(data: {
   userId: string;
 }) {
   const { db } = getDatabase();
+
+  // Validate subdomain format (lowercase letters and hyphens only)
+  if (!/^[a-z0-9-]+$/.test(data.subdomain)) {
+    throw new Error('Subdomain must contain only lowercase letters, numbers, and hyphens');
+  }
+
+  // Check if subdomain already exists
+  const [existingProject] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .where(eq(projects.subdomain, data.subdomain))
+    .limit(1);
+
+  if (existingProject) {
+    throw new Error('Subdomain already exists');
+  }
+
   const [row] = await db
     .insert(projects)
     .values({
@@ -62,6 +60,7 @@ export async function createProject(data: {
 
 export async function updateProject(
   id: string,
+  userId: string,
   data: Partial<{
     name: string;
     subdomain: string;
@@ -69,6 +68,37 @@ export async function updateProject(
   }>
 ) {
   const { db } = getDatabase();
+
+  // Check if project exists and user owns it
+  const [existingProject] = await db
+    .select({ id: projects.id, subdomain: projects.subdomain })
+    .from(projects)
+    .where(and(eq(projects.id, id), eq(projects.userId, userId)))
+    .limit(1);
+
+  if (!existingProject) {
+    throw new Error('Project not found or access denied');
+  }
+
+  // If subdomain is being updated, validate format and uniqueness
+  if (data.subdomain && data.subdomain !== existingProject.subdomain) {
+    // Validate subdomain format
+    if (!/^[a-z0-9-]+$/.test(data.subdomain)) {
+      throw new Error('Subdomain must contain only lowercase letters, numbers, and hyphens');
+    }
+
+    // Check if new subdomain already exists
+    const [duplicateProject] = await db
+      .select({ id: projects.id })
+      .from(projects)
+      .where(eq(projects.subdomain, data.subdomain))
+      .limit(1);
+
+    if (duplicateProject) {
+      throw new Error('Subdomain already exists');
+    }
+  }
+
   const [row] = await db
     .update(projects)
     .set({
@@ -80,31 +110,30 @@ export async function updateProject(
   return row;
 }
 
-export async function deleteProject(id: string) {
+export async function deleteProject(id: string, userId: string) {
   const { db } = getDatabase();
+
+  // Check if project exists and user owns it
+  const [existingProject] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .where(and(eq(projects.id, id), eq(projects.userId, userId)))
+    .limit(1);
+
+  if (!existingProject) {
+    throw new Error('Project not found or access denied');
+  }
+
+  // TODO: Add cascade deletion for boards, posts, comments, votes
+  // For now, just delete the project
   const [row] = await db
     .delete(projects)
     .where(eq(projects.id, id))
     .returning();
   return row;
-}
-
-export function extractSubdomain(hostname: string): string | null {
-  const parts = hostname.split('.');
-  if (parts.length < 2) return null;
-  
-  // Handle localhost development
-  if (hostname.includes('localhost')) {
-    if (parts.length === 2) return null; // localhost:3000
-    if (parts.length === 3) return parts[0]; // demo.localhost:3000
   }
-  
-  // Handle production domains
-  if (parts.length === 3) return parts[0]; // demo.openboards.co
-  return null;
-}
 
-export async function getCurrentProjectFromHeaders(headers: Headers) {
+  export async function getCurrentProjectFromHeaders(headers: Headers) {
   const host = headers.get('host');
   if (!host) return null;
   
