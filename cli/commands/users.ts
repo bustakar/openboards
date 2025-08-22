@@ -8,6 +8,42 @@ import inquirer from 'inquirer';
 export const usersCommand = new Command('users')
   .description('Manage users')
   .addCommand(
+    new Command('list').description('List all users').action(async () => {
+      const { db } = getDatabase();
+      try {
+        const rows = await db
+          .select({
+            id: users.id,
+            email: users.email,
+            createdAt: users.createdAt,
+            updatedAt: users.updatedAt,
+          })
+          .from(users)
+          .orderBy(users.createdAt);
+
+        if (rows.length === 0) {
+          console.log(chalk.yellow('No users found'));
+          return;
+        }
+
+        console.log(chalk.blue(`\n📋 Found ${rows.length} user(s):\n`));
+        rows.forEach((user, index) => {
+          console.log(chalk.white(`${index + 1}. ${user.email}`));
+          console.log(chalk.gray(`   ID: ${user.id}`));
+          console.log(
+            chalk.gray(`   Created: ${user.createdAt.toLocaleDateString()}`)
+          );
+          console.log(
+            chalk.gray(`   Updated: ${user.updatedAt.toLocaleDateString()}`)
+          );
+          console.log('');
+        });
+      } catch (e) {
+        console.error(chalk.red('❌ Failed to list users'), e);
+      }
+    })
+  )
+  .addCommand(
     new Command('create').description('Create a user').action(async () => {
       const answers = await inquirer.prompt([
         {

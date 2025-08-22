@@ -1,9 +1,12 @@
 import { BoardsList, type BoardItem } from '@/components/boards/BoardsList';
 import { PostsList } from '@/components/posts/PostsList';
 import { SelectProjectClient } from '@/components/projects/SelectProjectClient';
+import { projects } from '@/db/schema';
+import { getDatabase } from '@/server/db';
 import { listBoardsWithStats } from '@/server/repos/boards';
 import { listPosts } from '@/server/repos/posts';
 import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { asc } from 'drizzle-orm';
 
 async function fetchBoards(): Promise<BoardItem[]> {
   const data = await listBoardsWithStats();
@@ -17,15 +20,14 @@ async function fetchBoards(): Promise<BoardItem[]> {
   }));
 }
 
-export default async function Home(props: {
+export default async function PublicPage(props: {
   searchParams?: Promise<{ sort?: 'trending' | 'new' | 'top' }>;
 }) {
   const project = await getCurrentProjectFromHeaders();
+
+  // If no project found, this is the apex domain - show project selector
   if (!project) {
     // Load available projects for the selector
-    const { getDatabase } = await import('@/server/db');
-    const { projects } = await import('@/db/schema');
-    const { asc } = await import('drizzle-orm');
     const { db } = getDatabase();
     const rows = await db
       .select({
@@ -41,9 +43,12 @@ export default async function Home(props: {
       </main>
     );
   }
+
+  // We have a project, render the public homepage
   const boards = await fetchBoards();
   const sp = (await props.searchParams) ?? {};
   const sort = sp.sort ?? 'trending';
+
   // Get all posts across all boards within current project
   const allBoardsData = await Promise.all(
     boards.map(async (board) => {
@@ -82,6 +87,7 @@ export default async function Home(props: {
       }
     })
     .slice(0, 10);
+
   return (
     <main className="container mx-auto p-6">
       <div className="grid grid-cols-12 gap-6">
@@ -89,12 +95,21 @@ export default async function Home(props: {
           <BoardsList boards={boards} selectedSlug={undefined} />
         </div>
         <div className="col-span-12 md:col-span-8">
-          <PostsList
-            posts={allPosts}
-            basePath="/"
-            currentSort={sort}
-            boardName="All posts"
-          />
+          {boards.length === 0 ? (
+            <div className="text-center py-12">
+              <h2 className="text-xl font-semibold mb-2">No boards yet</h2>
+              <p className="text-gray-600">
+                This project doesn&apos;t have any boards yet.
+              </p>
+            </div>
+          ) : (
+            <PostsList
+              posts={allPosts}
+              basePath="/"
+              currentSort={sort}
+              boardName="All posts"
+            />
+          )}
         </div>
       </div>
     </main>
