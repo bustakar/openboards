@@ -1,17 +1,15 @@
 import { boards, projects } from '@/db/schema';
 import { getDatabase } from '@/server/db';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, ilike } from 'drizzle-orm';
 
 export async function listBoardsWithStats(userId?: string, projectId?: string | null) {
   const { db } = getDatabase();
 
-  if (!userId) {
+  if (!userId || !projectId) {
     return [];
   }
 
-  const whereCondition = projectId 
-    ? and(eq(projects.userId, userId), eq(projects.id, projectId))
-    : eq(projects.userId, userId);
+  const whereCondition = and(eq(projects.userId, userId), eq(projects.id, projectId));
 
   // Get boards directly for the user
   const boardsData = await db
@@ -41,15 +39,23 @@ export async function listBoardsWithStats(userId?: string, projectId?: string | 
 export async function getBoardBySlug(slug: string, userId?: string) {
   const { db } = getDatabase();
 
-  if (!userId) {
-    return null;
+  if (userId) {
+    // Private access - filter by user authorization
+    const [row] = await db
+      .select()
+      .from(boards)
+      .innerJoin(projects, eq(boards.projectId, projects.id))
+      .where(and(ilike(boards.slug, slug), eq(projects.userId, userId)));
+    
+    return row ? row.boards : null;
+  } else {
+    // Public access - no user authorization required
+    const [row] = await db
+      .select()
+      .from(boards)
+      .where(ilike(boards.slug, slug))
+      .limit(1);
+    
+    return row ?? null;
   }
-
-  const [row] = await db
-    .select()
-    .from(boards)
-    .innerJoin(projects, eq(boards.projectId, projects.id))
-    .where(and(eq(boards.slug, slug), eq(projects.userId, userId)));
-  
-  return row ? row.boards : null;
 }

@@ -9,13 +9,13 @@ describe('cn utility function', () => {
   it('should handle conditional classes', () => {
     const isActive = true;
     const isDisabled = false;
-    
+
     const result = cn(
       'base-class',
       isActive && 'active-class',
       isDisabled && 'disabled-class'
     );
-    
+
     expect(result).toBe('base-class active-class');
   });
 
@@ -30,22 +30,22 @@ describe('cn utility function', () => {
       'bg-blue-500': false,
       'p-4': true,
     });
-    
+
     expect(result).toBe('text-red-500 p-4');
   });
 
   it('should handle mixed input types', () => {
     const isActive = true;
     const classes = ['text-red-500', 'bg-blue-500'];
-    
-    const result = cn(
-      'base-class',
-      classes,
-      isActive && 'active-class',
-      { 'conditional-class': true, 'hidden-class': false }
+
+    const result = cn('base-class', classes, isActive && 'active-class', {
+      'conditional-class': true,
+      'hidden-class': false,
+    });
+
+    expect(result).toBe(
+      'base-class text-red-500 bg-blue-500 active-class conditional-class'
     );
-    
-    expect(result).toBe('base-class text-red-500 bg-blue-500 active-class conditional-class');
   });
 
   it('should handle empty inputs', () => {
@@ -71,18 +71,14 @@ describe('cn utility function', () => {
       'bg-red-500 hover:bg-red-600',
       'bg-blue-500 hover:bg-blue-600'
     );
-    
+
     // Should merge conflicting classes, keeping the last occurrence
     expect(result).toBe('px-6 py-3 text-lg bg-blue-500 hover:bg-blue-600');
   });
 
   it('should handle nested arrays', () => {
-    const result = cn([
-      'text-red-500',
-      ['bg-blue-500', 'p-4'],
-      'border'
-    ]);
-    
+    const result = cn(['text-red-500', ['bg-blue-500', 'p-4'], 'border']);
+
     expect(result).toBe('text-red-500 bg-blue-500 p-4 border');
   });
 
@@ -93,13 +89,13 @@ describe('cn utility function', () => {
         'nested-1',
         {
           'nested-2': true,
-          'nested-3': false
+          'nested-3': false,
         },
-        'nested-4'
+        'nested-4',
       ],
       'final'
     );
-    
+
     expect(result).toBe('base nested-1 nested-2 nested-4 final');
   });
 
@@ -122,7 +118,7 @@ describe('cn utility function', () => {
   it('should handle complex conditional logic', () => {
     const user = { role: 'admin', isActive: true };
     const theme = 'dark';
-    
+
     const result = cn(
       'base-button',
       user.role === 'admin' && 'admin-button',
@@ -130,7 +126,9 @@ describe('cn utility function', () => {
       theme === 'dark' && 'dark-theme',
       'always-present'
     );
-    
-    expect(result).toBe('base-button admin-button active-button dark-theme always-present');
+
+    expect(result).toBe(
+      'base-button admin-button active-button dark-theme always-present'
+    );
   });
 });
