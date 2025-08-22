@@ -1,9 +1,9 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { authOptions } from '@/server/auth/options';
+import { listProjectsByUser } from '@/server/repos/projects';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { listProjectsByUser } from '@/server/repos/projects';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -14,7 +14,7 @@ export default async function DashboardPage() {
 
   // Check if user has any projects
   const projects = await listProjectsByUser(userId);
-  
+
   // If no projects, redirect to setup
   if (projects.length === 0) {
     redirect('/setup');

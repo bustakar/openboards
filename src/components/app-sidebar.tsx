@@ -1,12 +1,24 @@
 'use client';
 
-import { IconMessageCircle, IconRoad, IconSettings, IconChevronDown } from '@tabler/icons-react';
+import {
+  IconChevronDown,
+  IconMessageCircle,
+  IconRoad,
+  IconSettings,
+} from '@tabler/icons-react';
 import * as React from 'react';
 import { useState } from 'react';
 
 import { NavMain } from '@/components/nav-main';
 import { NavSecondary } from '@/components/nav-secondary';
 import { NavUser } from '@/components/nav-user';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -16,13 +28,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 
 const navData = {
   navMain: [
@@ -99,7 +104,9 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
                     <DropdownMenuItem
                       key={project.id}
                       onClick={() => handleProjectSelect(project)}
-                      className={selectedProject?.id === project.id ? 'bg-accent' : ''}
+                      className={
+                        selectedProject?.id === project.id ? 'bg-accent' : ''
+                      }
                     >
                       <div className="flex flex-col items-start">
                         <span className="font-medium">{project.name}</span>

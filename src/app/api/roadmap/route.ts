@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { posts } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
-import { posts } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const headersList = await headers();
@@ -29,5 +29,3 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json(rows);
 }
-
-

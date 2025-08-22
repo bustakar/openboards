@@ -1,6 +1,6 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { getDatabase } from '@/server/db';
-import { boards, posts } from '@/db/schema';
+import { boards, posts, projects } from '@/db/schema';
 
 export async function listPosts({
   boardId,
@@ -19,18 +19,6 @@ export async function listPosts({
     return { items: [], total: 0, hasMore: false };
   }
 
-  // Get user's projects first
-  const userProjects = await db
-    .select({ id: sql<string>`projects.id` })
-    .from(sql`projects`)
-    .where(eq(sql`projects.user_id`, userId));
-
-  if (userProjects.length === 0) {
-    return { items: [], total: 0, hasMore: false };
-  }
-
-  const projectIds = userProjects.map(p => p.id);
-
   let orderBy;
   switch (sort) {
     case 'new':
@@ -45,7 +33,7 @@ export async function listPosts({
       break;
   }
 
-  const whereConditions = [sql`posts.project_id = ANY(${projectIds})`];
+  const whereConditions = [eq(projects.userId, userId)];
   
   if (boardId) {
     whereConditions.push(eq(posts.boardId, boardId));
@@ -67,7 +55,8 @@ export async function listPosts({
       },
     })
     .from(posts)
-    .leftJoin(boards, eq(posts.boardId, boards.id))
+    .innerJoin(boards, eq(posts.boardId, boards.id))
+    .innerJoin(projects, eq(boards.projectId, projects.id))
     .where(and(...whereConditions))
     .orderBy(orderBy)
     .limit(limit + 1);

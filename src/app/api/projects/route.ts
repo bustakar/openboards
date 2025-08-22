@@ -1,5 +1,5 @@
 import { authOptions } from '@/server/auth/options';
-import { listProjectsByUser, createProject } from '@/server/repos/projects';
+import { createProject, listProjectsByUser } from '@/server/repos/projects';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -38,7 +38,10 @@ export async function POST(request: NextRequest) {
     const { name, subdomain, description } = body;
 
     if (!name || !subdomain) {
-      return NextResponse.json({ error: 'missing_required_fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'missing_required_fields' },
+        { status: 400 }
+      );
     }
 
     // Validate subdomain format

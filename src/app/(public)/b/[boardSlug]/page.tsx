@@ -1,9 +1,9 @@
-import { notFound } from 'next/navigation';
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { PostsList } from '@/components/posts/PostsList';
 import { getBoardBySlug } from '@/server/repos/boards';
 import { listPosts } from '@/server/repos/posts';
-import { PostsList } from '@/components/posts/PostsList';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
 import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
 
 export default async function BoardPage(props: {
   params: Promise<{ boardSlug: string }>;

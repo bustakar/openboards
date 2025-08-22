@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function SetupPage() {
   const [name, setName] = useState('');
@@ -64,7 +64,7 @@ export default function SetupPage() {
                   {error}
                 </div>
               )}
-              
+
               <div>
                 <Label htmlFor="name">Project Name</Label>
                 <Input
@@ -85,7 +85,11 @@ export default function SetupPage() {
                     id="subdomain"
                     type="text"
                     value={subdomain}
-                    onChange={(e) => setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    onChange={(e) =>
+                      setSubdomain(
+                        e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                      )
+                    }
                     required
                     placeholder="myproject"
                     disabled={isLoading}
