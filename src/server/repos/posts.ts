@@ -4,11 +4,13 @@ import { boards, posts, projects } from '@/db/schema';
 
 export async function listPosts({
   boardId,
+  projectId,
   sort = 'trending',
   limit = 50,
   userId,
 }: {
   boardId?: string;
+  projectId?: string;
   sort?: 'trending' | 'new' | 'top';
   limit?: number;
   userId?: string;
@@ -34,6 +36,10 @@ export async function listPosts({
   }
 
   const whereConditions = [eq(projects.userId, userId)];
+  
+  if (projectId) {
+    whereConditions.push(eq(projects.id, projectId));
+  }
   
   if (boardId) {
     whereConditions.push(eq(posts.boardId, boardId));

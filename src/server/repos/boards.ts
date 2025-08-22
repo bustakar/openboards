@@ -2,12 +2,16 @@ import { boards, projects } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import { and, eq } from 'drizzle-orm';
 
-export async function listBoardsWithStats(userId?: string) {
+export async function listBoardsWithStats(userId?: string, projectId?: string | null) {
   const { db } = getDatabase();
 
   if (!userId) {
     return [];
   }
+
+  const whereCondition = projectId 
+    ? and(eq(projects.userId, userId), eq(projects.id, projectId))
+    : eq(projects.userId, userId);
 
   // Get boards directly for the user
   const boardsData = await db
@@ -24,7 +28,7 @@ export async function listBoardsWithStats(userId?: string) {
     })
     .from(boards)
     .innerJoin(projects, eq(boards.projectId, projects.id))
-    .where(eq(projects.userId, userId))
+    .where(whereCondition)
     .orderBy(boards.position, boards.createdAt);
 
   // Add post count as 0 for now (we can optimize this later)

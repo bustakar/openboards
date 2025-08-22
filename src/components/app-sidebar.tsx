@@ -7,7 +7,8 @@ import {
   IconSettings,
 } from '@tabler/icons-react';
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { NavMain } from '@/components/nav-main';
 import { NavSecondary } from '@/components/nav-secondary';
@@ -71,14 +72,58 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(
-    projects.length > 0 ? projects[0] : null
-  );
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('project');
+  
+  const [selectedProject, setSelectedProject] = useState<Project | null>(() => {
+    if (projectId) {
+      return projects.find(p => p.id === projectId) || null;
+    }
+    return projects.length > 0 ? projects[0] : null;
+  });
+
+  useEffect(() => {
+    if (projectId) {
+      const project = projects.find(p => p.id === projectId);
+      if (project) {
+        setSelectedProject(project);
+      }
+    } else if (projects.length > 0 && !selectedProject) {
+      setSelectedProject(projects[0]);
+    }
+  }, [projectId, projects, selectedProject]);
 
   const handleProjectSelect = (project: Project) => {
     setSelectedProject(project);
-    // TODO: Update the current project context
-    // This could involve updating a global state or URL parameter
+    const currentPath = window.location.pathname;
+    const newUrl = `${currentPath}?project=${project.id}`;
+    router.push(newUrl);
+  };
+
+  const getNavData = () => {
+    const projectParam = selectedProject ? `?project=${selectedProject.id}` : '';
+    return {
+      navMain: [
+        {
+          title: 'Feedback',
+          url: `/dashboard/feedback${projectParam}`,
+          icon: IconMessageCircle,
+        },
+        {
+          title: 'Roadmap',
+          url: `/dashboard/roadmap${projectParam}`,
+          icon: IconRoad,
+        },
+      ],
+      navSecondary: [
+        {
+          title: 'Settings',
+          url: `/dashboard/settings${projectParam}`,
+          icon: IconSettings,
+        },
+      ],
+    };
   };
 
   return (
@@ -128,8 +173,8 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navData.navMain} />
-        <NavSecondary items={navData.navSecondary} className="mt-auto" />
+        <NavMain items={getNavData().navMain} />
+        <NavSecondary items={getNavData().navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         {user && <NavUser user={{ ...user, avatar: user.avatar || '' }} />}

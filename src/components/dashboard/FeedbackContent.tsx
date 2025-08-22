@@ -13,7 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { IconMessageCircle, IconPlus, IconSearch } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface Board {
   id: string;
@@ -35,20 +36,19 @@ interface Post {
 }
 
 export function FeedbackContent() {
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('project');
+  
   const [boards, setBoards] = useState<Board[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchBoards();
-    fetchPosts();
-  }, []);
-
-  const fetchBoards = async () => {
+  const fetchBoards = useCallback(async () => {
     try {
-      const response = await fetch('/api/boards');
+      const url = projectId ? `/api/boards?project=${projectId}` : '/api/boards';
+      const response = await fetch(url);
       if (!response.ok) {
         if (response.status === 401) {
           setError('Authentication required. Please log in again.');
@@ -62,13 +62,18 @@ export function FeedbackContent() {
       console.error('Error fetching boards:', error);
       setError('Failed to load boards. Please try again.');
     }
-  };
+  }, [projectId]);
 
-  const fetchPosts = async (boardId?: string) => {
+  const fetchPosts = useCallback(async (boardId?: string) => {
     try {
       setLoading(true);
       setError(null);
-      const url = boardId ? `/api/posts?boardId=${boardId}` : '/api/posts';
+      let url = '/api/posts';
+      const params = new URLSearchParams();
+      if (projectId) params.append('project', projectId);
+      if (boardId) params.append('boardId', boardId);
+      if (params.toString()) url += `?${params.toString()}`;
+      
       const response = await fetch(url);
       if (!response.ok) {
         if (response.status === 401) {
@@ -85,7 +90,14 @@ export function FeedbackContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    if (projectId) {
+      fetchBoards();
+      fetchPosts();
+    }
+  }, [projectId, fetchBoards, fetchPosts]);
 
   const handleBoardSelect = (boardId: string | null) => {
     setSelectedBoard(boardId);
@@ -210,15 +222,15 @@ export function FeedbackContent() {
               <div className="text-gray-500">No posts found</div>
             </div>
           ) : (
-            <Table>
+            <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-20">Votes</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead className="w-24">Date</TableHead>
-                  <TableHead className="w-32">Board</TableHead>
-                  <TableHead className="w-24">Status</TableHead>
-                  <TableHead className="w-20">Comments</TableHead>
+                  <TableHead className="w-16">Votes</TableHead>
+                  <TableHead className="min-w-0 flex-1">Title</TableHead>
+                  <TableHead className="w-20">Date</TableHead>
+                  <TableHead className="w-24">Board</TableHead>
+                  <TableHead className="w-20">Status</TableHead>
+                  <TableHead className="w-16">Comments</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

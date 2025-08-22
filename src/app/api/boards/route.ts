@@ -1,9 +1,9 @@
 import { authOptions } from '@/server/auth/options';
 import { listBoardsWithStats } from '@/server/repos/boards';
 import { getServerSession } from 'next-auth';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   // Check if user is authenticated
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -16,6 +16,9 @@ export async function GET() {
     return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
   }
 
-  const data = await listBoardsWithStats(userId);
+  const { searchParams } = new URL(request.url);
+  const projectId = searchParams.get('project');
+
+  const data = await listBoardsWithStats(userId, projectId);
   return NextResponse.json(data);
 }

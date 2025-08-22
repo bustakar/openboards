@@ -21,12 +21,14 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const boardIdParam = searchParams.get('boardId');
   const boardId = boardIdParam || undefined;
+  const projectId = searchParams.get('project');
   const sort = searchParams.get('sort') || 'trending';
   const limit = parseInt(searchParams.get('limit') || '50');
 
   try {
     const data = await listPosts({
       boardId,
+      projectId: projectId || undefined,
       sort: sort as 'trending' | 'new' | 'top',
       limit,
       userId,
