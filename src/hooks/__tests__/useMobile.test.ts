@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useIsMobile } from '../useMobile';
 
 describe('useIsMobile', () => {
@@ -76,7 +76,10 @@ describe('useIsMobile', () => {
   it('should add resize event listener on mount', () => {
     renderHook(() => useIsMobile());
 
-    expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function));
+    expect(window.addEventListener).toHaveBeenCalledWith(
+      'resize',
+      expect.any(Function)
+    );
   });
 
   it('should remove resize event listener on unmount', () => {
@@ -84,7 +87,10 @@ describe('useIsMobile', () => {
 
     unmount();
 
-    expect(window.removeEventListener).toHaveBeenCalledWith('resize', expect.any(Function));
+    expect(window.removeEventListener).toHaveBeenCalledWith(
+      'resize',
+      expect.any(Function)
+    );
   });
 
   it('should update state when window is resized', () => {
@@ -108,7 +114,8 @@ describe('useIsMobile', () => {
       });
 
       // Get the resize handler that was registered
-      const resizeHandler = (window.addEventListener as jest.Mock).mock.calls[0][1];
+      const resizeHandler = (window.addEventListener as jest.Mock).mock
+        .calls[0][1];
       resizeHandler();
     });
 
@@ -128,7 +135,8 @@ describe('useIsMobile', () => {
     expect(result.current).toBe(true);
 
     // Get the resize handler
-    const resizeHandler = (window.addEventListener as jest.Mock).mock.calls[0][1];
+    const resizeHandler = (window.addEventListener as jest.Mock).mock
+      .calls[0][1];
 
     // Simulate resize to desktop
     act(() => {
