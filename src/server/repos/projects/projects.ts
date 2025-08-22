@@ -22,6 +22,13 @@ export async function getProjectBySubdomain(subdomain: string) {
   return row ?? null;
 }
 
+export async function isSubdomainAvailable(
+  subdomain: string
+): Promise<boolean> {
+  const existingProject = await getProjectBySubdomain(subdomain);
+  return !existingProject;
+}
+
 export async function createProject(data: {
   name: string;
   subdomain: string;

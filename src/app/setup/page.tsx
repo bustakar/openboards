@@ -4,19 +4,119 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { createProjectSchema } from '@/server/repos/projects/validation';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+interface ValidationErrors {
+  name?: string;
+  subdomain?: string;
+  description?: string;
+}
 
 export default function SetupPage() {
+  const { data: session } = useSession();
   const [name, setName] = useState('');
   const [subdomain, setSubdomain] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
+    {}
+  );
+  const [isSubdomainAvailable, setIsSubdomainAvailable] = useState<
+    boolean | null
+  >(null);
   const router = useRouter();
+
+  // Validate form data using the schema
+  const validateForm = useCallback(() => {
+    const errors: ValidationErrors = {};
+
+    try {
+      createProjectSchema.parse({
+        name,
+        subdomain,
+        description: description || undefined,
+        userId: (session?.user as { id?: string })?.id || '',
+      });
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'errors' in error) {
+        const zodError = error as {
+          errors: Array<{ path: string[]; message: string }>;
+        };
+        zodError.errors.forEach((err) => {
+          if (err.path[0] === 'name') errors.name = err.message;
+          if (err.path[0] === 'subdomain') errors.subdomain = err.message;
+          if (err.path[0] === 'description') errors.description = err.message;
+        });
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, [name, subdomain, description, session?.user]);
+
+  // Check subdomain availability
+  const checkSubdomainAvailability = useCallback(async (subdomain: string) => {
+    if (!subdomain || subdomain.length < 1) {
+      setIsSubdomainAvailable(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/projects/check-subdomain?subdomain=${encodeURIComponent(
+          subdomain
+        )}`
+      );
+      const data = await response.json();
+      setIsSubdomainAvailable(data.available);
+    } catch {
+      setIsSubdomainAvailable(null);
+    }
+  }, []);
+
+  // Debounced subdomain check
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (subdomain && !validationErrors.subdomain) {
+        checkSubdomainAvailability(subdomain);
+      } else {
+        setIsSubdomainAvailable(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [subdomain, validationErrors.subdomain, checkSubdomainAvailability]);
+
+  // Validate on input changes
+  useEffect(() => {
+    if (name || subdomain || description) {
+      validateForm();
+    }
+  }, [name, subdomain, description, session?.user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const userId = (session?.user as { id?: string })?.id;
+    if (!userId) {
+      setError('You must be logged in to create a project');
+      return;
+    }
+
+    if (!validateForm()) {
+      setError('Please fix the validation errors');
+      return;
+    }
+
+    if (isSubdomainAvailable === false) {
+      setError('This subdomain is already taken');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -29,7 +129,7 @@ export default function SetupPage() {
         body: JSON.stringify({
           name,
           subdomain,
-          description,
+          description: description || undefined,
         }),
       });
 
@@ -45,6 +145,15 @@ export default function SetupPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const isFormValid = () => {
+    return (
+      name.length > 0 &&
+      subdomain.length > 0 &&
+      Object.keys(validationErrors).length === 0 &&
+      isSubdomainAvailable !== false
+    );
   };
 
   return (
@@ -75,7 +184,16 @@ export default function SetupPage() {
                   required
                   placeholder="My Awesome Project"
                   disabled={isLoading}
+                  className={validationErrors.name ? 'border-red-500' : ''}
                 />
+                {validationErrors.name && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {validationErrors.name}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  {name.length}/100 characters
+                </p>
               </div>
 
               <div>
@@ -93,14 +211,37 @@ export default function SetupPage() {
                     required
                     placeholder="myproject"
                     disabled={isLoading}
-                    className="rounded-r-none"
+                    className={`rounded-r-none ${
+                      validationErrors.subdomain ||
+                      isSubdomainAvailable === false
+                        ? 'border-red-500'
+                        : isSubdomainAvailable === true
+                        ? 'border-green-500'
+                        : ''
+                    }`}
                   />
                   <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600 border border-l-0 rounded-r-md">
                     .openboards.co
                   </span>
                 </div>
+                {validationErrors.subdomain && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {validationErrors.subdomain}
+                  </p>
+                )}
+                {isSubdomainAvailable === true && (
+                  <p className="text-xs text-green-600 mt-1">
+                    ✓ Subdomain available
+                  </p>
+                )}
+                {isSubdomainAvailable === false && (
+                  <p className="text-xs text-red-600 mt-1">
+                    ✗ Subdomain already taken
+                  </p>
+                )}
                 <p className="text-xs text-gray-500 mt-1">
-                  Only letters, numbers, and hyphens allowed
+                  {subdomain.length}/50 characters • Only letters, numbers, and
+                  hyphens allowed
                 </p>
               </div>
 
@@ -113,10 +254,25 @@ export default function SetupPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="What's this project about?"
                   disabled={isLoading}
+                  className={
+                    validationErrors.description ? 'border-red-500' : ''
+                  }
                 />
+                {validationErrors.description && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {validationErrors.description}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  {description.length}/500 characters
+                </p>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !isFormValid()}
+              >
                 {isLoading ? 'Creating Project...' : 'Create Project'}
               </Button>
             </form>

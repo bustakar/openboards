@@ -5,6 +5,7 @@ import {
   deleteProject,
   getCurrentProjectFromHeaders,
   getProjectBySubdomain,
+  isSubdomainAvailable,
   listProjectsByUser,
   updateProject,
 } from '../projects';
@@ -503,6 +504,34 @@ describe('Projects Repository', () => {
       );
 
       expect(mockDb.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isSubdomainAvailable', () => {
+    it('should return true when subdomain is available', async () => {
+      const subdomain = 'new-project';
+
+      // Mock no existing project found
+      mockLimit.mockResolvedValueOnce([]);
+
+      const result = await isSubdomainAvailable(subdomain);
+
+      expect(result).toBe(true);
+      expect(mockDb.select).toHaveBeenCalledWith();
+      expect(mockLimit).toHaveBeenCalledWith(1);
+    });
+
+    it('should return false when subdomain is taken', async () => {
+      const subdomain = 'existing-project';
+
+      // Mock existing project found
+      mockLimit.mockResolvedValueOnce([{ id: 'project-1' }]);
+
+      const result = await isSubdomainAvailable(subdomain);
+
+      expect(result).toBe(false);
+      expect(mockDb.select).toHaveBeenCalledWith();
+      expect(mockLimit).toHaveBeenCalledWith(1);
     });
   });
 
