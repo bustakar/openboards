@@ -3,7 +3,9 @@ import { boards, posts } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
 import { and, desc, eq, inArray } from 'drizzle-orm';
+import { headers } from 'next/headers';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 type GroupKey = 'backlog' | 'planned' | 'in_progress' | 'completed';
 
@@ -21,11 +23,11 @@ function statusMeta(status: GroupKey): { label: string } {
 }
 
 export default async function RoadmapPage() {
+  const headersList = await headers();
+  const project = await getCurrentProjectFromHeaders(headersList);
+  if (!project) return notFound();
+
   const { db } = getDatabase();
-  const project = await getCurrentProjectFromHeaders();
-  if (!project) {
-    return <main className="container mx-auto p-6"></main>;
-  }
 
   const where = and(
     eq(posts.isArchived, false),

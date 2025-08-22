@@ -1,7 +1,59 @@
 import { checkAndRecordLimit } from '@/server/rateLimit';
-import { createPost } from '@/server/repos/posts';
+import { createPost, listPosts } from '@/server/repos/posts';
 import { createPostSchema, sanitizeBody, sanitizeTitle } from '@/server/validation';
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/server/auth/options';
+
+export async function GET(request: NextRequest) {
+  // Check if user is authenticated
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  }
+
+  // Get user ID from session
+  const userId = (session.user as { id?: string }).id;
+  if (!userId) {
+    return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const boardIdParam = searchParams.get('boardId');
+  const boardId = boardIdParam || undefined;
+  const projectId = searchParams.get('project');
+  const sort = searchParams.get('sort') || 'trending';
+  const limit = parseInt(searchParams.get('limit') || '50');
+
+  try {
+    const data = await listPosts({
+      boardId,
+      projectId: projectId || undefined,
+      sort: sort as 'trending' | 'new' | 'top',
+      limit,
+      userId,
+    });
+
+    // Transform the data to include board name
+    const postsWithBoardName = data.items.map(post => ({
+      ...post,
+      createdAt: post.createdAt.toISOString(),
+      boardName: post.board?.name || 'Unknown Board'
+    }));
+
+    return NextResponse.json({
+      items: postsWithBoardName,
+      total: data.total,
+      hasMore: data.hasMore
+    });
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return NextResponse.json(
+      { error: 'internal_error' },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   const ip = (
@@ -37,7 +89,8 @@ export async function POST(request: NextRequest) {
     const post = await createPost({
       boardId: validated.boardId,
       title: sanitizedTitle,
-      body: sanitizedBody,
+      body: sanitizedBody || undefined,
+      slug: sanitizedTitle.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").replace(/-+/g, "-").slice(0, 80),
     });
 
     return NextResponse.json({ slug: post.slug });
