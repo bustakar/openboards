@@ -1,7 +1,7 @@
-import { BoardsList } from './BoardsList';
 import { listBoardsForProject } from '@/server/repos/boards/boards';
 import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { headers } from 'next/headers';
+import { BoardsList } from './BoardsList';
 
 async function fetchBoards(projectId: string) {
   const data = await listBoardsForProject(projectId);
@@ -20,7 +20,10 @@ interface BoardsLayoutProps {
   selectedSlug?: string;
 }
 
-export async function BoardsLayout({ children, selectedSlug }: BoardsLayoutProps) {
+export async function BoardsLayout({
+  children,
+  selectedSlug,
+}: BoardsLayoutProps) {
   const headersList = await headers();
   const project = await getCurrentProjectFromHeaders(headersList);
 
@@ -36,9 +39,7 @@ export async function BoardsLayout({ children, selectedSlug }: BoardsLayoutProps
         <div className="col-span-12 md:col-span-4">
           <BoardsList boards={boards} selectedSlug={selectedSlug} />
         </div>
-        <div className="col-span-12 md:col-span-8">
-          {children}
-        </div>
+        <div className="col-span-12 md:col-span-8">{children}</div>
       </div>
     </main>
   );

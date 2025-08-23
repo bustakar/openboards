@@ -1,4 +1,5 @@
 import { Nav } from '@/components/Nav';
+import { NewPostSheet } from '@/components/posts/NewPostSheet';
 import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
@@ -20,6 +21,7 @@ export default async function PublicLayout({
     <div className="min-h-screen bg-background">
       <Nav title={project.name} />
       {children}
+      <NewPostSheet />
     </div>
   );
 }
