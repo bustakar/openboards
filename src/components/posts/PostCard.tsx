@@ -44,24 +44,16 @@ function formatTimeAgo(dateString: string): string {
 
 export function PostCard({ post, href }: { post: PostItem; href?: string }) {
   const st = statusVariant(post.status);
-  return (
+  
+  const cardContent = (
     <div className="px-6 py-6 hover:bg-gray-100/50 transition-colors border-b border-gray-200/50 last:border-b-0 bg-white">
       <div className="flex items-start gap-4">
         <div className="flex-1 min-w-0">
           {/* Title and status badge row */}
           <div className="flex items-center gap-3 mb-2">
-            {href ? (
-              <Link
-                href={href}
-                className="font-semibold text-base hover:underline line-clamp-2"
-              >
-                {post.title}
-              </Link>
-            ) : (
-              <div className="font-semibold text-base line-clamp-2">
-                {post.title}
-              </div>
-            )}
+            <div className="font-semibold text-base line-clamp-2">
+              {post.title}
+            </div>
             <Badge
               variant={st.variant}
               className="text-xs px-2 py-1 flex-shrink-0"
@@ -87,7 +79,10 @@ export function PostCard({ post, href }: { post: PostItem; href?: string }) {
         </div>
 
         {/* Vote count on the right */}
-        <div className="flex-shrink-0">
+        <div 
+          className="flex-shrink-0"
+          onClick={(e) => e.stopPropagation()}
+        >
           <VoteButton
             postId={post.id}
             initialCount={post.voteCount}
@@ -97,4 +92,14 @@ export function PostCard({ post, href }: { post: PostItem; href?: string }) {
       </div>
     </div>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block">
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }
