@@ -1,6 +1,7 @@
+'use client';
 import { VoteButton } from '@/components/posts/VoteButton';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
 export type PostItem = {
@@ -43,10 +44,29 @@ function formatTimeAgo(dateString: string): string {
 }
 
 export function PostCard({ post, href }: { post: PostItem; href?: string }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const st = statusVariant(post.status);
 
-  const cardContent = (
-    <div className="px-6 py-6 hover:bg-gray-100/50 transition-colors border-b border-gray-200/50 last:border-b-0 bg-white">
+  const handleCardClick = () => {
+    if (href) {
+      if (href.startsWith('?')) {
+        // Handle search param URLs (for post sheets)
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('post', post.id);
+        router.push(`?${params.toString()}`);
+      } else {
+        // Handle regular URLs
+        router.push(href);
+      }
+    }
+  };
+
+  return (
+    <div 
+      className="px-6 py-6 hover:bg-gray-100/50 transition-colors border-b border-gray-200/50 last:border-b-0 bg-white cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="flex items-start gap-4">
         <div className="flex-1 min-w-0">
           {/* Title and status badge row */}
@@ -89,14 +109,4 @@ export function PostCard({ post, href }: { post: PostItem; href?: string }) {
       </div>
     </div>
   );
-
-  if (href) {
-    return (
-      <Link href={href} className="block">
-        {cardContent}
-      </Link>
-    );
-  }
-
-  return cardContent;
 }

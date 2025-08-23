@@ -1,4 +1,4 @@
-import { posts } from '@/db/schema';
+import { posts, boards } from '@/db/schema';
 import { getDatabase } from '@/server/db';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,8 +21,14 @@ export async function GET(request: NextRequest) {
       createdAt: posts.createdAt,
       updatedAt: posts.updatedAt,
       lastActivityAt: posts.lastActivityAt,
+      board: {
+        id: boards.id,
+        name: boards.name,
+        slug: boards.slug,
+      },
     })
     .from(posts)
+    .innerJoin(boards, eq(posts.boardId, boards.id))
     .where(eq(posts.id, id))
     .limit(1);
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });

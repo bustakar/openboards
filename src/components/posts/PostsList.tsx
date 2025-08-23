@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
 
 export type { PostItem } from '@/components/posts/PostCard';
 
-type ItemWithBoard = PostItem & { 
+type ItemWithBoard = PostItem & {
   board?: {
     id: string;
     name: string;
@@ -100,11 +100,7 @@ export function PostsList({
           posts.map((p) => {
             const href = linkFor
               ? linkFor(p)
-              : boardSlug
-              ? `/b/${boardSlug}/${p.slug}`
-              : p.board?.slug
-              ? `/b/${p.board.slug}/${p.slug}`
-              : undefined;
+              : `?post=${p.id}`;
             return <PostCard key={p.id} post={p} href={href} />;
           })
         )}
