@@ -44,7 +44,7 @@ function formatTimeAgo(dateString: string): string {
 
 export function PostCard({ post, href }: { post: PostItem; href?: string }) {
   const st = statusVariant(post.status);
-  
+
   const cardContent = (
     <div className="px-6 py-6 hover:bg-gray-100/50 transition-colors border-b border-gray-200/50 last:border-b-0 bg-white">
       <div className="flex items-start gap-4">
@@ -79,10 +79,7 @@ export function PostCard({ post, href }: { post: PostItem; href?: string }) {
         </div>
 
         {/* Vote count on the right */}
-        <div 
-          className="flex-shrink-0"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
           <VoteButton
             postId={post.id}
             initialCount={post.voteCount}
