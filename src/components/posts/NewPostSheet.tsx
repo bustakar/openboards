@@ -1,13 +1,13 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Textarea } from '@/components/ui/textarea';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -64,10 +64,10 @@ export function NewPostSheet() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading || !selectedBoardId) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     const form = e.currentTarget;
     const formData = new FormData(form);
     const payload = {
@@ -75,7 +75,7 @@ export function NewPostSheet() {
       title: String(formData.get('title') || '').trim(),
       body: String(formData.get('body') || '').trim(),
     };
-    
+
     if (!payload.title) {
       setError('Title is required');
       setLoading(false);
@@ -88,16 +88,20 @@ export function NewPostSheet() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      
+
       if (!res.ok) {
         const errorData = await res.json();
-        setError(errorData.error === 'validation_error' ? 'Please check your input' : 'Failed to submit. Please try again.');
+        setError(
+          errorData.error === 'validation_error'
+            ? 'Please check your input'
+            : 'Failed to submit. Please try again.'
+        );
         setLoading(false);
         return;
       }
-      
+
       const created = await res.json();
-      const selectedBoard = boards.find(b => b.id === selectedBoardId);
+      const selectedBoard = boards.find((b) => b.id === selectedBoardId);
       if (selectedBoard) {
         // Close sheet and navigate to the new post
         handleClose();
@@ -111,14 +115,14 @@ export function NewPostSheet() {
     }
   }
 
-  return (
+    return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent side="right" className="w-[400px] sm:w-[540px]">
         <SheetHeader>
           <SheetTitle>Submit new feature/bug</SheetTitle>
         </SheetHeader>
         
-        <div className="mt-6">
+        <div className="mt-6 px-6 pb-6">
           <form className="space-y-4" onSubmit={onSubmit}>
             <div>
               <label className="block text-sm font-medium mb-1">Board</label>
@@ -136,11 +140,11 @@ export function NewPostSheet() {
               </select>
               {selectedBoardId && (
                 <div className="text-xs text-muted-foreground mt-1">
-                  {boards.find(b => b.id === selectedBoardId)?.description}
+                  {boards.find((b) => b.id === selectedBoardId)?.description}
                 </div>
               )}
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-1">Title</label>
               <Input
@@ -153,7 +157,7 @@ export function NewPostSheet() {
                 Up to 120 characters
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-1">
                 Details (optional)
@@ -165,13 +169,13 @@ export function NewPostSheet() {
                 className="min-h-[120px]"
               />
             </div>
-            
+
             {error && <div className="text-sm text-red-600">{error}</div>}
-            
+
             <div className="flex justify-end gap-2 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={handleClose}
                 disabled={loading}
               >

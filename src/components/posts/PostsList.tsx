@@ -1,7 +1,9 @@
+'use client';
 import { PostCard, type PostItem } from '@/components/posts/PostCard';
+import { Button } from '../ui/button';
 import Link from 'next/link';
 import * as React from 'react';
-import { Button } from '../ui/button';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export type { PostItem } from '@/components/posts/PostCard';
 
@@ -22,6 +24,15 @@ export function PostsList({
   currentSort?: 'trending' | 'new' | 'top';
   boardName?: string;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleNewPost = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('new', 'true');
+    router.push(`?${params.toString()}`);
+  };
+
   // Read sort from current URL and reflect in heading
   const heading =
     boardName ||
@@ -69,8 +80,8 @@ export function PostsList({
               </Link>
             </div>
           </div>
-          <Button asChild size="sm">
-            <Link href="/new">New post</Link>
+          <Button onClick={handleNewPost} size="sm">
+            New post
           </Button>
         </div>
       </div>
