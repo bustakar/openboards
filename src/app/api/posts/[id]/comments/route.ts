@@ -1,5 +1,5 @@
 import { checkAndRecordLimit } from '@/lib/rateLimit';
-import { createComment } from '@/server/repos/comments/comments';
+import { createComment, listComments } from '@/server/repos/comments/comments';
 import { createCommentSchema } from '@/server/repos/comments/validation';
 import { sanitizeBody } from '@/server/repos/posts/validation';
 import { NextRequest, NextResponse } from 'next/server';
@@ -45,6 +45,21 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('create comment failed', message);
+    return NextResponse.json(
+      { error: 'internal_error', message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const id = decodeURIComponent(request.nextUrl.pathname.split('/')[3] ?? '');
+  try {
+    const comments = await listComments(id);
+    return NextResponse.json(comments);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('list comments failed', message);
     return NextResponse.json(
       { error: 'internal_error', message },
       { status: 500 }

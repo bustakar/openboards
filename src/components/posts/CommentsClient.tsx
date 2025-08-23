@@ -41,7 +41,8 @@ export function CommentsClient({ postId }: { postId: string }) {
     setSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const body = String(formData.get('body') || '').trim();
-    const authorName = String(formData.get('authorName') || '').trim() || undefined;
+    const authorName =
+      String(formData.get('authorName') || '').trim() || undefined;
 
     if (!body) {
       setSubmitting(false);

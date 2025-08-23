@@ -84,7 +84,7 @@ export function PostSheet() {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('post');
     const newUrl = params.toString() ? `?${params.toString()}` : '';
-    router.replace(newUrl);
+    router.replace(newUrl, { scroll: false });
   };
 
   async function fetchPost(postId: string) {
@@ -111,7 +111,7 @@ export function PostSheet() {
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="right" className="w-[400px] sm:w-[600px] overflow-y-auto">
+      <SheetContent side="right" className="w-[400px] sm:w-[800px] overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="text-left">
             {loading ? 'Loading...' : post?.title}
