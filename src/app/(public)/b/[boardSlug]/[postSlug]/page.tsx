@@ -36,7 +36,7 @@ export default async function PostPage(props: {
   const params = await props.params;
   const board = await getBoardBySlug(params.boardSlug);
   if (!board) return notFound();
-  const post = await getPostBySlug(params.postSlug, board.id);
+  const post = await getPostBySlug(board.id, params.postSlug);
   if (!post) return notFound();
 
   const info = statusInfo(post.status);

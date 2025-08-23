@@ -49,15 +49,17 @@ export function NewPostSheet() {
         // Get the current project from the URL or headers
         const hostname = window.location.hostname;
         const subdomain = hostname.split('.')[0];
-        
+
         // Fetch project first to get project ID
-        const projectRes = await fetch(`/api/projects/public?subdomain=${subdomain}`);
+        const projectRes = await fetch(
+          `/api/projects/public?subdomain=${subdomain}`
+        );
         if (!projectRes.ok) {
           console.error('Failed to fetch project');
           return;
         }
         const project = await projectRes.json();
-        
+
         if (!project) {
           console.error('Project not found');
           return;
