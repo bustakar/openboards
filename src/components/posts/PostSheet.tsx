@@ -70,7 +70,7 @@ export function PostSheet() {
   useEffect(() => {
     const postId = searchParams.get('post');
     setOpen(!!postId);
-    
+
     if (postId) {
       fetchPost(postId);
     }
@@ -78,8 +78,6 @@ export function PostSheet() {
 
   // Handle sheet close - remove the search param
   const handleClose = () => {
-    setOpen(false);
-    setPost(null);
     // Remove the search param to close the sheet
     const params = new URLSearchParams(searchParams.toString());
     params.delete('post');
@@ -97,14 +95,14 @@ export function PostSheet() {
   async function fetchPost(postId: string) {
     setLoading(true);
     setError(null);
-    
+
     try {
       const res = await fetch(`/api/posts/${postId}`);
       if (!res.ok) {
         setError('Post not found');
         return;
       }
-      
+
       const postData = await res.json();
       setPost(postData);
     } catch (error) {
@@ -118,7 +116,7 @@ export function PostSheet() {
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="w-[400px] sm:w-[900px] lg:w-[1000px] overflow-y-auto">
+      <SheetContent side="right" className="min-w-9/10 lg:min-w-1/2 max-w-full">
         <SheetHeader>
           <SheetTitle className="text-left">
             {loading ? 'Loading...' : post?.title}
@@ -139,7 +137,10 @@ export function PostSheet() {
                     <h1 className="text-xl font-bold text-gray-900">
                       {post.title}
                     </h1>
-                    <Badge variant={statusInfo(post.status).variant} className="text-xs px-2 py-1">
+                    <Badge
+                      variant={statusInfo(post.status).variant}
+                      className="text-xs px-2 py-1"
+                    >
                       {statusInfo(post.status).label}
                     </Badge>
                   </div>

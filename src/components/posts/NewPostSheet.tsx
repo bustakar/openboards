@@ -35,7 +35,6 @@ export function NewPostSheet() {
 
   // Handle sheet close - remove the search param
   const handleClose = () => {
-    setOpen(false);
     // Remove the search param to close the sheet
     const params = new URLSearchParams(searchParams.toString());
     params.delete('new');
@@ -137,7 +136,10 @@ export function NewPostSheet() {
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+      <SheetContent
+        side="right"
+        className="min-w-9/10 lg:min-w-1/2 xl:min-w-1/3 max-w-[600px]"
+      >
         <SheetHeader>
           <SheetTitle>Submit new post</SheetTitle>
         </SheetHeader>

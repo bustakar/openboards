@@ -1,4 +1,4 @@
-import { Comments } from '@/components/posts/Comments';
+import { CommentsClient } from '@/components/posts/CommentsClient';
 import { VoteButton } from '@/components/posts/VoteButton';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -99,7 +99,7 @@ export default async function PostPage(props: {
         </div>
 
         {/* Comments */}
-        <Comments postId={post.id} />
+        <CommentsClient postId={post.id} />
       </div>
     </main>
   );
