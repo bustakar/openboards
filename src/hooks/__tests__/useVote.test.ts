@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useVote } from '../useVote';
 
 // Mock fetch globally
@@ -79,8 +79,6 @@ describe('useVote', () => {
     expect(result.current.count).toBe(5);
     expect(result.current.voted).toBe(false);
   });
-
-
 
   it('should update state correctly when removing vote', async () => {
     mockFetch.mockResolvedValueOnce({

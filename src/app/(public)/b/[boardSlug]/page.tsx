@@ -1,3 +1,4 @@
+import { BoardsLayout } from '@/components/boards/BoardsLayout';
 import { PostsList } from '@/components/posts/PostsList';
 import { getBoardBySlug } from '@/server/repos/boards/boards';
 import { listPosts } from '@/server/repos/posts/posts';
@@ -43,7 +44,7 @@ export default async function BoardPage(props: {
   }));
 
   return (
-    <>
+    <BoardsLayout selectedSlug={board.slug}>
       <div className="mb-8">
         <h1 className="text-3xl font-bold">{board.name}</h1>
         {board.description && (
@@ -58,6 +59,6 @@ export default async function BoardPage(props: {
         currentSort={sort}
         boardName={board.name}
       />
-    </>
+    </BoardsLayout>
   );
 }

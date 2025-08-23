@@ -1,3 +1,4 @@
+import { BoardsLayout } from '@/components/boards/BoardsLayout';
 import { PostsList } from '@/components/posts/PostsList';
 import { listPosts } from '@/server/repos/posts/posts';
 import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
@@ -30,12 +31,14 @@ export default async function HomePage(props: {
   }));
 
   return (
-    <PostsList
-      posts={formattedPosts}
-      basePath=""
-      boardSlug=""
-      currentSort={sort}
-      boardName="All Posts"
-    />
+    <BoardsLayout selectedSlug="">
+      <PostsList
+        posts={formattedPosts}
+        basePath=""
+        boardSlug=""
+        currentSort={sort}
+        boardName="All Posts"
+      />
+    </BoardsLayout>
   );
 }
