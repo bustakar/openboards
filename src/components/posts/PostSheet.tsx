@@ -85,13 +85,6 @@ export function PostSheet() {
     router.replace(newUrl, { scroll: false });
   };
 
-  // Handle sheet open/close changes
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      handleClose();
-    }
-  };
-
   async function fetchPost(postId: string) {
     setLoading(true);
     setError(null);
@@ -115,8 +108,11 @@ export function PostSheet() {
   if (!post && !loading) return null;
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="min-w-9/10 lg:min-w-1/2 max-w-full">
+    <Sheet open={open} onOpenChange={handleClose}>
+      <SheetContent
+        side="right"
+        className="min-w-[400px] sm:min-w-[600px] max-w-full overflow-y-auto"
+      >
         <SheetHeader>
           <SheetTitle className="text-left">
             {loading ? 'Loading...' : post?.title}

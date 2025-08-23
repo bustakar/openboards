@@ -136,10 +136,7 @@ export function NewPostSheet() {
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent
-        side="right"
-        className="min-w-9/10 lg:min-w-1/2 xl:min-w-1/3 max-w-[600px]"
-      >
+      <SheetContent side="right" className="min-w-[400px] sm:min-w-[540px] max-w-full">
         <SheetHeader>
           <SheetTitle>Submit new post</SheetTitle>
         </SheetHeader>
