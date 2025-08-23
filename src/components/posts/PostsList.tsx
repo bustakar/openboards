@@ -1,9 +1,9 @@
 'use client';
 import { PostCard, type PostItem } from '@/components/posts/PostCard';
-import { Button } from '../ui/button';
 import Link from 'next/link';
-import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import * as React from 'react';
+import { Button } from '../ui/button';
 
 export type { PostItem } from '@/components/posts/PostCard';
 

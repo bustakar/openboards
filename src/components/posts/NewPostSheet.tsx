@@ -46,7 +46,25 @@ export function NewPostSheet() {
   useEffect(() => {
     async function fetchBoards() {
       try {
-        const res = await fetch('/api/boards');
+        // Get the current project from the URL or headers
+        const hostname = window.location.hostname;
+        const subdomain = hostname.split('.')[0];
+        
+        // Fetch project first to get project ID
+        const projectRes = await fetch(`/api/projects/public?subdomain=${subdomain}`);
+        if (!projectRes.ok) {
+          console.error('Failed to fetch project');
+          return;
+        }
+        const project = await projectRes.json();
+        
+        if (!project) {
+          console.error('Project not found');
+          return;
+        }
+
+        // Fetch boards for the project
+        const res = await fetch(`/api/boards/public?project=${project.id}`);
         if (res.ok) {
           const data = await res.json();
           setBoards(data);
@@ -115,13 +133,13 @@ export function NewPostSheet() {
     }
   }
 
-    return (
+  return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent side="right" className="w-[400px] sm:w-[540px]">
         <SheetHeader>
-          <SheetTitle>Submit new feature/bug</SheetTitle>
+          <SheetTitle>Submit new post</SheetTitle>
         </SheetHeader>
-        
+
         <div className="mt-6 px-6 pb-6">
           <form className="space-y-4" onSubmit={onSubmit}>
             <div>
