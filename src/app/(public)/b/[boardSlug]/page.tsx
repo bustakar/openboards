@@ -7,29 +7,33 @@ import { notFound } from 'next/navigation';
 
 export default async function BoardPage(props: {
   params: Promise<{ boardSlug: string }>;
-  searchParams?: Promise<{ status?: string; sort?: 'trending' | 'new' | 'top'; q?: string }>;
+  searchParams?: Promise<{
+    status?: string;
+    sort?: 'trending' | 'new' | 'top';
+    q?: string;
+  }>;
 }) {
   const headersList = await headers();
   const project = await getCurrentProjectFromHeaders(headersList);
-  
+
   if (!project) {
     notFound();
   }
 
   const params = await props.params;
   const board = await getBoardBySlug(params.boardSlug);
-  
+
   if (!board) {
     notFound();
   }
 
   const searchParams = await props.searchParams;
   const sort = searchParams?.sort || 'trending';
-  
-  const posts = await listPosts({ 
-    boardId: board.id, 
+
+  const posts = await listPosts({
+    boardId: board.id,
     projectId: project.id,
-    sort: sort
+    sort: sort,
   });
 
   // Format the posts data to include createdAt as ISO string
