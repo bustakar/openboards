@@ -69,9 +69,7 @@ export function PostsList({
           </div>
         ) : (
           posts.map((p) => {
-            const href = linkFor
-              ? linkFor(p)
-              : `?post=${p.id}`;
+            const href = linkFor ? linkFor(p) : `?post=${p.id}`;
             return <PostCard key={p.id} post={p} href={href} />;
           })
         )}
