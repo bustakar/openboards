@@ -6,12 +6,11 @@ import {
   IconRoad,
   IconSettings,
 } from '@tabler/icons-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
 
 import { NavMain } from '@/components/nav-main';
-import { NavSecondary } from '@/components/nav-secondary';
 import { NavUser } from '@/components/nav-user';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,22 +28,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import Link from 'next/link';
-
-const navData = {
-  navMain: [
-    {
-      title: 'Feedback',
-      url: '/dashboard/feedback',
-      icon: IconMessageCircle,
-    },
-    {
-      title: 'Roadmap',
-      url: '/dashboard/roadmap',
-      icon: IconRoad,
-    },
-  ],
-};
 
 interface Project {
   id: string;
@@ -67,12 +50,12 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
   const searchParams = useSearchParams();
-  const projectId = searchParams.get('project');
-  const selectedProject = projects.find((p) => p.id === projectId);
+  const projectSlug = searchParams.get('project');
+  const selectedProject = projects.find((p) => p.subdomain === projectSlug);
 
   const getNavData = () => {
     const projectParam = selectedProject
-      ? `?project=${selectedProject.id}`
+      ? `?project=${selectedProject.subdomain}`
       : '';
     return {
       navMain: [
@@ -122,7 +105,7 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
                         className={
                           selectedProject?.id === project.id ? 'bg-accent' : ''
                         }
-                        href={`/dashboard/feedback?project=${project.id}`}
+                        href={`/dashboard/feedback?project=${project.subdomain}`}
                       >
                         <div className="flex flex-col items-start">
                           <span className="font-medium">{project.name}</span>

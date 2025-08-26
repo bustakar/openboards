@@ -28,7 +28,7 @@ interface Post {
 
 export function FeedbackContent() {
   const searchParams = useSearchParams();
-  const projectId = searchParams.get('project');
+  const projectSlug = searchParams.get('project');
   const boardSlug = searchParams.get('board');
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -41,7 +41,7 @@ export function FeedbackContent() {
       setError(null);
       let url = '/api/posts';
       const params = new URLSearchParams();
-      if (projectId) params.append('project', projectId);
+      if (projectSlug) params.append('project', projectSlug);
       if (boardSlug) params.append('boardSlug', boardSlug);
       if (params.toString()) url += `?${params.toString()}`;
 
@@ -61,13 +61,13 @@ export function FeedbackContent() {
     } finally {
       setLoading(false);
     }
-  }, [projectId, boardSlug]);
+  }, [projectSlug, boardSlug]);
 
   useEffect(() => {
-    if (projectId) {
+    if (projectSlug) {
       fetchPosts();
     }
-  }, [projectId, boardSlug, fetchPosts]);
+  }, [projectSlug, boardSlug, fetchPosts]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

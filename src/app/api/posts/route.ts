@@ -7,6 +7,7 @@ import {
   sanitizeBody,
   sanitizeTitle,
 } from '@/server/repos/posts/validation';
+import { getProjectBySubdomain } from '@/server/repos/projects/projects';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -26,12 +27,23 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const boardIdParam = searchParams.get('boardId');
   const boardSlugParam = searchParams.get('boardSlug');
-  const projectId = searchParams.get('project');
+  const projectParam = searchParams.get('project');
   const sort = searchParams.get('sort') || 'trending';
   const limit = parseInt(searchParams.get('limit') || '50');
 
-  if (!projectId) {
-    return NextResponse.json({ error: 'project_id_required' }, { status: 400 });
+  if (!projectParam) {
+    return NextResponse.json({ error: 'project_required' }, { status: 400 });
+  }
+
+  // Convert project slug to project ID if needed
+  let projectId = projectParam;
+  if (!projectParam.includes('-')) {
+    // If it doesn't look like a UUID, treat it as a slug
+    const project = await getProjectBySubdomain(projectParam);
+    if (!project) {
+      return NextResponse.json({ error: 'project_not_found' }, { status: 404 });
+    }
+    projectId = project.id;
   }
 
   // Convert boardSlug to boardId if provided

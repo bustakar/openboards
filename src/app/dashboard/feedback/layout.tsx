@@ -18,41 +18,53 @@ interface FeedbackLayoutProps {
 
 export default function FeedbackLayout({ children }: FeedbackLayoutProps) {
   const searchParams = useSearchParams();
-  const projectId = searchParams.get('project');
+  const projectSlug = searchParams.get('project');
   const boardSlug = searchParams.get('board');
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchBoards() {
-      if (!projectId) return;
+    async function fetchData() {
+      if (!projectSlug) return;
 
       try {
         setLoading(true);
-        const response = await fetch(`/api/boards?project=${projectId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setBoards(
-            data.map((b: Board) => ({
-              id: b.id,
-              name: b.name,
-              slug: b.slug,
-              description: b.description ?? null,
-              postCount: b.postCount,
-            }))
+
+        // First, get the project by slug to get the project ID
+        const projectResponse = await fetch(
+          `/api/projects/public?subdomain=${projectSlug}`
+        );
+        if (projectResponse.ok) {
+          const projectData = await projectResponse.json();
+
+          // Then fetch boards using the project ID
+          const boardsResponse = await fetch(
+            `/api/boards?project=${projectData.id}`
           );
+          if (boardsResponse.ok) {
+            const boardsData = await boardsResponse.json();
+            setBoards(
+              boardsData.map((b: Board) => ({
+                id: b.id,
+                name: b.name,
+                slug: b.slug,
+                description: b.description ?? null,
+                postCount: b.postCount,
+              }))
+            );
+          }
         }
       } catch (error) {
-        console.error('Error fetching boards:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchBoards();
-  }, [projectId]);
+    fetchData();
+  }, [projectSlug]);
 
-  if (!projectId) {
+  if (!projectSlug) {
     return <div>No project selected</div>;
   }
 
@@ -73,7 +85,7 @@ export default function FeedbackLayout({ children }: FeedbackLayoutProps) {
           <div className="space-y-2">
             {/* All Posts Button */}
             <Link
-              href={`/dashboard/feedback?project=${projectId}`}
+              href={`/dashboard/feedback?project=${projectSlug}`}
               className={getBoardLinkClass(!boardSlug)}
             >
               <div className="font-medium">All Posts</div>
@@ -87,7 +99,7 @@ export default function FeedbackLayout({ children }: FeedbackLayoutProps) {
               boards.map((board) => (
                 <Link
                   key={board.id}
-                  href={`/dashboard/feedback?project=${projectId}&board=${board.slug}`}
+                  href={`/dashboard/feedback?project=${projectSlug}&board=${board.slug}`}
                   className={getBoardLinkClass(boardSlug === board.slug)}
                 >
                   <div className="font-medium">{board.name}</div>
