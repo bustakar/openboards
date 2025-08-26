@@ -117,9 +117,8 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
                   {projects.map((project) => (
-                    <DropdownMenuItem asChild>
+                    <DropdownMenuItem key={project.id} asChild>
                       <Link
-                        key={project.id}
                         className={
                           selectedProject?.id === project.id ? 'bg-accent' : ''
                         }
