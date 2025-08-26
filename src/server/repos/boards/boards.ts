@@ -1,6 +1,6 @@
-import { boards, projects } from '@/db/schema';
+import { boards, posts, projects } from '@/db/schema';
 import { getDatabase } from '@/server/db';
-import { and, eq, ilike } from 'drizzle-orm';
+import { and, count, eq, ilike } from 'drizzle-orm';
 
 export async function listBoardsWithStats(projectId: string) {
   const { db } = getDatabase();
@@ -28,11 +28,22 @@ export async function listBoardsWithStats(projectId: string) {
     .where(whereCondition)
     .orderBy(boards.position, boards.createdAt);
 
-  // Add post count as 0 for now (we can optimize this later)
-  return boardsData.map((board) => ({
-    ...board,
-    postCount: 0,
-  }));
+  // Get post counts for each board
+  const boardsWithPostCounts = await Promise.all(
+    boardsData.map(async (board) => {
+      const postCountResult = await db
+        .select({ count: count() })
+        .from(posts)
+        .where(eq(posts.boardId, board.id));
+
+      return {
+        ...board,
+        postCount: postCountResult[0]?.count || 0,
+      };
+    })
+  );
+
+  return boardsWithPostCounts;
 }
 
 export async function listBoardsForProject(projectId: string) {
@@ -59,11 +70,22 @@ export async function listBoardsForProject(projectId: string) {
     .where(eq(boards.projectId, projectId))
     .orderBy(boards.position, boards.createdAt);
 
-  // Add post count as 0 for now (we can optimize this later)
-  return boardsData.map((board) => ({
-    ...board,
-    postCount: 0,
-  }));
+  // Get post counts for each board
+  const boardsWithPostCounts = await Promise.all(
+    boardsData.map(async (board) => {
+      const postCountResult = await db
+        .select({ count: count() })
+        .from(posts)
+        .where(eq(posts.boardId, board.id));
+
+      return {
+        ...board,
+        postCount: postCountResult[0]?.count || 0,
+      };
+    })
+  );
+
+  return boardsWithPostCounts;
 }
 
 export async function getBoardBySlug(slug: string, userId?: string) {

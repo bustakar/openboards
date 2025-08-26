@@ -1,5 +1,6 @@
 import { checkAndRecordLimit } from '@/lib/rateLimit';
 import { authOptions } from '@/server/auth/options';
+import { getBoardBySlug } from '@/server/repos/boards/boards';
 import { createPost, listPosts } from '@/server/repos/posts/posts';
 import {
   createPostSchema,
@@ -24,13 +25,20 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const boardIdParam = searchParams.get('boardId');
-  const boardId = boardIdParam || undefined;
+  const boardSlugParam = searchParams.get('boardSlug');
   const projectId = searchParams.get('project');
   const sort = searchParams.get('sort') || 'trending';
   const limit = parseInt(searchParams.get('limit') || '50');
 
   if (!projectId) {
     return NextResponse.json({ error: 'project_id_required' }, { status: 400 });
+  }
+
+  // Convert boardSlug to boardId if provided
+  let boardId = boardIdParam || undefined;
+  if (boardSlugParam && !boardId) {
+    const board = await getBoardBySlug(boardSlugParam, userId);
+    boardId = board?.id;
   }
 
   try {
