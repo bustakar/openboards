@@ -1,6 +1,6 @@
 'use client';
 import { PostCard, type PostItem } from '@/components/posts/PostCard';
-import Link from 'next/link';
+import { SortFilter } from '@/components/posts/SortFilter';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 import { Button } from '../ui/button';
@@ -46,6 +46,8 @@ export function PostsList({
       ? 'New'
       : currentSort === 'top'
       ? 'Top'
+      : currentSort === 'trending'
+      ? 'Trending'
       : 'Trending');
   return (
     <div className="h-full">
@@ -53,38 +55,7 @@ export function PostsList({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <h2 className="text-xl font-semibold">{heading}</h2>
-            <div className="inline-flex h-9 items-center justify-center rounded-lg bg-gray-100 p-1">
-              <Link
-                href={`${basePath}?sort=trending`}
-                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-colors ${
-                  currentSort === 'trending'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Top
-              </Link>
-              <Link
-                href={`${basePath}?sort=new`}
-                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-colors ${
-                  currentSort === 'new'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                New
-              </Link>
-              <Link
-                href={`${basePath}?sort=top`}
-                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-colors ${
-                  currentSort === 'top'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-900 hover:text-gray-900'
-                }`}
-              >
-                Trending
-              </Link>
-            </div>
+            <SortFilter basePath={basePath} currentSort={currentSort} />
           </div>
           <Button onClick={handleNewPost} size="sm">
             New post
