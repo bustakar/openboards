@@ -1,4 +1,5 @@
 'use client';
+
 import { CommentsClient } from '@/components/posts/CommentsClient';
 import { VoteButton } from '@/components/posts/VoteButton';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type Post = {
@@ -60,29 +61,31 @@ function formatTimeAgo(dateString: string): string {
 
 export function PostSheet() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [post, setPost] = useState<Post | null>(null);
 
-  // Check if sheet should be open based on URL
+  // Observe searchParams post - if present, open sheet, if not, close sheet
   useEffect(() => {
     const postId = searchParams.get('post');
-    setOpen(!!postId);
 
     if (postId) {
       fetchPost(postId);
+    } else {
+      setPost(null);
     }
+
+    setOpen(!!postId);
   }, [searchParams]);
 
   // Handle sheet close - remove the search param
   const handleClose = () => {
-    // Remove the search param to close the sheet
     const params = new URLSearchParams(searchParams.toString());
     params.delete('post');
-    const newUrl = params.toString() ? `?${params.toString()}` : '';
-    router.replace(newUrl, { scroll: false });
+    router.replace(`${pathname}?${params}`);
   };
 
   async function fetchPost(postId: string) {
@@ -104,8 +107,6 @@ export function PostSheet() {
       setLoading(false);
     }
   }
-
-  if (!post && !loading) return null;
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>

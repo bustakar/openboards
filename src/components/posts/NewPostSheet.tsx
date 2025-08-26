@@ -8,7 +8,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type Board = {
@@ -20,6 +20,7 @@ type Board = {
 
 export function NewPostSheet() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -35,11 +36,9 @@ export function NewPostSheet() {
 
   // Handle sheet close - remove the search param
   const handleClose = () => {
-    // Remove the search param to close the sheet
     const params = new URLSearchParams(searchParams.toString());
     params.delete('new');
-    const newUrl = params.toString() ? `?${params.toString()}` : '';
-    router.replace(newUrl);
+    router.replace(`${pathname}?${params}`);
   };
 
   useEffect(() => {
@@ -136,7 +135,10 @@ export function NewPostSheet() {
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="right" className="min-w-[400px] sm:min-w-[540px] max-w-full">
+      <SheetContent
+        side="right"
+        className="min-w-[400px] sm:min-w-[540px] max-w-full"
+      >
         <SheetHeader>
           <SheetTitle>Submit new post</SheetTitle>
         </SheetHeader>
