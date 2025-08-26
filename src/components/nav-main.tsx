@@ -29,14 +29,29 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => {
             // Check if current path matches this item's URL
-            const isActive = pathname === item.url || pathname.startsWith(item.url + '/');
-            
+            let isActive = false;
+
+            if (item.title === 'Feedback') {
+              // Feedback is active if path ends with /dashboard or /dashboard/feedback
+              isActive =
+                pathname === '/dashboard' ||
+                pathname === '/dashboard/feedback' ||
+                pathname.startsWith('/dashboard/feedback/');
+            } else if (item.title === 'Roadmap') {
+              // Roadmap is active if path is /dashboard/roadmap
+              isActive =
+                pathname === '/dashboard/roadmap' ||
+                pathname.startsWith('/dashboard/roadmap/');
+            }
+
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild tooltip={item.title}>
-                  <Link 
+                  <Link
                     href={item.url}
-                    className={isActive ? 'bg-accent text-accent-foreground' : ''}
+                    className={
+                      isActive ? 'bg-accent text-accent-foreground' : ''
+                    }
                   >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
