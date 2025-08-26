@@ -29,6 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import Link from 'next/link';
 
 const navData = {
   navMain: [
@@ -41,13 +42,6 @@ const navData = {
       title: 'Roadmap',
       url: '/dashboard/roadmap',
       icon: IconRoad,
-    },
-  ],
-  navSecondary: [
-    {
-      title: 'Settings',
-      url: '/dashboard/settings',
-      icon: IconSettings,
     },
   ],
 };
@@ -72,34 +66,9 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const projectId = searchParams.get('project');
-
-  const [selectedProject, setSelectedProject] = useState<Project | null>(() => {
-    if (projectId) {
-      return projects.find((p) => p.id === projectId) || null;
-    }
-    return projects.length > 0 ? projects[0] : null;
-  });
-
-  useEffect(() => {
-    if (projectId) {
-      const project = projects.find((p) => p.id === projectId);
-      if (project) {
-        setSelectedProject(project);
-      }
-    } else if (projects.length > 0 && !selectedProject) {
-      setSelectedProject(projects[0]);
-    }
-  }, [projectId, projects, selectedProject]);
-
-  const handleProjectSelect = (project: Project) => {
-    setSelectedProject(project);
-    const currentPath = window.location.pathname;
-    const newUrl = `${currentPath}?project=${project.id}`;
-    router.push(newUrl);
-  };
+  const selectedProject = projects.find((p) => p.id === projectId);
 
   const getNavData = () => {
     const projectParam = selectedProject
@@ -148,19 +117,21 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
                   {projects.map((project) => (
-                    <DropdownMenuItem
-                      key={project.id}
-                      onClick={() => handleProjectSelect(project)}
-                      className={
-                        selectedProject?.id === project.id ? 'bg-accent' : ''
-                      }
-                    >
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">{project.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {project.subdomain}.openboards.co
-                        </span>
-                      </div>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        key={project.id}
+                        className={
+                          selectedProject?.id === project.id ? 'bg-accent' : ''
+                        }
+                        href={`/dashboard/feedback?project=${project.id}`}
+                      >
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">{project.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {project.subdomain}.openboards.co
+                          </span>
+                        </div>
+                      </Link>
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuItem asChild>
@@ -176,7 +147,6 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={getNavData().navMain} />
-        <NavSecondary items={getNavData().navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         {user && <NavUser user={{ ...user, avatar: user.avatar || '' }} />}

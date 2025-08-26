@@ -151,9 +151,9 @@ export function FeedbackContent() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen w-full">
       {/* Left Sidebar - Boards List */}
-      <div className="w-80 border-r bg-gray-50/50">
+      <div className="w-80 border-r bg-gray-50/50 flex-shrink-0">
         <div className="p-6">
           <h2 className="text-lg font-semibold mb-4">Boards</h2>
 
@@ -197,7 +197,7 @@ export function FeedbackContent() {
       </div>
 
       {/* Right Main Content - Posts Table */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col w-full">
         {/* Header */}
         <div className="border-b p-6">
           <div className="flex items-center justify-between mb-4">
@@ -217,7 +217,7 @@ export function FeedbackContent() {
         </div>
 
         {/* Posts Table */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto w-full">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-gray-500">Loading posts...</div>
@@ -227,11 +227,11 @@ export function FeedbackContent() {
               <div className="text-gray-500">No posts found</div>
             </div>
           ) : (
-            <Table className="w-full">
+            <Table className="w-full min-w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-16">Votes</TableHead>
-                  <TableHead className="min-w-0 flex-1">Title</TableHead>
+                  <TableHead className="flex-1">Title</TableHead>
                   <TableHead className="w-20">Date</TableHead>
                   <TableHead className="w-24">Board</TableHead>
                   <TableHead className="w-20">Status</TableHead>
