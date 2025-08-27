@@ -140,3 +140,46 @@ export async function pinPost(postId: string, pinnedValue: boolean) {
     .set({ pinned: pinnedValue })
     .where(eq(posts.id, postId));
 }
+
+export async function updatePost(
+  postId: string,
+  updates: {
+    status?: 'backlog' | 'planned' | 'in_progress' | 'completed' | 'closed';
+  },
+  userId: string
+) {
+  const { db } = getDatabase();
+
+  try {
+    // First check if the user has permission to update this post
+    // (user can update posts in their projects)
+    const existingPost = await db
+      .select({
+        post: posts,
+        project: projects,
+      })
+      .from(posts)
+      .innerJoin(projects, eq(posts.projectId, projects.id))
+      .where(and(eq(posts.id, postId), eq(projects.userId, userId)))
+      .limit(1);
+
+    if (existingPost.length === 0) {
+      return null;
+    }
+
+    // Update the post
+    const [updatedPost] = await db
+      .update(posts)
+      .set({
+        status: updates.status,
+        updatedAt: new Date(),
+      })
+      .where(eq(posts.id, postId))
+      .returning();
+
+    return updatedPost;
+  } catch (error) {
+    console.error('Error updating post:', error);
+    return null;
+  }
+}

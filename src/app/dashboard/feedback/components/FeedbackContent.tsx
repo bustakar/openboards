@@ -2,7 +2,6 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -11,9 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { IconMessageCircle, IconPlus, IconSearch } from '@tabler/icons-react';
+import { IconMessageCircle } from '@tabler/icons-react';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { PostManagementSheet } from './PostManagementSheet';
 
 interface Post {
   id: string;
@@ -34,6 +34,8 @@ export function FeedbackContent() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isManagementSheetOpen, setIsManagementSheetOpen] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -91,6 +93,20 @@ export function FeedbackContent() {
     });
   };
 
+  const handleManagePost = (post: Post) => {
+    setSelectedPost(post);
+    setIsManagementSheetOpen(true);
+  };
+
+  const handleCloseManagementSheet = () => {
+    setIsManagementSheetOpen(false);
+    setSelectedPost(null);
+  };
+
+  const handlePostUpdate = () => {
+    fetchPosts(); // Refresh the posts list
+  };
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -115,17 +131,6 @@ export function FeedbackContent() {
               </span>
             )}
           </h1>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <IconPlus className="w-4 h-4 mr-2" />
-            Create Post
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input placeholder="Search posts..." className="pl-10" />
-          </div>
         </div>
       </div>
 
@@ -156,6 +161,7 @@ export function FeedbackContent() {
                 <TableRow
                   key={post.id}
                   className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleManagePost(post)}
                 >
                   <TableCell>
                     <div className="flex items-center gap-1 text-gray-600">
@@ -190,6 +196,14 @@ export function FeedbackContent() {
           </Table>
         )}
       </div>
+
+      {/* Post Management Sheet */}
+      <PostManagementSheet
+        post={selectedPost}
+        isOpen={isManagementSheetOpen}
+        onClose={handleCloseManagementSheet}
+        onUpdate={handlePostUpdate}
+      />
     </div>
   );
 }
