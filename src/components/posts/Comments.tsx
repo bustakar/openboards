@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { listComments } from '@/server/repos/comments';
+import { listComments } from '@/server/repos/comments/comments';
+import { createCommentAction } from '@/server/actions/comments';
 import * as React from 'react';
 
 export type CommentItem = {
@@ -73,24 +74,7 @@ export async function Comments({ postId }: { postId: string }) {
 
 function CommentForm({ postId }: { postId: string }) {
   async function action(formData: FormData) {
-    'use server';
-    const body = String(formData.get('body') || '').trim();
-    const authorName =
-      String(formData.get('authorName') || '').trim() || undefined;
-    if (!body) return;
-    await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL ?? ''}/api/posts/${postId}/comments`,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ body, authorName }),
-      }
-    );
-    // Best-effort revalidation for pages under /b
-    try {
-      const { revalidatePath } = await import('next/cache');
-      revalidatePath('/b');
-    } catch {}
+    await createCommentAction(postId, formData);
   }
 
   return (

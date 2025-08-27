@@ -1,5 +1,8 @@
 import { authOptions } from '@/server/auth/options';
-import { createProject, listProjectsByUser } from '@/server/repos/projects';
+import {
+  createProject,
+  listProjectsByUser,
+} from '@/server/repos/projects/projects';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 

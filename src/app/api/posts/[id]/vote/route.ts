@@ -1,4 +1,4 @@
-import { checkAndRecordLimit } from '@/server/rateLimit';
+import { checkAndRecordLimit } from '@/lib/rateLimit';
 import { toggleVote } from '@/server/repos/votes';
 import { NextRequest, NextResponse } from 'next/server';
 

@@ -1,21 +1,9 @@
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
-import { listBoardsWithStats } from '@/server/repos/boards';
-import { listPosts } from '@/server/repos/posts';
-import { BoardsList } from '@/components/boards/BoardsList';
+import { BoardsLayout } from '@/components/boards/BoardsLayout';
 import { PostsList } from '@/components/posts/PostsList';
+import { listPosts } from '@/server/repos/posts/posts';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { headers } from 'next/headers';
-
-async function fetchBoards() {
-  const data = await listBoardsWithStats();
-  return data.map((b) => ({
-    id: b.id,
-    name: b.name,
-    slug: b.slug,
-    description: b.description ?? null,
-    icon: b.icon ?? null,
-    posts: b.postCount,
-  }));
-}
+import { notFound } from 'next/navigation';
 
 export default async function HomePage(props: {
   searchParams?: Promise<{ sort?: 'trending' | 'new' | 'top' }>;
@@ -23,13 +11,18 @@ export default async function HomePage(props: {
   const headersList = await headers();
   const project = await getCurrentProjectFromHeaders(headersList);
 
-  // If no project found, this is the apex domain - show project selector
+  // If no project found, return 404
   if (!project) {
-    return null;
+    notFound();
   }
 
-  const boards = await fetchBoards();
-  const posts = await listPosts({});
+  const searchParams = await props.searchParams;
+  const sort = searchParams?.sort || 'trending';
+  
+  const posts = await listPosts({ 
+    projectId: project.id,
+    sort: sort as 'trending' | 'new' | 'top'
+  });
 
   // Format the posts data to include createdAt as ISO string
   const formattedPosts = posts.items.map((post) => ({
@@ -38,21 +31,14 @@ export default async function HomePage(props: {
   }));
 
   return (
-    <main className="container mx-auto p-6">
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 md:col-span-4">
-          <BoardsList boards={boards} />
-        </div>
-        <div className="col-span-12 md:col-span-8">
-          <PostsList
-            posts={formattedPosts}
-            basePath=""
-            boardSlug=""
-            currentSort="trending"
-            boardName="All Posts"
-          />
-        </div>
-      </div>
-    </main>
+    <BoardsLayout selectedSlug="">
+      <PostsList
+        posts={formattedPosts}
+        basePath=""
+        boardSlug=""
+        currentSort={sort}
+        boardName="All Posts"
+      />
+    </BoardsLayout>
   );
 }

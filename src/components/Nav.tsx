@@ -8,8 +8,11 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function Nav({ title = 'OpenBoards' }: { title?: string }) {
+  const pathname = usePathname();
+
   return (
     <header className="border-b border-gray-200 bg-white">
       <div className="container mx-auto flex items-center justify-between p-4">
@@ -23,7 +26,14 @@ export function Nav({ title = 'OpenBoards' }: { title?: string }) {
                 asChild
                 className={navigationMenuTriggerStyle()}
               >
-                <Link href="/">Feedback</Link>
+                <Link
+                  href="/"
+                  className={
+                    pathname === '/' ? 'bg-gray-100 text-gray-900' : ''
+                  }
+                >
+                  Feedback
+                </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
@@ -31,7 +41,14 @@ export function Nav({ title = 'OpenBoards' }: { title?: string }) {
                 asChild
                 className={navigationMenuTriggerStyle()}
               >
-                <Link href="/roadmap">Roadmap</Link>
+                <Link
+                  href="/roadmap"
+                  className={
+                    pathname === '/roadmap' ? 'bg-gray-100 text-gray-900' : ''
+                  }
+                >
+                  Roadmap
+                </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>

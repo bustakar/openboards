@@ -1,5 +1,5 @@
 import { authOptions } from '@/server/auth/options';
-import { listBoardsWithStats } from '@/server/repos/boards';
+import { listBoardsWithStats } from '@/server/repos/boards/boards';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -19,6 +19,10 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const projectId = searchParams.get('project');
 
-  const data = await listBoardsWithStats(userId, projectId);
+  if (!projectId) {
+    return NextResponse.json({ error: 'project_id_required' }, { status: 400 });
+  }
+
+  const data = await listBoardsWithStats(projectId);
   return NextResponse.json(data);
 }

@@ -1,6 +1,7 @@
+'use client';
 import { VoteButton } from '@/components/posts/VoteButton';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
 export type PostItem = {
@@ -43,25 +44,36 @@ function formatTimeAgo(dateString: string): string {
 }
 
 export function PostCard({ post, href }: { post: PostItem; href?: string }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const st = statusVariant(post.status);
+
+  const handleCardClick = () => {
+    if (href) {
+      if (href.startsWith('?')) {
+        // Handle search param URLs (for post sheets)
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('post', post.id);
+        router.push(`?${params.toString()}`);
+      } else {
+        // Handle regular URLs
+        router.push(href);
+      }
+    }
+  };
+
   return (
-    <div className="px-6 py-6 hover:bg-gray-100/50 transition-colors border-b border-gray-200/50 last:border-b-0 bg-white">
+    <div
+      className="px-6 py-6 hover:bg-gray-100/50 transition-colors border-b border-gray-200/50 last:border-b-0 bg-white cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="flex items-start gap-4">
         <div className="flex-1 min-w-0">
           {/* Title and status badge row */}
           <div className="flex items-center gap-3 mb-2">
-            {href ? (
-              <Link
-                href={href}
-                className="font-semibold text-base hover:underline line-clamp-2"
-              >
-                {post.title}
-              </Link>
-            ) : (
-              <div className="font-semibold text-base line-clamp-2">
-                {post.title}
-              </div>
-            )}
+            <div className="font-semibold text-base line-clamp-2">
+              {post.title}
+            </div>
             <Badge
               variant={st.variant}
               className="text-xs px-2 py-1 flex-shrink-0"
@@ -87,7 +99,7 @@ export function PostCard({ post, href }: { post: PostItem; href?: string }) {
         </div>
 
         {/* Vote count on the right */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
           <VoteButton
             postId={post.id}
             initialCount={post.voteCount}

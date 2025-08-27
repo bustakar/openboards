@@ -1,25 +1,21 @@
-import { and, desc, eq, sql } from 'drizzle-orm';
-import { getDatabase } from '@/server/db';
 import { boards, posts, projects } from '@/db/schema';
+import { getDatabase } from '@/server/db';
+import { and, desc, eq } from 'drizzle-orm';
 
 export async function listPosts({
   boardId,
   projectId,
   sort = 'trending',
   limit = 50,
-  userId,
+  status,
 }: {
   boardId?: string;
-  projectId?: string;
+  projectId: string;
   sort?: 'trending' | 'new' | 'top';
   limit?: number;
-  userId?: string;
+  status?: 'backlog' | 'planned' | 'in_progress' | 'completed' | 'closed';
 }) {
   const { db } = getDatabase();
-
-  if (!userId) {
-    return { items: [], total: 0, hasMore: false };
-  }
 
   let orderBy;
   switch (sort) {
@@ -35,14 +31,17 @@ export async function listPosts({
       break;
   }
 
-  const whereConditions = [eq(projects.userId, userId)];
-  
-  if (projectId) {
-    whereConditions.push(eq(projects.id, projectId));
-  }
-  
+  const whereConditions = [eq(projects.id, projectId)];
+
   if (boardId) {
     whereConditions.push(eq(posts.boardId, boardId));
+  }
+
+  // Filter by non-archived posts by default
+  whereConditions.push(eq(posts.isArchived, false));
+
+  if (status) {
+    whereConditions.push(eq(posts.status, status));
   }
 
   const items = await db
@@ -84,15 +83,26 @@ export async function createPost(data: {
   slug: string;
 }) {
   const { db } = getDatabase();
-  
+
   // Get the project ID from the board
   const [board] = await db
     .select({ projectId: boards.projectId })
     .from(boards)
     .where(eq(boards.id, data.boardId));
-  
+
   if (!board) {
     throw new Error('Board not found');
+  }
+
+  // Check if slug already exists in this board
+  const [existingPost] = await db
+    .select({ id: posts.id })
+    .from(posts)
+    .where(and(eq(posts.boardId, data.boardId), eq(posts.slug, data.slug)))
+    .limit(1);
+
+  if (existingPost) {
+    throw new Error('Post with this slug already exists in this board');
   }
 
   const [row] = await db
@@ -118,31 +128,6 @@ export async function getPostBySlug(boardId: string, postSlug: string) {
   return row ?? null;
 }
 
-export async function incrementVoteCount(postId: string, delta: number) {
-  const { db } = getDatabase();
-  const [row] = await db
-    .update(posts)
-    .set({ voteCount: sql`${posts.voteCount} + ${delta}`, lastActivityAt: sql`now()` })
-    .where(eq(posts.id, postId))
-    .returning({ voteCount: posts.voteCount });
-  return row?.voteCount ?? 0;
-}
-
-export async function incrementCommentCount(postId: string, delta: number) {
-  const { db } = getDatabase();
-  const [row] = await db
-    .update(posts)
-    .set({ commentCount: sql`${posts.commentCount} + ${delta}`, lastActivityAt: sql`now()` })
-    .where(eq(posts.id, postId))
-    .returning({ commentCount: posts.commentCount });
-  return row?.commentCount ?? 0;
-}
-
-export async function bumpLastActivity(postId: string) {
-  const { db } = getDatabase();
-  await db.update(posts).set({ lastActivityAt: sql`now()` }).where(eq(posts.id, postId));
-}
-
 export async function archivePost(postId: string) {
   const { db } = getDatabase();
   await db.update(posts).set({ isArchived: true }).where(eq(posts.id, postId));
@@ -150,7 +135,51 @@ export async function archivePost(postId: string) {
 
 export async function pinPost(postId: string, pinnedValue: boolean) {
   const { db } = getDatabase();
-  await db.update(posts).set({ pinned: pinnedValue }).where(eq(posts.id, postId));
+  await db
+    .update(posts)
+    .set({ pinned: pinnedValue })
+    .where(eq(posts.id, postId));
 }
 
+export async function updatePost(
+  postId: string,
+  updates: {
+    status?: 'backlog' | 'planned' | 'in_progress' | 'completed' | 'closed';
+  },
+  userId: string
+) {
+  const { db } = getDatabase();
 
+  try {
+    // First check if the user has permission to update this post
+    // (user can update posts in their projects)
+    const existingPost = await db
+      .select({
+        post: posts,
+        project: projects,
+      })
+      .from(posts)
+      .innerJoin(projects, eq(posts.projectId, projects.id))
+      .where(and(eq(posts.id, postId), eq(projects.userId, userId)))
+      .limit(1);
+
+    if (existingPost.length === 0) {
+      return null;
+    }
+
+    // Update the post
+    const [updatedPost] = await db
+      .update(posts)
+      .set({
+        status: updates.status,
+        updatedAt: new Date(),
+      })
+      .where(eq(posts.id, postId))
+      .returning();
+
+    return updatedPost;
+  } catch (error) {
+    console.error('Error updating post:', error);
+    return null;
+  }
+}

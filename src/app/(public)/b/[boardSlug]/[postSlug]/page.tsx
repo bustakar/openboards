@@ -1,13 +1,13 @@
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
-import { getBoardBySlug } from '@/server/repos/boards';
-import { getPostBySlug } from '@/server/repos/posts';
+import { CommentsClient } from '@/components/posts/CommentsClient';
+import { VoteButton } from '@/components/posts/VoteButton';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Comments } from '@/components/posts/Comments';
-import { VoteButton } from '@/components/posts/VoteButton';
+import { getBoardBySlug } from '@/server/repos/boards/boards';
+import { getPostBySlug } from '@/server/repos/posts/posts';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { headers } from 'next/headers';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 function statusInfo(status: string): {
   label: string;
@@ -36,7 +36,7 @@ export default async function PostPage(props: {
   const params = await props.params;
   const board = await getBoardBySlug(params.boardSlug);
   if (!board) return notFound();
-  const post = await getPostBySlug(params.postSlug, board.id);
+  const post = await getPostBySlug(board.id, params.postSlug);
   if (!post) return notFound();
 
   const info = statusInfo(post.status);
@@ -99,7 +99,7 @@ export default async function PostPage(props: {
         </div>
 
         {/* Comments */}
-        <Comments postId={post.id} />
+        <CommentsClient postId={post.id} />
       </div>
     </main>
   );

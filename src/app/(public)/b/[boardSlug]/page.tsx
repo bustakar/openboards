@@ -1,21 +1,41 @@
+import { BoardsLayout } from '@/components/boards/BoardsLayout';
 import { PostsList } from '@/components/posts/PostsList';
-import { getBoardBySlug } from '@/server/repos/boards';
-import { listPosts } from '@/server/repos/posts';
-import { getCurrentProjectFromHeaders } from '@/server/repos/projects';
+import { getBoardBySlug } from '@/server/repos/boards/boards';
+import { listPosts } from '@/server/repos/posts/posts';
+import { getCurrentProjectFromHeaders } from '@/server/repos/projects/projects';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 export default async function BoardPage(props: {
   params: Promise<{ boardSlug: string }>;
-  searchParams?: Promise<{ status?: string; sort?: string; q?: string }>;
+  searchParams?: Promise<{
+    status?: string;
+    sort?: 'trending' | 'new' | 'top';
+    q?: string;
+  }>;
 }) {
   const headersList = await headers();
   const project = await getCurrentProjectFromHeaders(headersList);
-  if (!project) return notFound();
+
+  if (!project) {
+    notFound();
+  }
+
   const params = await props.params;
   const board = await getBoardBySlug(params.boardSlug);
-  if (!board) return notFound();
-  const posts = await listPosts({ boardId: board.id });
+
+  if (!board) {
+    notFound();
+  }
+
+  const searchParams = await props.searchParams;
+  const sort = searchParams?.sort || 'trending';
+
+  const posts = await listPosts({
+    boardId: board.id,
+    projectId: project.id,
+    sort: sort,
+  });
 
   // Format the posts data to include createdAt as ISO string
   const formattedPosts = posts.items.map((post) => ({
@@ -24,7 +44,7 @@ export default async function BoardPage(props: {
   }));
 
   return (
-    <main className="container mx-auto p-6">
+    <BoardsLayout selectedSlug={board.slug}>
       <div className="mb-8">
         <h1 className="text-3xl font-bold">{board.name}</h1>
         {board.description && (
@@ -36,9 +56,9 @@ export default async function BoardPage(props: {
         posts={formattedPosts}
         basePath={`/b/${board.slug}`}
         boardSlug={board.slug}
-        currentSort="trending"
+        currentSort={sort}
         boardName={board.name}
       />
-    </main>
+    </BoardsLayout>
   );
 }
