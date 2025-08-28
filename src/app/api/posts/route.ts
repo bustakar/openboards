@@ -1,3 +1,4 @@
+import { auth } from '@/lib/auth';
 import { checkAndRecordLimit } from '@/lib/rateLimit';
 import { getBoardBySlug } from '@/server/repos/boards/boards';
 import { createPost, listPosts } from '@/server/repos/posts/posts';
@@ -7,7 +8,6 @@ import {
   sanitizeTitle,
 } from '@/server/repos/posts/validation';
 import { getProjectBySubdomain } from '@/server/repos/projects/projects';
-import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 

@@ -11,6 +11,8 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 
+export * as authSchema from '../../../../auth-schema';
+
 export const postStatusEnum = pgEnum('post_status', [
   'backlog',
   'planned',

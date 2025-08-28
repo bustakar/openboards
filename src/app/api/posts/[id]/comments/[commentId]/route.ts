@@ -1,5 +1,5 @@
-import { updateComment } from '@/server/repos/comments/comments';
 import { auth } from '@/lib/auth';
+import { updateComment } from '@/server/repos/comments/comments';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -28,7 +28,11 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updatedComment = await updateComment(commentId, { isArchived }, userId);
+    const updatedComment = await updateComment(
+      commentId,
+      { isArchived },
+      userId
+    );
 
     if (!updatedComment) {
       return NextResponse.json({ error: 'comment_not_found' }, { status: 404 });

@@ -1,9 +1,9 @@
 import { posts } from '@/db/schema';
-import { getDatabase } from '@/server/db';
 import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
+import { getDatabase } from '@/server/db';
 import { updatePost } from '@/server/repos/posts/posts';
 import { eq } from 'drizzle-orm';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {

@@ -1,5 +1,5 @@
-import { listBoardsWithStats } from '@/server/repos/boards/boards';
 import { auth } from '@/lib/auth';
+import { listBoardsWithStats } from '@/server/repos/boards/boards';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
