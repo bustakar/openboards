@@ -1,5 +1,4 @@
 import { checkAndRecordLimit } from '@/lib/rateLimit';
-import { authOptions } from '@/server/auth/options';
 import { getBoardBySlug } from '@/server/repos/boards/boards';
 import { createPost, listPosts } from '@/server/repos/posts/posts';
 import {
@@ -8,21 +7,16 @@ import {
   sanitizeTitle,
 } from '@/server/repos/posts/validation';
 import { getProjectBySubdomain } from '@/server/repos/projects/projects';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  // Check if user is authenticated
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
-
-  // Get user ID from session
-  const userId = (session.user as { id?: string }).id;
-  if (!userId) {
-    return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
-  }
+  const userId = session.user.id as string | undefined;
 
   const { searchParams } = new URL(request.url);
   const boardIdParam = searchParams.get('boardId');

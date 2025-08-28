@@ -3,8 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
 import { useState } from 'react';
 
 export default function LoginPage() {
@@ -20,17 +20,16 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
+      const { error } = await authClient.signIn.email({
         email: email.trim().toLowerCase(),
         password,
-        redirect: false,
+        callbackURL: '/dashboard',
       });
-
-      if (result?.error) {
-        setError('Invalid email or password');
-      } else {
-        router.push('/dashboard');
+      if (error) {
+        setError(error.message || 'Invalid email or password');
+        return;
       }
+      router.push('/dashboard');
     } catch {
       setError('An error occurred. Please try again.');
     } finally {

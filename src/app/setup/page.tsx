@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createProjectSchema } from '@/server/repos/projects/validation';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -16,7 +15,6 @@ interface ValidationErrors {
 }
 
 export default function SetupPage() {
-  const { data: session } = useSession();
   const [name, setName] = useState('');
   const [subdomain, setSubdomain] = useState('');
   const [description, setDescription] = useState('');
@@ -35,11 +33,11 @@ export default function SetupPage() {
     const errors: ValidationErrors = {};
 
     try {
-      createProjectSchema.parse({
+      // Validate fields except userId (auth removed for now)
+      createProjectSchema.omit({ userId: true }).parse({
         name,
         subdomain,
         description: description || undefined,
-        userId: (session?.user as { id?: string })?.id || '',
       });
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'errors' in error) {
@@ -56,7 +54,7 @@ export default function SetupPage() {
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [name, subdomain, description, session?.user]);
+  }, [name, subdomain, description]);
 
   // Check subdomain availability
   const checkSubdomainAvailability = useCallback(async (subdomain: string) => {
@@ -96,16 +94,10 @@ export default function SetupPage() {
     if (name || subdomain || description) {
       validateForm();
     }
-  }, [name, subdomain, description, session?.user]);
+  }, [name, subdomain, description, validateForm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const userId = (session?.user as { id?: string })?.id;
-    if (!userId) {
-      setError('You must be logged in to create a project');
-      return;
-    }
 
     if (!validateForm()) {
       setError('Please fix the validation errors');

@@ -1,15 +1,14 @@
-import { authOptions } from '@/server/auth/options';
 import { updateComment } from '@/server/repos/comments/comments';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
-
-  const userId = (session.user as { id?: string }).id;
+  const userId = session.user.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
   }
@@ -29,11 +28,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updatedComment = await updateComment(
-      commentId,
-      { isArchived },
-      userId
-    );
+    const updatedComment = await updateComment(commentId, { isArchived }, userId);
 
     if (!updatedComment) {
       return NextResponse.json({ error: 'comment_not_found' }, { status: 404 });

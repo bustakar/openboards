@@ -38,10 +38,14 @@ export function NavSecondary({
 
           <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={() => {
-                // Use next-auth signOut to log out the user
-                import('next-auth/react').then(({ signOut }) => {
-                  signOut({ callbackUrl: '/login' });
+              onClick={async () => {
+                const { authClient } = await import('@/lib/auth-client');
+                await authClient.signOut({
+                  fetchOptions: {
+                    onSuccess: () => {
+                      window.location.href = '/login';
+                    },
+                  },
                 });
               }}
             >
