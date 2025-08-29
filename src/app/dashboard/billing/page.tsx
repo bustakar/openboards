@@ -1,0 +1,42 @@
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { auth } from '@/lib/auth';
+import { authClient } from '@/lib/auth-client';
+import { listProjectsByUser } from '@/server/repos/projects/projects';
+import { headers } from 'next/headers';
+
+export default async function BillingPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  const userId = session?.user?.id as string | undefined;
+  const projects = userId ? await listProjectsByUser(userId) : [];
+  const hasProjects = projects.length > 0;
+
+  return (
+    <div className="p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Billing</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p>
+            Manage your subscription. All plans include a 14-day free trial.
+          </p>
+
+          <div className="flex gap-3">
+            {/* Buttons are no-ops on server; rendered for clarity. Client page can wire actions later. */}
+            <Button className="min-w-32" disabled>
+              Start trial / Upgrade
+            </Button>
+            <Button
+              variant="outline"
+              className="min-w-32"
+              disabled={!hasProjects}
+            >
+              Manage billing
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

@@ -74,6 +74,16 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
     const projectParam = selectedProject
       ? `?project=${selectedProject.subdomain}`
       : '';
+    const billing =
+      process.env.NEXT_PUBLIC_ENABLE_STRIPE_BILLING === 'true'
+        ? [
+            {
+              title: 'Billing',
+              url: `/dashboard/billing${projectParam}`,
+              icon: IconSettings,
+            },
+          ]
+        : [];
     return {
       navMain: [
         {
@@ -93,6 +103,7 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
           url: `/dashboard/settings${projectParam}`,
           icon: IconSettings,
         },
+        ...billing,
       ],
     };
   };
