@@ -27,25 +27,31 @@ export function initStripePlugin(
     subscription: {
       enabled: true,
       plans: [
-        options.prices.single && {
+        {
           name: 'single',
-          priceId: options.prices.single,
+          ...(options.prices.single
+            ? { priceId: options.prices.single }
+            : { lookupKey: 'PRICE_SINGLE' }),
           limits: { projects: 1 },
           freeTrial: { days: options.trialDays },
         },
-        options.prices.multi3 && {
+        {
           name: 'multi_3',
-          priceId: options.prices.multi3,
+          ...(options.prices.multi3
+            ? { priceId: options.prices.multi3 }
+            : { lookupKey: 'PRICE_MULTI_3' }),
           limits: { projects: 3 },
           freeTrial: { days: options.trialDays },
         },
-        options.prices.multi10 && {
+        {
           name: 'multi_10',
-          priceId: options.prices.multi10,
+          ...(options.prices.multi10
+            ? { priceId: options.prices.multi10 }
+            : { lookupKey: 'PRICE_MULTI_10' }),
           limits: { projects: 10 },
           freeTrial: { days: options.trialDays },
         },
-      ].filter(Boolean) as Array<any>,
+      ],
     },
   });
 }

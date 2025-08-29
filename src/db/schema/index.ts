@@ -10,8 +10,14 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { account, session, user, verification } from '../../../auth-schema';
-export { account, session, user, verification };
+import {
+  account,
+  session,
+  subscription,
+  user,
+  verification,
+} from '../../../auth-schema';
+export { account, session, subscription, user, verification };
 
 export const postStatusEnum = pgEnum('post_status', [
   'backlog',
