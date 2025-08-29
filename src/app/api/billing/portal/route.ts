@@ -51,12 +51,16 @@ export async function POST() {
     return NextResponse.json({ url: portal.url });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    if (message.includes('Customer portal') || message.includes('Portal')) {
+    const lower = message.toLowerCase();
+    if (lower.includes('customer portal') || lower.includes('portal')) {
       return NextResponse.json(
         { error: 'portal_not_configured' },
         { status: 400 }
       );
     }
-    return NextResponse.json({ error: 'internal_error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'internal_error', message },
+      { status: 500 }
+    );
   }
 }

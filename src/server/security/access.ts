@@ -1,4 +1,6 @@
+import { subscription } from '@/db/schema';
 import { auth } from '@/lib/auth';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { getDatabase } from '../db';
 
@@ -26,30 +28,44 @@ export async function getAccess(): Promise<{
   let trialEnd: Date | null = null;
 
   if (process.env.ENABLE_STRIPE_BILLING === 'true') {
-    // Better Auth Stripe plugin exposes a subscription model via its schema
-    // Query latest active/trialing subscription for the user
-    const { db, sql } = getDatabase();
+    const { db } = getDatabase();
     try {
-      // The plugin exposes a subscription table named `subscription` by default
-      // We will query via raw SQL to avoid tight coupling; if table missing, fall back
-      const result = await sql`
-        select plan, status, "trialEnd" as trial_end
-        from subscription
-        where "referenceId" = ${userId}
-        order by "updatedAt" desc
-        limit 1
-      `;
-      const row = (
-        Array.isArray(result)
-          ? (result as unknown[])[0]
-          : (result as { rows?: unknown[] })?.rows?.[0]
-      ) as { plan?: string; status?: string; trial_end?: Date } | undefined;
+      const preferred = await db
+        .select({
+          plan: subscription.plan,
+          status: subscription.status,
+          periodEnd: subscription.periodEnd,
+        })
+        .from(subscription)
+        .where(
+          and(
+            eq(subscription.referenceId, userId),
+            inArray(subscription.status, ['active', 'trialing'])
+          )
+        )
+        .limit(1);
+      const rows = preferred.length
+        ? preferred
+        : await db
+            .select({
+              plan: subscription.plan,
+              status: subscription.status,
+              periodEnd: subscription.periodEnd,
+            })
+            .from(subscription)
+            .where(eq(subscription.referenceId, userId))
+            .orderBy(desc(subscription.periodEnd))
+            .limit(1);
+      const row = rows[0];
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[access]', { userId, row });
+      }
       plan = row?.plan ?? null;
       status = row?.status ?? null;
-      trialEnd = row?.trial_end ?? null;
+      trialEnd = row?.periodEnd ?? null;
 
       const isActive = status === 'active' || status === 'trialing';
-      canWrite = !!isActive;
+      canWrite = isActive;
       switch (plan) {
         case 'single':
           maxProjects = 1;
@@ -61,12 +77,10 @@ export async function getAccess(): Promise<{
           maxProjects = 10;
           break;
         default:
-          // No plan: read-only
           maxProjects = 0;
           canWrite = false;
       }
     } catch {
-      // If any issue with schema, default to read-only safe mode
       canWrite = false;
       maxProjects = 0;
     }
