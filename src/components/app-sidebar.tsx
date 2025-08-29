@@ -2,6 +2,7 @@
 
 import {
   IconChevronDown,
+  IconExternalLink,
   IconMessageCircle,
   IconRoad,
   IconSettings,
@@ -52,6 +53,22 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const projectSlug = searchParams.get('project');
   const selectedProject = projects.find((p) => p.subdomain === projectSlug);
+
+  // Build origin for a given subdomain using current protocol and port in dev
+  const getOriginForSubdomain = (sub: string) => {
+    if (typeof window !== 'undefined') {
+      const protocol = window.location.protocol; // http: or https:
+      const hostname = window.location.hostname;
+      const port = window.location.port;
+      const rootDomain = hostname.replace(/^[^.]+\./, '');
+      const hostWithPort = port
+        ? `${sub}.${rootDomain}:${port}`
+        : `${sub}.${rootDomain}`;
+      return `${protocol}//${hostWithPort}`;
+    }
+    const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'openboards.co';
+    return `https://${sub}.${root}`;
+  };
 
   const getNavData = () => {
     const projectParam = selectedProject
@@ -131,6 +148,22 @@ export function AppSidebar({ user, projects = [], ...props }: AppSidebarProps) {
         <NavMain items={getNavData().navMain} />
       </SidebarContent>
       <SidebarFooter>
+        {selectedProject && (
+          <div className="p-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start gap-2"
+              onClick={() => {
+                const origin = getOriginForSubdomain(selectedProject.subdomain);
+                window.open(origin, '_blank');
+              }}
+            >
+              <IconExternalLink className="h-4 w-4" />
+              Open Project
+            </Button>
+          </div>
+        )}
         {user && <NavUser user={{ ...user, avatar: user.avatar || '' }} />}
       </SidebarFooter>
     </Sidebar>

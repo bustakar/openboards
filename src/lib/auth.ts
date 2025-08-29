@@ -1,6 +1,7 @@
 import { getDatabase } from '@/server/db';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import 'dotenv/config';
 
 export const auth = betterAuth({
   // Server base URL for callbacks; optional if same domain

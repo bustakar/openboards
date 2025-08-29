@@ -11,7 +11,7 @@ export const createProjectSchema = z.object({
         'Subdomain must contain only lowercase letters, numbers, and hyphens',
     }),
   description: z.string().max(500).optional(),
-  userId: z.string().uuid(),
+  userId: z.string(),
 });
 
 export const updateProjectSchema = z.object({

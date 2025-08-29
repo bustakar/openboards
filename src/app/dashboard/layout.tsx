@@ -1,4 +1,5 @@
 import { AppSidebar } from '@/components/app-sidebar';
+import { ProjectSelector } from '@/components/project-selector';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { auth } from '@/lib/auth';
 import { listProjectsByUser } from '@/server/repos/projects/projects';
@@ -20,20 +21,22 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <Suspense>
-        <AppSidebar
-          user={{
-            name: session.user.name || session.user.email?.split('@')[0] || 'User',
-            email: session.user.email || '',
-            avatar: session.user.image || undefined,
-          }}
-          projects={projects}
-        />
-      </Suspense>
-      <main className="w-full">
-        <SidebarTrigger />
-        <Suspense>{children}</Suspense>
-      </main>
+      <ProjectSelector projects={projects}>
+        <Suspense>
+          <AppSidebar
+            user={{
+              name: session.user.name || session.user.email?.split('@')[0] || 'User',
+              email: session.user.email || '',
+              avatar: session.user.image || undefined,
+            }}
+            projects={projects}
+          />
+        </Suspense>
+        <main className="w-full">
+          <SidebarTrigger />
+          <Suspense>{children}</Suspense>
+        </main>
+      </ProjectSelector>
     </SidebarProvider>
   );
 }
