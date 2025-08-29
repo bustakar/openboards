@@ -1,42 +1,31 @@
-import { authOptions } from '@/server/auth/options';
-import {
-  createProject,
-  listProjectsByUser,
-} from '@/server/repos/projects/projects';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/lib/auth';
+import { createProject, listProjectsByUser } from '@/server/repos/projects/projects';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
-  // Check if user is authenticated
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
-
-  // Get user ID from session
-  const userId = (session.user as { id?: string }).id;
+  const userId = session.user.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
   }
-
   const projects = await listProjectsByUser(userId);
   return NextResponse.json(projects);
 }
 
 export async function POST(request: NextRequest) {
-  // Check if user is authenticated
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-  }
-
-  // Get user ID from session
-  const userId = (session.user as { id?: string }).id;
-  if (!userId) {
-    return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
-  }
-
   try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
+    const userId = session.user.id as string | undefined;
+    if (!userId) {
+      return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
+    }
     const body = await request.json();
     const { name, subdomain, description } = body;
 
@@ -58,7 +47,6 @@ export async function POST(request: NextRequest) {
       description,
       userId,
     });
-
     return NextResponse.json(project);
   } catch (error) {
     console.error('Error creating project:', error);

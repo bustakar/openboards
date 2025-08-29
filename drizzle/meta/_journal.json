@@ -36,6 +36,20 @@
       "when": 1755845728789,
       "tag": "0004_lovely_slayback",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1756463356516,
+      "tag": "0005_fuzzy_prism",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1756464093476,
+      "tag": "0006_projects_user_text",
+      "breakpoints": true
     }
   ]
 }

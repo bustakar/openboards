@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createProjectSchema } from '@/server/repos/projects/validation';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -16,7 +15,6 @@ interface ValidationErrors {
 }
 
 export default function SetupPage() {
-  const { data: session } = useSession();
   const [name, setName] = useState('');
   const [subdomain, setSubdomain] = useState('');
   const [description, setDescription] = useState('');
@@ -35,11 +33,11 @@ export default function SetupPage() {
     const errors: ValidationErrors = {};
 
     try {
-      createProjectSchema.parse({
+      // Validate fields except userId (auth removed for now)
+      createProjectSchema.omit({ userId: true }).parse({
         name,
         subdomain,
         description: description || undefined,
-        userId: (session?.user as { id?: string })?.id || '',
       });
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'errors' in error) {
@@ -56,7 +54,7 @@ export default function SetupPage() {
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [name, subdomain, description, session?.user]);
+  }, [name, subdomain, description]);
 
   // Check subdomain availability
   const checkSubdomainAvailability = useCallback(async (subdomain: string) => {
@@ -96,16 +94,10 @@ export default function SetupPage() {
     if (name || subdomain || description) {
       validateForm();
     }
-  }, [name, subdomain, description, session?.user]);
+  }, [name, subdomain, description, validateForm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const userId = (session?.user as { id?: string })?.id;
-    if (!userId) {
-      setError('You must be logged in to create a project');
-      return;
-    }
 
     if (!validateForm()) {
       setError('Please fix the validation errors');
@@ -167,114 +159,118 @@ export default function SetupPage() {
             <CardTitle className="text-xl">Create Your First Project</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                  {error}
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-6">
+                {error && (
+                  <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                    {error}
+                  </div>
+                )}
+
+                <div className="grid gap-6">
+                  <div className="grid gap-3">
+                    <Label htmlFor="name">Project Name</Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      placeholder="My Awesome Project"
+                      disabled={isLoading}
+                      className={validationErrors.name ? 'border-red-500' : ''}
+                    />
+                    {validationErrors.name && (
+                      <p className="text-xs text-red-600 mt-1">
+                        {validationErrors.name}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {name.length}/100 characters
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3">
+                    <Label htmlFor="subdomain">Subdomain</Label>
+                    <div className="flex items-center">
+                      <Input
+                        id="subdomain"
+                        type="text"
+                        value={subdomain}
+                        onChange={(e) =>
+                          setSubdomain(
+                            e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                          )
+                        }
+                        required
+                        placeholder="myproject"
+                        disabled={isLoading}
+                        className={`rounded-r-none ${
+                          validationErrors.subdomain ||
+                          isSubdomainAvailable === false
+                            ? 'border-red-500'
+                            : isSubdomainAvailable === true
+                            ? 'border-green-500'
+                            : ''
+                        }`}
+                      />
+                      <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600 border border-l-0 rounded-r-md">
+                        .openboards.co
+                      </span>
+                    </div>
+                    {validationErrors.subdomain && (
+                      <p className="text-xs text-red-600 mt-1">
+                        {validationErrors.subdomain}
+                      </p>
+                    )}
+                    {isSubdomainAvailable === true && (
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ Subdomain available
+                      </p>
+                    )}
+                    {isSubdomainAvailable === false && (
+                      <p className="text-xs text-red-600 mt-1">
+                        ✗ Subdomain already taken
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {subdomain.length}/50 characters • Only letters, numbers, and
+                      hyphens allowed
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3">
+                    <Label htmlFor="description">Description (Optional)</Label>
+                    <Input
+                      id="description"
+                      type="text"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="What's this project about?"
+                      disabled={isLoading}
+                      className={
+                        validationErrors.description ? 'border-red-500' : ''
+                      }
+                    />
+                    {validationErrors.description && (
+                      <p className="text-xs text-red-600 mt-1">
+                        {validationErrors.description}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {description.length}/500 characters
+                    </p>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isLoading || !isFormValid()}
+                  >
+                    {isLoading ? 'Creating Project...' : 'Create Project'}
+                  </Button>
                 </div>
-              )}
-
-              <div>
-                <Label htmlFor="name">Project Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  placeholder="My Awesome Project"
-                  disabled={isLoading}
-                  className={validationErrors.name ? 'border-red-500' : ''}
-                />
-                {validationErrors.name && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {validationErrors.name}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {name.length}/100 characters
-                </p>
               </div>
-
-              <div>
-                <Label htmlFor="subdomain">Subdomain</Label>
-                <div className="flex items-center">
-                  <Input
-                    id="subdomain"
-                    type="text"
-                    value={subdomain}
-                    onChange={(e) =>
-                      setSubdomain(
-                        e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
-                      )
-                    }
-                    required
-                    placeholder="myproject"
-                    disabled={isLoading}
-                    className={`rounded-r-none ${
-                      validationErrors.subdomain ||
-                      isSubdomainAvailable === false
-                        ? 'border-red-500'
-                        : isSubdomainAvailable === true
-                        ? 'border-green-500'
-                        : ''
-                    }`}
-                  />
-                  <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600 border border-l-0 rounded-r-md">
-                    .openboards.co
-                  </span>
-                </div>
-                {validationErrors.subdomain && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {validationErrors.subdomain}
-                  </p>
-                )}
-                {isSubdomainAvailable === true && (
-                  <p className="text-xs text-green-600 mt-1">
-                    ✓ Subdomain available
-                  </p>
-                )}
-                {isSubdomainAvailable === false && (
-                  <p className="text-xs text-red-600 mt-1">
-                    ✗ Subdomain already taken
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {subdomain.length}/50 characters • Only letters, numbers, and
-                  hyphens allowed
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="description">Description (Optional)</Label>
-                <Input
-                  id="description"
-                  type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="What's this project about?"
-                  disabled={isLoading}
-                  className={
-                    validationErrors.description ? 'border-red-500' : ''
-                  }
-                />
-                {validationErrors.description && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {validationErrors.description}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {description.length}/500 characters
-                </p>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading || !isFormValid()}
-              >
-                {isLoading ? 'Creating Project...' : 'Create Project'}
-              </Button>
             </form>
           </CardContent>
         </Card>

@@ -1,9 +1,9 @@
 import { posts } from '@/db/schema';
-import { authOptions } from '@/server/auth/options';
+import { auth } from '@/lib/auth';
 import { getDatabase } from '@/server/db';
 import { updatePost } from '@/server/repos/posts/posts';
 import { eq } from 'drizzle-orm';
-import { getServerSession } from 'next-auth';
+import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -17,12 +17,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
-
-  const userId = (session.user as { id?: string }).id;
+  const userId = session.user.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
   }

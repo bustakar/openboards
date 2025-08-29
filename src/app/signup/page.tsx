@@ -7,7 +7,8 @@ import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export default function LoginPage() {
+export default function SignUpPage() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,13 +21,14 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const { error } = await authClient.signIn.email({
+      const { error } = await authClient.signUp.email({
         email: email.trim().toLowerCase(),
         password,
+        name: name.trim(),
         callbackURL: '/dashboard',
       });
       if (error) {
-        setError(error.message || 'Invalid email or password');
+        setError(error.message || 'Unable to sign up');
         return;
       }
       router.push('/dashboard');
@@ -45,7 +47,7 @@ export default function LoginPage() {
         </a>
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">Welcome back</CardTitle>
+            <CardTitle className="text-xl">Create your account</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,6 +56,16 @@ export default function LoginPage() {
                   {error}
                 </div>
               )}
+              <div>
+                <label className="block text-sm mb-1">Name</label>
+                <Input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Jane Doe"
+                  disabled={isLoading}
+                />
+              </div>
               <div>
                 <label className="block text-sm mb-1">Email</label>
                 <Input
@@ -76,7 +88,7 @@ export default function LoginPage() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? 'Creating account...' : 'Sign up'}
               </Button>
             </form>
           </CardContent>

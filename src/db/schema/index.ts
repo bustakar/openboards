@@ -10,6 +10,8 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { account, session, user, verification } from '../../../auth-schema';
+export { account, session, user, verification };
 
 export const postStatusEnum = pgEnum('post_status', [
   'backlog',
@@ -24,9 +26,9 @@ export const projects = pgTable('projects', {
   name: text('name').notNull(),
   subdomain: text('subdomain').notNull().unique(),
   description: text('description'),
-  userId: uuid('user_id')
+  userId: text('user_id')
     .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
+    .references(() => user.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),

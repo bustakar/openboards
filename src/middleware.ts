@@ -1,4 +1,3 @@
-import { getToken } from 'next-auth/jwt';
 import { NextResponse, type NextRequest } from 'next/server';
 
 function generateId(length = 24) {
@@ -65,28 +64,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(appUrl);
   }
 
-  // Handle app subdomain routing
-  if (subdomain === 'app') {
-    // Check if user is authenticated
-    const token = await getToken({
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET,
-    });
-
-    if (token) {
-      // User is logged in, redirect to dashboard
-      if (pathname === '/' || pathname === '/login') {
-        const dashboardUrl = new URL('/dashboard', request.url);
-        return NextResponse.redirect(dashboardUrl);
-      }
-    } else {
-      // User is not logged in, redirect to login
-      if (pathname === '/' || pathname === '/dashboard') {
-        const loginUrl = new URL('/login', request.url);
-        return NextResponse.redirect(loginUrl);
-      }
-    }
-  }
+  // Handle app subdomain routing (allow through; route guards handled in layouts/routes)
 
   // Handle project subdomain routing (rewrite to public route group)
   if (subdomain && subdomain !== 'app') {
