@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth';
 import { updateComment } from '@/server/repos/comments/comments';
+import { getAccess } from '@/server/security/access';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -11,6 +12,13 @@ export async function PATCH(request: NextRequest) {
   const userId = session.user.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
+  }
+  const access = await getAccess();
+  if (
+    process.env.ENABLE_STRIPE_BILLING === 'true' &&
+    (!access || !access.access.canWrite)
+  ) {
+    return NextResponse.json({ error: 'read_only' }, { status: 402 });
   }
 
   try {

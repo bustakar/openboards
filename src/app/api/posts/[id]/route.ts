@@ -2,6 +2,7 @@ import { posts } from '@/db/schema';
 import { auth } from '@/lib/auth';
 import { getDatabase } from '@/server/db';
 import { updatePost } from '@/server/repos/posts/posts';
+import { getAccess } from '@/server/security/access';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -24,6 +25,13 @@ export async function PATCH(request: NextRequest) {
   const userId = session.user.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
+  }
+  const access = await getAccess();
+  if (
+    process.env.ENABLE_STRIPE_BILLING === 'true' &&
+    (!access || !access.access.canWrite)
+  ) {
+    return NextResponse.json({ error: 'read_only' }, { status: 402 });
   }
 
   try {

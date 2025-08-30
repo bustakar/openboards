@@ -3,6 +3,7 @@ import { ProjectSelector } from '@/components/project-selector';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { auth } from '@/lib/auth';
 import { listProjectsByUser } from '@/server/repos/projects/projects';
+import { getAccess } from '@/server/security/access';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
@@ -18,6 +19,13 @@ export default async function DashboardLayout({
   if (!userId) redirect('/login');
   const projects = await listProjectsByUser(userId);
   if (projects.length === 0) redirect('/setup');
+  const accessInfo = await getAccess();
+  if (
+    process.env.ENABLE_STRIPE_BILLING === 'true' &&
+    (!accessInfo || !['active', 'trialing'].includes(accessInfo.access.status || ''))
+  ) {
+    redirect('/trial');
+  }
 
   return (
     <SidebarProvider>
