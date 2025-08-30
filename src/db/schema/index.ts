@@ -35,6 +35,15 @@ export const projects = pgTable('projects', {
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
+  // Optional custom domain mapped to this project
+  customDomain: text('custom_domain').unique(),
+  // Cached verification state for the custom domain
+  customDomainVerified: boolean('custom_domain_verified')
+    .notNull()
+    .default(false),
+  customDomainCheckedAt: timestamp('custom_domain_checked_at', {
+    withTimezone: true,
+  }),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),

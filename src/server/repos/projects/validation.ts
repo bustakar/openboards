@@ -26,6 +26,13 @@ export const updateProjectSchema = z.object({
     })
     .optional(),
   description: z.string().max(500).optional(),
+  customDomain: z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(/^(?!https?:\/\/)(?!www\.)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+    .optional()
+    .nullable(),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;

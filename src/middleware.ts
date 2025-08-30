@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // Subdomain detection and routing
+  // Subdomain and custom domain detection and routing
   const host = request.headers.get('host') || '';
   const withoutPort = host.split(':')[0] ?? host;
   const root = process.env.ROOT_DOMAIN || 'openboards.co';
@@ -67,8 +67,8 @@ export async function middleware(request: NextRequest) {
   // Handle app subdomain routing (allow through; route guards handled in layouts/routes)
 
   // Handle project subdomain routing (rewrite to public route group)
-  if (subdomain && subdomain !== 'app') {
-    response.headers.set('x-openboards-subdomain', subdomain);
+  if (!isApex && (subdomain ? subdomain !== 'app' : true)) {
+    response.headers.set('x-openboards-subdomain', subdomain || '');
 
     // Rewrite URLs to the public route group
     // For project subdomains, we want to serve the public pages

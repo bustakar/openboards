@@ -22,6 +22,17 @@ export async function getProjectBySubdomain(subdomain: string) {
   return row ?? null;
 }
 
+export async function getProjectByCustomDomain(domain: string) {
+  const { db } = getDatabase();
+  const normalized = domain.toLowerCase();
+  const [row] = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.customDomain, normalized))
+    .limit(1);
+  return row ?? null;
+}
+
 export async function isSubdomainAvailable(
   subdomain: string
 ): Promise<boolean> {
@@ -74,6 +85,9 @@ export async function updateProject(
     name: string;
     subdomain: string;
     description: string;
+    customDomain: string | null;
+    customDomainVerified: boolean;
+    customDomainCheckedAt: Date | null;
   }>
 ) {
   const { db } = getDatabase();
@@ -148,8 +162,13 @@ export async function getCurrentProjectFromHeaders(headers: Headers) {
   const host = headers.get('host');
   if (!host) return null;
 
+  // Prefer custom domain mapping first
+  const projectByDomain = await getProjectByCustomDomain(
+    host.split(':')[0] ?? host
+  );
+  if (projectByDomain) return projectByDomain;
+
   const subdomain = extractSubdomain(host);
   if (!subdomain) return null;
-
   return await getProjectBySubdomain(subdomain);
 }

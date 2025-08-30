@@ -1,14 +1,14 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function extractSubdomain(hostname: string): string | null {
   const parts = hostname.split('.');
   if (parts.length < 2) return null;
-  
+
   // Handle localhost development
   if (hostname.includes('localhost')) {
     if (parts.length === 2) {
@@ -18,8 +18,11 @@ export function extractSubdomain(hostname: string): string | null {
     }
     if (parts.length >= 3) return parts[0]; // demo.localhost:3000, demo.localhost
   }
-  
-  // Handle production domains
-  if (parts.length === 3) return parts[0]; // demo.openboards.co
+
+  // Handle production domains for known root domain
+  const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'openboards.co';
+  if (hostname.endsWith(`.${root}`) && parts.length >= 3) {
+    return parts[0]; // demo.openboards.co
+  }
   return null;
 }
