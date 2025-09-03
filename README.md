@@ -10,7 +10,7 @@ License: Elastic License v2 (ELv2). You may use, modify, and distribute; you may
 
 Next.js (App Router), better-auth (magic link + GitHub), Drizzle ORM, Postgres, shadcn/ui, Zod.
 
-## Features (MVP)
+## Features (MVP) - In Progress
 
 - Public: `/[project]/feedback` (boards + posts + submit), `/[project]/roadmap`
 - Anonymous voting (one per person) and comments (optional display name)
@@ -18,7 +18,7 @@ Next.js (App Router), better-auth (magic link + GitHub), Drizzle ORM, Postgres, 
 - Private dashboard: orgs/teams, projects, feedback, roadmap
 - Multi-tenant RBAC (OWNER/ADMIN/MEMBER/VIEWER/BILLING)
 
-## Routing
+## Routing - In Progress
 
 - Public:
   - `/[project]/feedback`
