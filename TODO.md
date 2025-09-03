@@ -2,7 +2,7 @@
 
 ## M0 – Foundation
 
-- [ ] Initialize repo (Next.js App Router, TS, Tailwind, shadcn/ui, ESLint/Prettier)
+- [x] Initialize repo (Next.js App Router, TS, Tailwind, shadcn/ui, ESLint/Prettier)
 - [ ] CI: type-check, lint, build
 - [ ] Database: Drizzle setup, migrations skeleton, seed script
 - [ ] Auth: better-auth scaffolding (magic link + GitHub)
