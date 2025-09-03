@@ -1,0 +1,29 @@
+# Node/Next
+node_modules/
+.next/
+out/
+dist/
+.vercel/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Drizzle metadata (keep migrations committed; don't ignore drizzle/)
+drizzle-meta.json
+
+# Tests/coverage
+coverage/
+playwright-report/
+test-results/
+
+# OS/Editors
+.DS_Store
+.idea/
+.vscode/
+
