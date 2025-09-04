@@ -4,15 +4,15 @@
 
 - [x] Initialize repo (Next.js App Router, TS, Tailwind, shadcn/ui, ESLint/Prettier)
 - [ ] CI: type-check, lint, build
-- [ ] Database: Drizzle setup, migrations skeleton, seed script
-- [ ] Auth: better-auth scaffolding (magic link + GitHub)
+- [x] Database: Drizzle setup, migrations skeleton, seed script
+- [x] Auth: better-auth scaffolding (magic link + GitHub)
 - [ ] Docs: README, LICENSE (ELv2), CODE_OF_CONDUCT, CONTRIBUTING (optional)
 
 ## M1 – Auth + Tenancy
 
 - [ ] Magic link flow (SMTP via Nodemailer; Mailpit in dev)
 - [ ] GitHub OAuth
-- [ ] Users, Organizations, Memberships schema + migrations
+- [x] Users, Organizations, Memberships schema + migrations
 - [ ] Org creation, invite via email
 - [ ] Org switcher in dashboard shell
 
