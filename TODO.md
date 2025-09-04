@@ -6,7 +6,7 @@
 - [ ] CI: type-check, lint, build
 - [x] Database: Drizzle setup, migrations skeleton, seed script
 - [x] Auth: better-auth scaffolding (magic link + GitHub)
-- [ ] Docs: README, LICENSE (ELv2), CODE_OF_CONDUCT, CONTRIBUTING (optional)
+- [x] Docs: README, LICENSE (ELv2), CONTRIBUTING
 
 ## M1 – Auth + Tenancy
 
