@@ -10,11 +10,11 @@
 
 ## M1 – Auth + Tenancy
 
-- [ ] Magic link flow (SMTP via Nodemailer; Mailpit in dev)
-- [ ] GitHub OAuth
+- [x] Magic link flow (SMTP via Nodemailer; Mailpit in dev)
+- [x] GitHub OAuth
 - [x] Users, Organizations, Memberships schema + migrations
 - [ ] Org creation, invite via email
-- [ ] Org switcher in dashboard shell
+- [x] Org switcher in dashboard shell
 
 ## M2 – Projects + Dashboard Shell
 
