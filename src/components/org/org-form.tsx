@@ -22,7 +22,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from './ui/form';
+} from '../ui/form';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -56,7 +56,7 @@ export function OrganizationForm() {
         await authClient.organization.setActive({
           organizationId: organization.data?.id,
         });
-        router.push(`/dashboard`);
+        router.push(`/dashboard/${organization.data?.slug}/feedback`);
       }
       form.reset();
     } catch (error) {

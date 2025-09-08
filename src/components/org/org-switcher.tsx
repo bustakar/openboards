@@ -6,7 +6,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -26,14 +25,15 @@ export function OrganizationSwitcher({ orgs }: { orgs: Organization[] }) {
   const { isMobile } = useSidebar();
   const activeOrg = authClient.useActiveOrganization().data;
 
-  async function handleSelect(id: string) {
+  async function handleSelect(organization: Organization) {
     await authClient.organization.setActive({
-      organizationId: id,
+      organizationId: organization.id,
     });
+    router.push(`/dashboard/${organization.slug}/feedback`);
   }
 
   function handleAdd() {
-    router.push('/onboarding/organization');
+    router.push('/dashboard/organization/setup');
   }
 
   return (
@@ -50,7 +50,7 @@ export function OrganizationSwitcher({ orgs }: { orgs: Organization[] }) {
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="truncate font-medium">{activeOrg?.name}</span>
-                <span className="truncate text-xs">Organization</span>
+                <span className="truncate text-xs">{activeOrg?.slug}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -64,18 +64,16 @@ export function OrganizationSwitcher({ orgs }: { orgs: Organization[] }) {
             <DropdownMenuLabel className="text-muted-foreground text-xs">
               Organizations
             </DropdownMenuLabel>
-            {orgs.map((org, index) => (
+            {orgs.map((org) => (
               <DropdownMenuItem
                 key={org.id}
-                onClick={() => handleSelect(org.id)}
+                onClick={() => handleSelect(org)}
                 disabled={org.id === activeOrg?.id}
                 className="gap-2 p-2"
               >
                 <span className="flex-1">{org.name}</span>
-                {org.id === activeOrg?.id ? (
+                {org.id === activeOrg?.id && (
                   <Check className="size-3.5 opacity-60" />
-                ) : (
-                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                 )}
               </DropdownMenuItem>
             ))}

@@ -1,4 +1,4 @@
-import { OrganizationForm } from '@/components/org-form';
+import { OrganizationForm } from '@/components/org/org-form';
 
 export default function OrganizationPage() {
   return (

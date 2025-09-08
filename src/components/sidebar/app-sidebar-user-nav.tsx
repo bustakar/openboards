@@ -18,10 +18,9 @@ import {
 } from '@/components/ui/sidebar';
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Button } from './ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
-export function NavUser({
+export function AppSidebarUserNav({
   user,
 }: {
   user: {

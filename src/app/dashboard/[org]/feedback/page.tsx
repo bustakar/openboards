@@ -1,6 +1,5 @@
 'use client';
 
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { authClient } from '@/lib/auth-client';
 
 export default function DashboardPage() {
@@ -8,7 +7,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-2 m-4">
-      <SidebarTrigger className="-ml-1" />
       <div className="flex flex-col">
         <p>You&apos;re successfully logged in! This is your dashboard</p>
         <p>
