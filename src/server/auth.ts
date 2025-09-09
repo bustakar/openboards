@@ -1,6 +1,6 @@
 import { db } from '@/db/index';
 import * as schema from '@/db/schema';
-import { sendMagicLinkEmail } from '@/server/email';
+import { sendMagicLinkEmail, sendOrganizationInvitation } from '@/server/email';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { magicLink, organization } from 'better-auth/plugins';
@@ -17,7 +17,18 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    organization(),
+    organization({
+      async sendInvitationEmail(data) {
+        const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${data.id}`;
+        sendOrganizationInvitation({
+          email: data.email,
+          invitedByUsername: data.inviter.user.name,
+          invitedByEmail: data.inviter.user.email,
+          teamName: data.organization.name,
+          inviteLink,
+        });
+      },
+    }),
     magicLink({
       async sendMagicLink({ email, url }) {
         await sendMagicLinkEmail(email, url);

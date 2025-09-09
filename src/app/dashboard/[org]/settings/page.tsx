@@ -38,9 +38,13 @@ export default async function OrganizationSettingsPage({
 
   const invitations = fullOrganization?.invitations;
 
+  const editAllowed =
+    members.find((member) => member.userId === userId)?.role === 'owner';
+
   return (
     <div className="p-6">
       <OrganizationSettings
+        editAllowed={editAllowed}
         org={organization}
         members={members}
         invitations={invitations}

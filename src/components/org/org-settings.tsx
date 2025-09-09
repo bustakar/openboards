@@ -3,7 +3,7 @@ import {
   Member,
   Organization,
 } from 'better-auth/plugins/organization';
-import { Card, CardContent } from '../ui/card';
+import { Separator } from '../ui/separator';
 import { InvitationsTable } from './invitations-table';
 import { MemberInviteButton } from './member-invite-button';
 import { MembersTable } from './members-table';
@@ -16,42 +16,41 @@ export type MemberData = Member & {
 };
 
 export function OrganizationSettings({
+  editAllowed,
   org,
   members,
   invitations,
 }: {
+  editAllowed: boolean;
   org: Organization;
   members: MemberData[];
   invitations: Invitation[];
 }) {
   return (
-    <div className="max-w-5xl mx-auto mb-4 p-6">
-      <div className="flex flex-row items-center gap-4">
-        <div className="text-xl mb-4">Members</div>
-        <div className="flex-1" />
-        <MemberInviteButton org={org} />
+    <div className="max-w-5xl mx-auto p-6 space-y-24">
+      <div className="space-y-4">
+        <div className="flex flex-row items-center gap-4">
+          <div className="text-xl">Members</div>
+          <div className="flex-1" />
+          <MemberInviteButton org={org} />
+        </div>
+        <Separator orientation="horizontal" />
+        <MembersTable editAllowed={editAllowed} rows={members} />
       </div>
-      <Card className="my-4">
-        <CardContent>
-          <MembersTable rows={members} />
-        </CardContent>
-      </Card>
-      <div className="text-xl mb-4">Invitations</div>
-      <Card className="my-4">
-        <CardContent>
-          <InvitationsTable invitations={invitations} />
-        </CardContent>
-      </Card>
-      <div className="text-xl mb-4">Danger Zone</div>
-      <Card className="my-4">
-        <CardContent>
-          <div className="flex flex-row items-center gap-4">
-            <div>Delete Organization</div>
-            <div className="flex-1" />
-            <OrganizationDeleteButton org={org} />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="text-xl">Invitations</div>
+        <Separator orientation="horizontal" />
+        <InvitationsTable invitations={invitations} />
+      </div>
+      <div className="space-y-4">
+        <div className="text-xl">Danger Zone</div>
+        <Separator orientation="horizontal" />
+        <div className="flex flex-row items-center gap-4">
+          <div>Delete Organization</div>
+          <div className="flex-1" />
+          <OrganizationDeleteButton org={org} />
+        </div>
+      </div>
     </div>
   );
 }

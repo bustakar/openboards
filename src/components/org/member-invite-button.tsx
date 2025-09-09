@@ -63,7 +63,9 @@ export function MemberInviteButton({ org }: { org: Organization }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Invite Member</Button>
+        <Button variant="outline" size="sm">
+          Invite Member
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <Form {...form}>

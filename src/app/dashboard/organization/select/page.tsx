@@ -1,11 +1,16 @@
 import { OrganizationSelectForm } from '@/components/org/org-select-form';
 import { auth } from '@/server/auth';
 import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export default async function OrganizationPage() {
   const organizations = await auth.api.listOrganizations({
     headers: await headers(),
   });
+
+  if (organizations.length === 0) {
+    redirect('/dashboard/organization/setup');
+  }
 
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">

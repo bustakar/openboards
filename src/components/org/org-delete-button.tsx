@@ -62,7 +62,9 @@ export function OrganizationDeleteButton({ org }: { org: Organization }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="destructive">Delete Organization</Button>
+        <Button variant="destructive" size="sm">
+          Delete Organization
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <Form {...form}>

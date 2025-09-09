@@ -16,7 +16,13 @@ import {
 import * as React from 'react';
 import { MemberData } from './org-settings';
 
-export function MembersTable({ rows }: { rows: MemberData[] }) {
+export function MembersTable({
+  editAllowed,
+  rows,
+}: {
+  editAllowed: boolean;
+  rows: MemberData[];
+}) {
   const roles = ['owner', 'admin', 'member'];
   return (
     <Table>
@@ -47,7 +53,7 @@ export function MembersTable({ rows }: { rows: MemberData[] }) {
               </TableCell>
               <TableCell>
                 <div className="max-w-[200px]">
-                  <Select value={member.role}>
+                  <Select value={member.role} disabled={!editAllowed}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

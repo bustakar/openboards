@@ -25,14 +25,14 @@ export async function AppSidebar({
     main: [
       {
         name: 'Feedback',
-        url: `/${org}/feedback`,
+        url: `/dashboard/${org}/feedback`,
         icon: 'ListTodo',
       },
     ],
     organization: [
       {
         name: 'Settings',
-        url: `/${org}/settings`,
+        url: `/dashboard/${org}/settings`,
         icon: 'Settings',
       },
     ],

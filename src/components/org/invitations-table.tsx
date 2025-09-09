@@ -20,8 +20,9 @@ export function InvitationsTable({
       <TableHeader>
         <TableRow>
           <TableHead>User</TableHead>
-          <TableHead>Status</TableHead>
           <TableHead className="w-[220px]">Role</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Expiry Date</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
