@@ -1,6 +1,6 @@
 'use client';
 
-import { OrganizationForm } from '@/components/org/org-form';
+import { OrganizationForm } from '@/components/organization/org-form';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 import { redirect } from 'next/navigation';

@@ -1,4 +1,4 @@
-import { OrganizationSelectForm } from '@/components/org/org-select-form';
+import { OrganizationSelectForm } from '@/components/organization/org-select-form';
 import { auth } from '@/server/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';

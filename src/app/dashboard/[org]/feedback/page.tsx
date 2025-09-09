@@ -1,17 +1,24 @@
-'use client';
+import { BoardsList } from '@/components/board/boards-list';
+import { Separator } from '@/components/ui/separator';
 
-import { authClient } from '@/lib/auth-client';
-
-export default function DashboardPage() {
-  const activeOrg = authClient.useActiveOrganization().data;
+export default async function FeedbackPage({
+  params,
+  searchParams,
+}: {
+  params: { org: string };
+  searchParams?: { board?: string };
+}) {
+  const { org } = await params;
+  const { board } = await searchParams;
 
   return (
-    <div className="flex flex-col gap-2 m-4">
+    <div className="p-6">
       <div className="flex flex-col">
-        <p>You&apos;re successfully logged in! This is your dashboard</p>
-        <p>
-          Selected organization: <b>{activeOrg?.name}</b>{' '}
-        </p>
+        <div className="w-96">
+          <BoardsList orgSlug={org} selectedBoardId={board} />
+        </div>
+        <Separator orientation="vertical" className="h-full" />
+        <div className="flew-grow h-full"></div>
       </div>
     </div>
   );

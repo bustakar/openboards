@@ -25,14 +25,16 @@ const rejectInvitationAction = async (invitationId: string) => {
 
 export default function InviteCardContent({
   invitation,
+  organizationName,
 }: {
   invitation: Invitation;
+  organizationName: string;
 }) {
   return (
     <CardContent className="space-y-4">
       <div className="space-y-3">
         <p>
-          Accept invitation and join <b>{invitation.organizationName}</b> as{' '}
+          Accept invitation and join <b>{organizationName}</b> as{' '}
           <b>{invitation.email}</b>.
         </p>
         <Button

@@ -1,4 +1,4 @@
-import { OrganizationSwitcher } from '@/components/org/org-switcher';
+import { OrganizationSwitcher } from '@/components/organization/org-switcher';
 import {
   Sidebar,
   SidebarContent,
@@ -26,14 +26,14 @@ export async function AppSidebar({
       {
         name: 'Feedback',
         url: `/dashboard/${org}/feedback`,
-        icon: 'ListTodo',
+        icon: 'ListTodo' as const,
       },
     ],
     organization: [
       {
         name: 'Settings',
         url: `/dashboard/${org}/settings`,
-        icon: 'Settings',
+        icon: 'Settings' as const,
       },
     ],
   };
