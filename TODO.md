@@ -16,13 +16,6 @@
 - [x] Org creation, invite via email
 - [x] Org switcher in dashboard shell
 
-## M2 – Projects + Dashboard Shell
-
-- [ ] Projects schema (global unique `slug`)
-- [ ] Dashboard layout + nav + breadcrumbs
-- [ ] Project create/edit/delete
-- [ ] Guards: `requireMembership`, `assertProjectAccess`
-
 ## M3 – Feedback (private)
 
 - [ ] Boards schema + CRUD
