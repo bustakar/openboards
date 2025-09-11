@@ -6,19 +6,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { auth } from '@/server/auth';
 import { getBoardsByOrgSlug } from '@/server/repo/board-repo';
 import { getOrganizationBySlug } from '@/server/repo/org-repo';
-import { getPostsByBoardId, getPostsByOrgId } from '@/server/repo/post-repo';
-import { MoreHorizontal } from 'lucide-react';
-import { Button } from '../ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+  getPostsWithVotesByBoardId,
+  getPostsWithVotesByOrgId,
+} from '@/server/repo/post-repo';
+import { headers } from 'next/headers';
 import { PostAddButton } from './post-add-button';
-import { PostDeleteButton } from './post-delete-button';
-import { PostEditButton } from './post-edit-button';
+import { PostsTableRow } from './posts-table-row';
 
 export async function PostsTable({
   orgSlug,
@@ -27,14 +24,18 @@ export async function PostsTable({
   orgSlug: string;
   selectedBoardId?: string;
 }) {
+  const h = await headers();
+  const session = await auth.api.getSession({ headers: h });
+  const userId = session?.user?.id;
+
   const org = await getOrganizationBySlug(orgSlug);
   if (!org) return null;
 
   const [boards, posts] = await Promise.all([
     getBoardsByOrgSlug(orgSlug),
     selectedBoardId
-      ? getPostsByBoardId(org.id, selectedBoardId)
-      : getPostsByOrgId(org.id),
+      ? getPostsWithVotesByBoardId(org.id, selectedBoardId, userId)
+      : getPostsWithVotesByOrgId(org.id, userId),
   ]);
 
   return (
@@ -53,6 +54,7 @@ export async function PostsTable({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-24">Votes</TableHead>
             <TableHead className="w-[40%]">Title</TableHead>
             <TableHead>Board</TableHead>
             <TableHead>Created</TableHead>
@@ -68,61 +70,12 @@ export async function PostsTable({
             </TableRow>
           ) : (
             posts.map((p) => (
-              <TableRow key={p.id} className="group">
-                <TableCell className="pr-6">
-                  <div className="truncate">{p.title}</div>
-                  <div className="text-muted-foreground line-clamp-1 text-xs">
-                    {p.description}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span>{p.boardIcon}</span>
-                    <span className="truncate">{p.boardTitle}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground text-xs">
-                  {new Date(
-                    p.createdAt as unknown as string
-                  ).toLocaleDateString()}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label="More options"
-                        >
-                          <MoreHorizontal className="size-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <PostEditButton
-                          orgSlug={orgSlug}
-                          boards={boards.map((b) => ({
-                            id: b.id,
-                            title: b.title,
-                            icon: b.icon,
-                          }))}
-                          post={{
-                            id: p.id,
-                            title: p.title,
-                            description: p.description,
-                            boardId: p.boardId!,
-                          }}
-                        />
-                        <PostDeleteButton
-                          orgSlug={orgSlug}
-                          postId={p.id}
-                          postTitle={p.title}
-                        />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
-              </TableRow>
+              <PostsTableRow
+                key={p.id}
+                post={p}
+                orgSlug={orgSlug}
+                boards={boards}
+              />
             ))
           )}
         </TableBody>

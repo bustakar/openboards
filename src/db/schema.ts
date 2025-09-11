@@ -1,6 +1,5 @@
-import { index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
-import { organization } from './auth-schema';
-
+import { index, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import { organization, user } from './auth-schema';
 export * from './auth-schema';
 
 export const board = pgTable(
@@ -50,3 +49,28 @@ export const post = pgTable(
 );
 
 export type Post = typeof post.$inferSelect;
+
+export const vote = pgTable(
+  'vote',
+  {
+    id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
+    postId: text('post_id')
+      .notNull()
+      .references(() => post.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    uniq: unique('vote_post_user_unique').on(t.postId, t.userId),
+    orgIdx: index('vote_org_idx').on(t.organizationId),
+    postIdx: index('vote_post_idx').on(t.postId),
+    userIdx: index('vote_user_idx').on(t.userId),
+  })
+);
+
+export type Vote = typeof vote.$inferSelect;
