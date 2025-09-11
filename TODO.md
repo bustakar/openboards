@@ -27,10 +27,9 @@
 
 ## M4 – Public Feedback + Interactions
 
-- [ ] Public `[project]/feedback`: boards list + posts list + submit post dialog
-- [ ] Anonymous voting (one per person; cookie-based `visitorId`)
-- [ ] Anonymous comments (optional display name; default “Anonymous”)
-- [ ] Rate limiting + honeypot fields
+- [x] Public `[organization]/feedback`: boards list + posts list + submit post dialog
+- [x] Anonymous voting (one per person; cookie-based `visitorId`)
+- [x] Rate limiting + honeypot fields
 
 ## M5 – Roadmap
 
