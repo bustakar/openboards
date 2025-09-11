@@ -29,8 +29,9 @@ export function MembersTable({
       <TableHeader>
         <TableRow>
           <TableHead>User</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="w-[220px]">Role</TableHead>
+          <TableHead className="md:w-[160px]">Role</TableHead>
+          <TableHead className="md:w-[160px]">Status</TableHead>
+          <TableHead className="md:w-[160px]">Joined At</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -52,20 +53,23 @@ export function MembersTable({
                 <span className="text-xs">member</span>
               </TableCell>
               <TableCell>
-                <div className="max-w-[200px]">
-                  <Select value={member.role} disabled={!editAllowed}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {roles.map((role) => (
-                        <SelectItem key={role} value={role}>
-                          {role}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Select value={member.role} disabled={!editAllowed}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </TableCell>
+              <TableCell>
+                <span className="text-xs">
+                  {member.createdAt.toLocaleDateString()}
+                </span>
               </TableCell>
             </TableRow>
           );

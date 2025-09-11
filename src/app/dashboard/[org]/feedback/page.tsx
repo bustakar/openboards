@@ -1,17 +1,34 @@
-'use client';
+import { BoardsList } from '@/components/board/boards-list';
+import { PostsTable } from '@/components/post/posts-table';
+import { Separator } from '@/components/ui/separator';
+import { PostStatus } from '@/db/schema';
 
-import { authClient } from '@/lib/auth-client';
-
-export default function DashboardPage() {
-  const activeOrg = authClient.useActiveOrganization().data;
+export default async function FeedbackPage({
+  params,
+  searchParams,
+}: {
+  params: { org: string };
+  searchParams?: { board?: string; statuses?: string };
+}) {
+  const { org } = await params;
+  const resolvedSearchParams = await searchParams;
+  const board = resolvedSearchParams?.board;
+  const statuses = resolvedSearchParams?.statuses;
+  const statusesArray = statuses ? (statuses.split(',') as PostStatus[]) : [];
 
   return (
-    <div className="flex flex-col gap-2 m-4">
-      <div className="flex flex-col">
-        <p>You&apos;re successfully logged in! This is your dashboard</p>
-        <p>
-          Selected organization: <b>{activeOrg?.name}</b>{' '}
-        </p>
+    <div className="p-6">
+      <div className="flex flex-row gap-4">
+        <div className="w-96">
+          <BoardsList orgSlug={org} selectedBoardId={board} />
+        </div>
+        <Separator orientation="vertical" className="h-full" />
+        <div className="w-full">
+          <PostsTable
+            orgSlug={org}
+            filters={{ selectedBoardId: board, statuses: statusesArray }}
+          />
+        </div>
       </div>
     </div>
   );

@@ -14,15 +14,14 @@ export function InvitationsTable({
 }: {
   invitations: Invitation[];
 }) {
-  const roles = ['owner', 'admin', 'member'];
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>User</TableHead>
-          <TableHead className="w-[220px]">Role</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Expiry Date</TableHead>
+          <TableHead className="md:w-[160px]">Role</TableHead>
+          <TableHead className="md:w-[160px]">Status</TableHead>
+          <TableHead className="md:w-[160px]">Expiry Date</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

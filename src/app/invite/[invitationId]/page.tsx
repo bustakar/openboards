@@ -2,6 +2,7 @@ import InviteCardContent from '@/components/invitation-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { auth } from '@/server/auth';
+import { getOrganizationById } from '@/server/repo/org-repo';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -21,6 +22,8 @@ export default async function InvitePage({
     query: { id: params.invitationId },
     headers: h,
   });
+
+  const organization = await getOrganizationById(invitation.organizationId);
 
   if (!invitation) {
     return (
@@ -64,7 +67,10 @@ export default async function InvitePage({
             Invitation to join {invitation.organizationName}
           </CardTitle>
         </CardHeader>
-        <InviteCardContent invitation={invitation} />
+        <InviteCardContent
+          invitation={invitation}
+          organizationName={organization?.name || 'Unknown'}
+        />
       </Card>
     </div>
   );

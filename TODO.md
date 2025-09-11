@@ -18,11 +18,12 @@
 
 ## M3 – Feedback (private)
 
-- [ ] Boards schema + CRUD
-- [ ] Posts schema (status: backlog/planned/in_progress/done/closed; optional `visitorId`)
-- [ ] Private feedback single page: table + filters; dialogs for new post + post detail
-- [ ] Tags + status transitions
-- [ ] Indexes for common queries
+- [x] Boards schema + CRUD
+- [x] Posts schema (status: backlog/planned/in_progress/done/closed; optional `visitorId`)
+- [x] Private feedback single page: table + dialogs for new post
+- [x] Votes schema + vote button for posts
+- [x] Post statuses
+- [x] Indexes for common queries
 
 ## M4 – Public Feedback + Interactions
 

@@ -15,6 +15,41 @@
       "when": 1756988081442,
       "tag": "0001_peaceful_the_renegades",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757415195480,
+      "tag": "0002_sparkling_skreet",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1757420783130,
+      "tag": "0003_empty_logan",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1757514152674,
+      "tag": "0004_motionless_korvac",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1757601357304,
+      "tag": "0005_high_raider",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1757609908356,
+      "tag": "0006_equal_bulldozer",
+      "breakpoints": true
     }
   ]
 }

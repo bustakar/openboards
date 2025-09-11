@@ -1,7 +1,7 @@
 import {
   MemberData,
   OrganizationSettings,
-} from '@/components/org/org-settings';
+} from '@/components/organization/org-settings';
 import { auth } from '@/server/auth';
 import { Organization } from 'better-auth/plugins/organization';
 import { headers } from 'next/headers';
@@ -36,7 +36,7 @@ export default async function OrganizationSettingsPage({
     isCurrentUser: member.userId === userId,
   })) as MemberData[];
 
-  const invitations = fullOrganization?.invitations;
+  const invitations = fullOrganization?.invitations || [];
 
   const editAllowed =
     members.find((member) => member.userId === userId)?.role === 'owner';
