@@ -54,6 +54,10 @@ export const post = pgTable(
     title: text('title').notNull(),
     description: text('description').notNull(),
     status: postStatusEnum('status').default('open').notNull(),
+    createdByUserId: text('created_by_user_id').references(() => user.id, {
+      onDelete: 'set null',
+    }),
+    createdByVisitorId: text('created_by_visitor_id'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()
@@ -63,6 +67,8 @@ export const post = pgTable(
   (t) => ({
     orgIdx: index('post_org_idx').on(t.organizationId),
     boardIdx: index('post_board_idx').on(t.boardId),
+    statusIdx: index('post_status_idx').on(t.status),
+    visitorIdx: index('post_visitor_idx').on(t.createdByVisitorId),
   })
 );
 
@@ -78,16 +84,17 @@ export const vote = pgTable(
     postId: text('post_id')
       .notNull()
       .references(() => post.id, { onDelete: 'cascade' }),
-    userId: text('user_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
+    userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }),
+    anonymousId: text('anonymous_id'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (t) => ({
-    uniq: unique('vote_post_user_unique').on(t.postId, t.userId),
+    uniqUser: unique('vote_post_user_unique').on(t.postId, t.userId),
+    uniqAnon: unique('vote_post_anon_unique').on(t.postId, t.anonymousId),
     orgIdx: index('vote_org_idx').on(t.organizationId),
     postIdx: index('vote_post_idx').on(t.postId),
     userIdx: index('vote_user_idx').on(t.userId),
+    anonIdx: index('vote_anon_idx').on(t.anonymousId),
   })
 );
 
