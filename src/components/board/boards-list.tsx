@@ -27,7 +27,7 @@ export async function BoardsList({
         <BoardAddButton orgSlug={orgSlug} />
       </div>
       <nav className="flex flex-col gap-1">
-        <Link asChild href={`/dashboard/${orgSlug}/feedback`}>
+        <Link href={`/dashboard/${orgSlug}/feedback`}>
           <Button
             variant={selectedBoardId ? 'ghost' : 'secondary'}
             size="lg"
@@ -39,7 +39,6 @@ export async function BoardsList({
         </Link>
         {boards.map((b) => (
           <Link
-            asChild
             key={b.id}
             href={`/dashboard/${orgSlug}/feedback?board=${b.id}`}
             className="group"
