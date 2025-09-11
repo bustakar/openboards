@@ -43,6 +43,13 @@
       "when": 1757601357304,
       "tag": "0005_high_raider",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1757609908356,
+      "tag": "0006_equal_bulldozer",
+      "breakpoints": true
     }
   ]
 }

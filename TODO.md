@@ -21,9 +21,9 @@
 - [x] Boards schema + CRUD
 - [x] Posts schema (status: backlog/planned/in_progress/done/closed; optional `visitorId`)
 - [x] Private feedback single page: table + dialogs for new post
-- [ ] Votes schema + vote button for posts
-- [ ] Post status transitions
-- [ ] Indexes for common queries
+- [x] Votes schema + vote button for posts
+- [x] Post statuses
+- [x] Indexes for common queries
 
 ## M4 – Public Feedback + Interactions
 

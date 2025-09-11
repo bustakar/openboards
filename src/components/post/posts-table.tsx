@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { PostStatus } from '@/db/schema';
 import { auth } from '@/server/auth';
 import { getBoardsByOrgSlug } from '@/server/repo/board-repo';
 import { getOrganizationBySlug } from '@/server/repo/org-repo';
@@ -15,14 +16,20 @@ import {
 } from '@/server/repo/post-repo';
 import { headers } from 'next/headers';
 import { PostAddButton } from './post-add-button';
+import { PostsTableFilterButton } from './posts-table-filter-button';
 import { PostsTableRow } from './posts-table-row';
+
+export type PostsTableFilters = {
+  selectedBoardId?: string;
+  statuses?: PostStatus[];
+};
 
 export async function PostsTable({
   orgSlug,
-  selectedBoardId,
+  filters,
 }: {
   orgSlug: string;
-  selectedBoardId?: string;
+  filters: PostsTableFilters;
 }) {
   const h = await headers();
   const session = await auth.api.getSession({ headers: h });
@@ -33,15 +40,23 @@ export async function PostsTable({
 
   const [boards, posts] = await Promise.all([
     getBoardsByOrgSlug(orgSlug),
-    selectedBoardId
-      ? getPostsWithVotesByBoardId(org.id, selectedBoardId, userId)
-      : getPostsWithVotesByOrgId(org.id, userId),
+    filters.selectedBoardId
+      ? getPostsWithVotesByBoardId(
+          org.id,
+          filters.selectedBoardId,
+          userId,
+          filters.statuses
+        )
+      : getPostsWithVotesByOrgId(org.id, userId, filters.statuses),
   ]);
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-medium">Posts</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-medium">Posts</h2>
+          <PostsTableFilterButton />
+        </div>
         <PostAddButton
           orgSlug={orgSlug}
           boards={boards.map((b) => ({
@@ -55,7 +70,8 @@ export async function PostsTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-24">Votes</TableHead>
-            <TableHead className="w-[40%]">Title</TableHead>
+            <TableHead className="w-full max-w-[40%]">Title</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Board</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="w-24 text-right">Actions</TableHead>

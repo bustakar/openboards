@@ -14,6 +14,7 @@ import {
 import { VoteButton } from '../vote/vote-button';
 import { PostDeleteButton } from './post-delete-button';
 import { PostEditButton } from './post-edit-button';
+import { PostStatusBadge } from './post-status-badge';
 
 type PostWithVotes = Awaited<ReturnType<typeof getPostsWithVotesByOrgId>>[0];
 type Board = Awaited<ReturnType<typeof getBoardsByOrgSlug>>[0];
@@ -51,6 +52,9 @@ export function PostsTableRow({
         <div className="text-muted-foreground line-clamp-1 text-xs">
           {post.description}
         </div>
+      </TableCell>
+      <TableCell>
+        <PostStatusBadge status={post.status} />
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">

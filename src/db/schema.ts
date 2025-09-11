@@ -1,6 +1,23 @@
-import { index, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import {
+  index,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+} from 'drizzle-orm/pg-core';
 import { organization, user } from './auth-schema';
 export * from './auth-schema';
+
+export const postStatusEnum = pgEnum('post_status', [
+  'open',
+  'backlog',
+  'planned',
+  'in_progress',
+  'done',
+  'closed',
+]);
+export type PostStatus = (typeof postStatusEnum)['enumValues'][number];
 
 export const board = pgTable(
   'board',
@@ -36,6 +53,7 @@ export const post = pgTable(
       .references(() => board.id, { onDelete: 'restrict' }),
     title: text('title').notNull(),
     description: text('description').notNull(),
+    status: postStatusEnum('status').default('open').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()

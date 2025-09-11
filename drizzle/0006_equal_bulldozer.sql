@@ -1,0 +1,2 @@
+CREATE TYPE "public"."post_status" AS ENUM('open', 'backlog', 'planned', 'in_progress', 'done', 'closed');--> statement-breakpoint
+ALTER TABLE "post" ADD COLUMN "status" "post_status" DEFAULT 'open' NOT NULL;
