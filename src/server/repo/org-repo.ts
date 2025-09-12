@@ -10,6 +10,7 @@ export async function getOrganizationById(id: string) {
 }
 
 export async function getOrganizationBySlug(slug: string) {
+  console.log('getOrganizationBySlug', slug);
   return db.query.organization.findFirst({
     where: eq(organization.slug, slug),
     columns: { id: true, name: true, slug: true },
