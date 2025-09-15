@@ -41,6 +41,10 @@ export default async function OrganizationSettingsPage({
   const editAllowed =
     members.find((member) => member.userId === userId)?.role === 'owner';
 
+  const customDomain =
+    (fullOrganization as { customDomain?: string | null })?.customDomain ||
+    null;
+
   return (
     <div className="p-6">
       <OrganizationSettings
@@ -48,6 +52,7 @@ export default async function OrganizationSettingsPage({
         org={organization}
         members={members}
         invitations={invitations}
+        customDomain={customDomain}
       />
     </div>
   );

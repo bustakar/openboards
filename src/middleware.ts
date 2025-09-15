@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 const ROOT = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+const CUSTOM_DOMAINS = process.env.NEXT_PUBLIC_CUSTOM_DOMAINS || 'off';
 
 function getOrgFromHost(host: string | null): string | null {
   if (!host || !ROOT) return null;
@@ -15,9 +16,34 @@ function getOrgFromHost(host: string | null): string | null {
   return org;
 }
 
-export function middleware(req: NextRequest) {
+async function getOrgFromCustomDomain(
+  req: NextRequest
+): Promise<string | null> {
+  if (CUSTOM_DOMAINS !== 'vercel') return null;
+  const host = req.headers.get('host');
+  if (!host) return null;
+  const hostname = host.split(':')[0];
+
+  if (ROOT && (hostname === ROOT || hostname.endsWith('.' + ROOT))) {
+    return null;
+  }
+
+  try {
+    const url = req.nextUrl.clone();
+    url.pathname = '/api/resolve-host';
+    url.search = `?host=${encodeURIComponent(hostname)}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { found: boolean; orgSlug?: string };
+    if (data.found && data.orgSlug) return data.orgSlug;
+  } catch {}
+  return null;
+}
+
+export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
-  const org = getOrgFromHost(req.headers.get('host'));
+  const orgSub = getOrgFromHost(req.headers.get('host'));
+  const org = orgSub || (await getOrgFromCustomDomain(req));
 
   if (!org) {
     return NextResponse.next();

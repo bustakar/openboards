@@ -59,7 +59,7 @@ export async function PublicPostsList({
                 initialVoted={p.hasVoted as boolean}
                 initialCount={p.votesCount as number}
               />
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 gap-2 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="truncate font-medium">{p.title}</span>
                   <PostStatusBadge status={p.status} />

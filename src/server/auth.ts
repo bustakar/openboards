@@ -18,6 +18,17 @@ export const auth = betterAuth({
   },
   plugins: [
     organization({
+      schema: {
+        organization: {
+          additionalFields: {
+            customDomain: {
+              type: 'string',
+              input: true,
+              required: false,
+            },
+          },
+        },
+      },
       async sendInvitationEmail(data) {
         const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${data.id}`;
         sendOrganizationInvitation({
