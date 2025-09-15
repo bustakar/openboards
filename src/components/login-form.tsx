@@ -50,7 +50,7 @@ export function LoginForm({
     try {
       await authClient.signIn.magicLink({
         email: data.email,
-        callbackURL: '/dashboard',
+        callbackURL: '/dashboard/organization/select',
       });
       form.reset();
     } catch (error) {
