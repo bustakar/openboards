@@ -5,7 +5,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  if ((process.env.NEXT_PUBLIC_CUSTOM_DOMAINS || 'off') !== 'vercel') {
+  if (process.env.CUSTOM_DOMAINS_PROVIDER === 'disabled') {
     return NextResponse.json({ found: false }, { status: 404 });
   }
 
