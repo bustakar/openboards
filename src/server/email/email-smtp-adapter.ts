@@ -8,8 +8,8 @@ export class SmtpEmailAdapter implements EmailAdapter {
   constructor() {
     const host = process.env.SMTP_HOST;
     const port = Number(process.env.SMTP_PORT || 587);
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
+    const user = process.env.SMTP_USERNAME;
+    const pass = process.env.SMTP_PASSWORD;
 
     if (!host) throw new Error('SMTP_HOST is required for SMTP adapter');
 
