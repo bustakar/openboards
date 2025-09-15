@@ -38,45 +38,39 @@ export async function BoardsList({
           </Button>
         </Link>
         {boards.map((b) => (
-          <Link
-            key={b.id}
-            href={`/dashboard/feedback?board=${b.id}`}
-            className="group"
-          >
-            <Button
-              variant={selectedBoardId === b.id ? 'secondary' : 'ghost'}
-              size="lg"
-              className="justify-start w-full"
-            >
-              <span className="text-base">{b.icon}</span>
-              <span className="truncate w-full text-left">{b.title}</span>
+          <div key={b.id} className="group relative">
+            <Link href={`/dashboard/feedback?board=${b.id}`} className="block">
+              <Button
+                variant={selectedBoardId === b.id ? 'secondary' : 'ghost'}
+                size="lg"
+                className="justify-start w-full"
+              >
+                <span className="text-base">{b.icon}</span>
+                <span className="truncate w-full text-left">{b.title}</span>
+              </Button>
+            </Link>
 
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="More options"
-                    >
-                      <MoreHorizontal className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <BoardEditButton
-                      orgSlug={orgSlug}
-                      board={{ id: b.id, title: b.title, icon: b.icon }}
-                    />
-                    <BoardDeleteButton
-                      orgSlug={orgSlug}
-                      boardId={b.id}
-                      boardTitle={b.title}
-                    />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </Button>
-          </Link>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="More options">
+                    <MoreHorizontal className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <BoardEditButton
+                    orgSlug={orgSlug}
+                    board={{ id: b.id, title: b.title, icon: b.icon }}
+                  />
+                  <BoardDeleteButton
+                    orgSlug={orgSlug}
+                    boardId={b.id}
+                    boardTitle={b.title}
+                  />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         ))}
       </nav>
     </div>

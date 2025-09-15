@@ -13,8 +13,9 @@ export default async function DashboardLayout({
   params: Promise<{ org: string }>;
 }) {
   const { org } = await params;
+  const h = await headers();
   const organizations = await auth.api.listOrganizations({
-    headers: await headers(),
+    headers: h,
   });
 
   if (organizations.length === 0) {
@@ -23,11 +24,18 @@ export default async function DashboardLayout({
 
   if (!organizations.some((organization) => organization.slug === org)) {
     redirect('/dashboard/organization/select');
+  } else {
+    await auth.api.setActiveOrganization({
+      body: {
+        organizationSlug: org,
+      },
+      headers: h,
+    });
   }
 
   return (
     <SidebarProvider>
-      <AppSidebar org={org} />
+      <AppSidebar />
       <SidebarInset>
         <Breadcrumbs />
         {children}

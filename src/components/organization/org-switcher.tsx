@@ -26,9 +26,6 @@ export function OrganizationSwitcher({ orgs }: { orgs: Organization[] }) {
   const activeOrg = authClient.useActiveOrganization().data;
 
   async function handleSelect(organization: Organization) {
-    await authClient.organization.setActive({
-      organizationId: organization.id,
-    });
     router.push(`/dashboard/${organization.slug}/feedback`);
   }
 
@@ -71,7 +68,12 @@ export function OrganizationSwitcher({ orgs }: { orgs: Organization[] }) {
                 disabled={org.id === activeOrg?.id}
                 className="gap-2 p-2"
               >
-                <span className="flex-1">{org.name}</span>
+                <div className="flex flex-col flex-1">
+                  <span>{org.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {org.slug}
+                  </span>
+                </div>
                 {org.id === activeOrg?.id && (
                   <Check className="size-3.5 opacity-60" />
                 )}
