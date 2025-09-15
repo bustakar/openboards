@@ -18,7 +18,7 @@ export async function PublicBoardsList({
         <h2 className="text-base font-medium">Boards</h2>
       </div>
       <nav className="flex flex-col gap-1">
-        <Link href={`/${orgSlug}/feedback`}>
+        <Link href={`/feedback`}>
           <Button
             variant={selectedBoardId ? 'ghost' : 'secondary'}
             size="lg"
@@ -29,7 +29,7 @@ export async function PublicBoardsList({
           </Button>
         </Link>
         {boards.map((b) => (
-          <Link key={b.id} href={`/${orgSlug}/feedback?board=${b.id}`}>
+          <Link key={b.id} href={`/feedback?board=${b.id}`}>
             <Button
               variant={selectedBoardId === b.id ? 'secondary' : 'ghost'}
               size="lg"

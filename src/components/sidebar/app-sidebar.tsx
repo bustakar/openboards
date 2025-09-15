@@ -12,11 +12,8 @@ import { AppSidebarNav } from './app-sidebar-nav';
 import { AppSidebarUserNav } from './app-sidebar-user-nav';
 
 export async function AppSidebar({
-  org,
   ...props
-}: React.ComponentProps<typeof Sidebar> & {
-  org: string;
-}) {
+}: React.ComponentProps<typeof Sidebar>) {
   const h = await headers();
   const session = await auth.api.getSession({ headers: h });
   const orgs = await auth.api.listOrganizations({ headers: h });
@@ -25,14 +22,14 @@ export async function AppSidebar({
     main: [
       {
         name: 'Feedback',
-        url: `/dashboard/${org}/feedback`,
+        url: `/dashboard/feedback`,
         icon: 'ListTodo' as const,
       },
     ],
     organization: [
       {
         name: 'Settings',
-        url: `/dashboard/${org}/settings`,
+        url: `/dashboard/settings`,
         icon: 'Settings' as const,
       },
     ],

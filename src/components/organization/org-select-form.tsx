@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { authClient } from '@/lib/auth-client';
 import { Organization } from 'better-auth/plugins';
 import { useRouter } from 'next/navigation';
 
@@ -14,9 +13,6 @@ export function OrganizationSelectForm({
   const router = useRouter();
 
   const onSelect = async (organization: Organization) => {
-    await authClient.organization.setActive({
-      organizationId: organization.id,
-    });
     router.push(`/dashboard/${organization.slug}/feedback`);
   };
 
