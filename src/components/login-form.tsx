@@ -68,7 +68,7 @@ export function LoginForm({
     try {
       await authClient.signIn.social({
         provider: 'github',
-        callbackURL: '/app',
+        callbackURL: '/dashboard/organization/select',
       });
     } catch (error) {
       setError(
