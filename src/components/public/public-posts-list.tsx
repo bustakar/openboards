@@ -31,7 +31,7 @@ export async function PublicPostsList({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-medium">Posts</h2>
         <SubmitPostButton
@@ -53,23 +53,17 @@ export async function PublicPostsList({
               key={p.id}
               className="border rounded-md p-3 flex gap-3 items-start"
             >
-              <PublicVoteButton
-                orgSlug={orgSlug}
-                postId={p.id}
-                initialVoted={p.hasVoted as boolean}
-                initialCount={p.votesCount as number}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="truncate font-medium">{p.title}</span>
-                  <PostStatusBadge status={p.status} />
-                </div>
+              <div className="flex flex-col gap-2 w-full">
+                <PostStatusBadge status={p.status} />
+                <span className="truncate font-medium">{p.title}</span>
                 <div className="text-muted-foreground line-clamp-2 text-sm">
                   {p.description}
                 </div>
                 <div className="text-muted-foreground text-xs mt-1 flex items-center gap-2">
-                  <span>{p.boardIcon}</span>
-                  <span className="truncate">{p.boardTitle}</span>
+                  <div className="bg-muted rounded-md py-1 px-2 flex items-center gap-2">
+                    <span>{p.boardIcon}</span>
+                    <span className="truncate">{p.boardTitle}</span>
+                  </div>
                   <span>•</span>
                   <span>
                     {new Date(
@@ -78,6 +72,12 @@ export async function PublicPostsList({
                   </span>
                 </div>
               </div>
+              <PublicVoteButton
+                orgSlug={orgSlug}
+                postId={p.id}
+                initialVoted={p.hasVoted as boolean}
+                initialCount={p.votesCount as number}
+              />
             </li>
           ))
         )}
