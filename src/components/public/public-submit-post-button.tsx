@@ -65,6 +65,7 @@ export function SubmitPostButton({
     setIsLoading(true);
     try {
       await createPublicPostAction({ orgSlug, ...data });
+      form.reset();
       setOpen(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to submit');

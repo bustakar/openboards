@@ -10,7 +10,6 @@ import {
 import { headers } from 'next/headers';
 import { PostAddButton } from './post-add-button';
 import { PostsListFilterButton } from './posts-list-filter-button';
-import { PostsTableFilterButton } from './posts-table-filter-button';
 import { PostsTableRow } from './posts-table-row';
 
 export type PostsTableFilters = {
