@@ -18,8 +18,8 @@ export default async function FeedbackPage({
 
   return (
     <div className="p-6">
-      <div className="flex flex-row gap-4">
-        <div className="w-96">
+      <div className="flex md:flex-row flex-col gap-4">
+        <div className="w-full md:w-96">
           <BoardsList orgSlug={org} selectedBoardId={board} />
         </div>
         <Separator orientation="vertical" className="h-full" />

@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { board, post } from '@/db/schema';
+import { board, post, PostStatus } from '@/db/schema';
 import { auth } from '@/server/auth';
 import { getOrganizationBySlug } from '@/server/repo/org-repo';
 import { getPostById } from '@/server/repo/post-repo';
@@ -72,6 +72,7 @@ export async function updatePostAction(input: {
   id: string;
   title: string;
   description: string;
+  status?: PostStatus | 'open';
   boardId: string;
 }) {
   const { org } = await requireOrgAndRole(input.orgSlug, 'member');
@@ -91,6 +92,7 @@ export async function updatePostAction(input: {
     .set({
       title: input.title.trim(),
       description: input.description.trim(),
+      status: input.status,
       boardId: input.boardId,
     })
     .where(eq(post.id, input.id))
