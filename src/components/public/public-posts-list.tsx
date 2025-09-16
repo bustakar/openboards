@@ -1,20 +1,23 @@
-import { PostStatus } from '@/db/schema';
 import { getBoardsByOrgSlug } from '@/server/repo/board-repo';
 import { getOrganizationBySlug } from '@/server/repo/org-repo';
-import { getPublicPostsByOrgSlug } from '@/server/repo/public-post-repo';
+import {
+  getPublicPostsByOrgSlug,
+  PostsListOptions,
+} from '@/server/repo/public-post-repo';
 import { getVisitorId } from '@/server/service/public-visitor';
 import { PostStatusBadge } from '../post/post-status-badge';
+import { PostsListFilterButton } from '../post/posts-list-filter-button';
+import { PostsListSortButton } from '../post/posts-list-sort-button';
+import { Search } from '../search';
 import { SubmitPostButton } from './public-submit-post-button';
 import { PublicVoteButton } from './public-vote-button';
 
 export async function PublicPostsList({
   orgSlug,
-  boardId,
-  statuses,
+  options,
 }: {
   orgSlug: string;
-  boardId?: string;
-  statuses?: string[];
+  options: PostsListOptions;
 }) {
   const org = await getOrganizationBySlug(orgSlug);
   if (!org) return null;
@@ -23,25 +26,25 @@ export async function PublicPostsList({
     getVisitorId(),
   ]);
 
-  const posts = await getPublicPostsByOrgSlug(
-    orgSlug,
-    visitorId,
-    statuses as PostStatus[],
-    boardId
-  );
+  const posts = await getPublicPostsByOrgSlug(orgSlug, options, visitorId);
 
   return (
     <div className="space-y-4 w-full">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 w-full">
         <h2 className="text-base font-medium">Posts</h2>
-        <SubmitPostButton
-          orgSlug={orgSlug}
-          boards={boards.map((b) => ({
-            id: b.id,
-            title: b.title,
-            icon: b.icon,
-          }))}
-        />
+        <div className="flex items-center gap-2">
+          <Search initial={options.search} />
+          <PostsListSortButton />
+          <PostsListFilterButton />
+          <SubmitPostButton
+            orgSlug={orgSlug}
+            boards={boards.map((b) => ({
+              id: b.id,
+              title: b.title,
+              icon: b.icon,
+            }))}
+          />
+        </div>
       </div>
 
       <ul className="space-y-2">
@@ -51,7 +54,7 @@ export async function PublicPostsList({
           posts.map((p) => (
             <li
               key={p.id}
-              className="border rounded-md p-3 flex gap-3 items-start"
+              className="border rounded-md p-3 flex gap-3 items-start w-full"
             >
               <div className="flex flex-col gap-2 w-full">
                 <PostStatusBadge status={p.status} />
