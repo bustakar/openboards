@@ -1,11 +1,4 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { PostStatus } from '@/db/schema';
 import { auth } from '@/server/auth';
 import { getBoardsByOrgSlug } from '@/server/repo/board-repo';
@@ -16,6 +9,7 @@ import {
 } from '@/server/repo/post-repo';
 import { headers } from 'next/headers';
 import { PostAddButton } from './post-add-button';
+import { PostsListFilterButton } from './posts-list-filter-button';
 import { PostsTableFilterButton } from './posts-table-filter-button';
 import { PostsTableRow } from './posts-table-row';
 
@@ -53,34 +47,25 @@ export async function PostsTable({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
+        <h2 className="text-base font-medium">Posts</h2>
         <div className="flex items-center gap-2">
-          <h2 className="text-base font-medium">Posts</h2>
-          <PostsTableFilterButton />
+          <PostsListFilterButton />
+          <PostAddButton
+            orgSlug={orgSlug}
+            boards={boards.map((b) => ({
+              id: b.id,
+              title: b.title,
+              icon: b.icon,
+            }))}
+          />
         </div>
-        <PostAddButton
-          orgSlug={orgSlug}
-          boards={boards.map((b) => ({
-            id: b.id,
-            title: b.title,
-            icon: b.icon,
-          }))}
-        />
       </div>
+
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-24">Votes</TableHead>
-            <TableHead className="w-full max-w-[40%]">Title</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Board</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead className="w-24 text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
         <TableBody>
           {posts.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-muted-foreground">
+              <TableCell colSpan={5} className="text-muted-foreground">
                 No posts yet.
               </TableCell>
             </TableRow>
