@@ -76,7 +76,7 @@ export function SubmitPostButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">Submit post</Button>
+        <Button>Submit post</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
