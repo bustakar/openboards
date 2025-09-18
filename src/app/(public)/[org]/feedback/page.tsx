@@ -1,6 +1,7 @@
 import { PublicBoardsList } from '@/components/public/public-boards-list';
 import { PublicPostsList } from '@/components/public/public-posts-list';
 import { PostStatus } from '@/db/schema';
+import { getOrganizationSettingsBySlug } from '@/server/repo/org-repo';
 import {
   PostsListOptions,
   PostsListSort,
@@ -21,8 +22,14 @@ export default async function PublicFeedbackPage({
   const { org } = await params;
   const sp = await searchParams;
 
+  const settings = (await getOrganizationSettingsBySlug(org)).public;
+
+  const statuses: PostStatus[] = sp?.statuses
+    ? (sp.statuses.split(',').filter(Boolean) as PostStatus[])
+    : settings.defaultStatusVisible;
+
   const options: PostsListOptions = {
-    statuses: (sp?.statuses || '').split(',').filter(Boolean) as PostStatus[],
+    statuses: statuses,
     boardId: sp?.board || undefined,
     search: sp?.search || '',
     sort: (sp?.sort as PostsListSort) || 'new',
@@ -35,7 +42,11 @@ export default async function PublicFeedbackPage({
           <PublicBoardsList orgSlug={org} selectedBoardId={options.boardId} />
         </div>
         <div className="w-full">
-          <PublicPostsList orgSlug={org} options={options} />
+          <PublicPostsList
+            orgSlug={org}
+            options={options}
+            settings={settings}
+          />
         </div>
       </div>
     </div>

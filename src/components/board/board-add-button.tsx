@@ -17,7 +17,7 @@ export function BoardAddButton({ orgSlug }: { orgSlug: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
+        <Button>
           <PlusIcon className="size-4 mr-1.5" />
           Add board
         </Button>

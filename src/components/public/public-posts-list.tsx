@@ -5,6 +5,7 @@ import {
   PostsListOptions,
 } from '@/server/repo/public-post-repo';
 import { getVisitorId } from '@/server/service/public-visitor';
+import { OrganizationPublicMetadata } from '@/types/organization';
 import { PostStatusBadge } from '../post/post-status-badge';
 import { PostsListFilterButton } from '../post/posts-list-filter-button';
 import { PostsListSortButton } from '../post/posts-list-sort-button';
@@ -15,9 +16,11 @@ import { PublicVoteButton } from './public-vote-button';
 export async function PublicPostsList({
   orgSlug,
   options,
+  settings,
 }: {
   orgSlug: string;
   options: PostsListOptions;
+  settings: OrganizationPublicMetadata;
 }) {
   const org = await getOrganizationBySlug(orgSlug);
   if (!org) return null;
@@ -57,7 +60,9 @@ export async function PublicPostsList({
               className="border rounded-md p-3 flex gap-3 items-start w-full"
             >
               <div className="flex flex-col gap-2 w-full">
-                <PostStatusBadge status={p.status} />
+                {settings.postBadgeVisibility.includes(p.status) && (
+                  <PostStatusBadge status={p.status} />
+                )}
                 <span className="truncate font-medium">{p.title}</span>
                 <div className="text-muted-foreground line-clamp-2 text-sm">
                   {p.description}

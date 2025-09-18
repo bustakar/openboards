@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 
 const LABELS: Record<PostStatus, string> = {
   open: 'Open',
-  backlog: 'Backlog',
   planned: 'Planned',
   in_progress: 'In progress',
   done: 'Done',
@@ -12,7 +11,6 @@ const LABELS: Record<PostStatus, string> = {
 
 const STYLES: Record<PostStatus, string> = {
   open: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200',
-  backlog: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
   planned:
     'bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200',
   in_progress:

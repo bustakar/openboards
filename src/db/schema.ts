@@ -1,4 +1,8 @@
 import {
+  POST_STATUSES,
+  type PostStatus as CorePostStatus,
+} from '@/types/status';
+import {
   index,
   pgEnum,
   pgTable,
@@ -7,17 +11,11 @@ import {
   unique,
 } from 'drizzle-orm/pg-core';
 import { organization, user } from './auth-schema';
+
 export * from './auth-schema';
 
-export const postStatusEnum = pgEnum('post_status', [
-  'open',
-  'backlog',
-  'planned',
-  'in_progress',
-  'done',
-  'closed',
-]);
-export type PostStatus = (typeof postStatusEnum)['enumValues'][number];
+export const postStatusEnum = pgEnum('post_status', [...POST_STATUSES]);
+export type PostStatus = CorePostStatus;
 
 export const board = pgTable(
   'board',
