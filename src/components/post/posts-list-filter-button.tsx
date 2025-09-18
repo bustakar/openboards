@@ -16,7 +16,6 @@ import { ALL_POST_STATUSES, POST_STATUS_LABELS } from './post-status-badge';
 
 const STATUS_DOT: Record<PostStatus, string> = {
   open: 'bg-blue-500',
-  backlog: 'bg-gray-400 dark:bg-gray-500',
   planned: 'bg-amber-500',
   in_progress: 'bg-violet-500',
   done: 'bg-emerald-500',

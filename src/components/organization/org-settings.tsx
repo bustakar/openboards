@@ -1,3 +1,4 @@
+import { OrganizationMetadata } from '@/types/organization';
 import {
   Invitation,
   Member,
@@ -8,6 +9,7 @@ import { InvitationsTable } from './invitations-table';
 import { MemberInviteButton } from './member-invite-button';
 import { MembersTable } from './members-table';
 import { OrganizationDeleteButton } from './org-delete-button';
+import { OrgPublicSettings } from './org-public-settings';
 
 export type MemberData = Member & {
   name: string;
@@ -20,14 +22,28 @@ export function OrganizationSettings({
   org,
   members,
   invitations,
+  metadata,
 }: {
   editAllowed: boolean;
   org: Organization;
   members: MemberData[];
   invitations: Invitation[];
+  metadata?: OrganizationMetadata;
 }) {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-24">
+      <div className="space-y-4">
+        <div className="flex flex-row items-center gap-4">
+          <div className="text-xl">Public Settings</div>
+          <div className="flex-1" />
+        </div>
+        <Separator orientation="horizontal" />
+        <OrgPublicSettings
+          orgSlug={org.slug}
+          editAllowed={editAllowed}
+          organizationMetadata={metadata}
+        />
+      </div>
       <div className="space-y-4">
         <div className="flex flex-row items-center gap-4">
           <div className="text-xl">Members</div>
