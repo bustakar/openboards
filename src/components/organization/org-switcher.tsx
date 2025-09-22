@@ -24,15 +24,29 @@ export function OrganizationSwitcher({ orgs }: { orgs: Organization[] }) {
   const router = useRouter();
   const { isMobile } = useSidebar();
   const activeOrg = authClient.useActiveOrganization().data;
+  const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   async function handleSelect(organization: Organization) {
-    await authClient.organization.setActive({
-      organizationId: organization.id,
-    });
-    router.push(`/dashboard/${organization.slug}/feedback`);
+    if (busy) return;
+    setError(null);
+    setBusy(true);
+    try {
+      await authClient.organization.setActive({
+        organizationId: organization.id,
+      });
+      router.push(`/dashboard/${organization.slug}/feedback`);
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : 'Failed to switch organization'
+      );
+    } finally {
+      setBusy(false);
+    }
   }
 
   function handleAdd() {
+    if (busy) return;
     router.push('/dashboard/organization/setup');
   }
 
@@ -68,7 +82,7 @@ export function OrganizationSwitcher({ orgs }: { orgs: Organization[] }) {
               <DropdownMenuItem
                 key={org.id}
                 onClick={() => handleSelect(org)}
-                disabled={org.id === activeOrg?.id}
+                disabled={busy || org.id === activeOrg?.id}
                 className="gap-2 p-2"
               >
                 <span className="flex-1">{org.name}</span>
@@ -78,7 +92,11 @@ export function OrganizationSwitcher({ orgs }: { orgs: Organization[] }) {
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2" onClick={handleAdd}>
+            <DropdownMenuItem
+              className="gap-2 p-2"
+              onClick={handleAdd}
+              disabled={busy}
+            >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />
               </div>
@@ -86,6 +104,9 @@ export function OrganizationSwitcher({ orgs }: { orgs: Organization[] }) {
                 Add organization
               </div>
             </DropdownMenuItem>
+            {error && (
+              <div className="text-destructive text-xs px-2 py-1">{error}</div>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

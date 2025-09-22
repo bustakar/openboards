@@ -7,7 +7,8 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const h = await headers();
+  const session = await auth.api.getSession({ headers: h });
 
   if (!session) {
     redirect('/login');

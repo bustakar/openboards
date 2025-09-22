@@ -3,15 +3,28 @@ import { PublicPostsList } from '@/components/public/public-posts-list';
 import { PublicTopNav } from '@/components/public/public-top-nav';
 import { Separator } from '@/components/ui/separator';
 import { PostStatus } from '@/db/schema';
-import { getOrganizationBySlug } from '@/server/repo/org-repo';
+import { z } from 'zod';
+
+import { OrgSlugSchema } from '@/server/lib/params';
+import {
+  getOrganizationBySlug,
+  getOrganizationPublicSettingsBySlug,
+} from '@/server/repo/org-repo';
 import {
   PostsListOptions,
   PostsListSort,
 } from '@/server/repo/public-post-repo';
-import {
-  DEFAULT_ORG_SETTINGS,
-  OrganizationMetadata,
-} from '@/types/organization';
+import { OrganizationPublicMetadata } from '@/types/organization';
+
+const QuerySchema = z.object({
+  board: z.string().min(1).optional(),
+  statuses: z
+    .string()
+    .transform((v) => (v ? v.split(',').filter(Boolean) : []))
+    .optional(),
+  search: z.string().optional(),
+  sort: z.enum(['new', 'top', 'hot', 'old']).optional(),
+});
 
 export default async function PublicFeedbackPage({
   params,
@@ -25,23 +38,21 @@ export default async function PublicFeedbackPage({
     sort?: string;
   };
 }) {
-  const { org } = await params;
-  const sp = await searchParams;
+  const { org } = OrgSlugSchema.parse(params);
+  const sp = QuerySchema.parse(searchParams ?? {});
 
   const organization = await getOrganizationBySlug(org);
-  const metadata: OrganizationMetadata = organization?.metadata
-    ? JSON.parse(organization.metadata)
-    : DEFAULT_ORG_SETTINGS;
+  const settings: OrganizationPublicMetadata =
+    await getOrganizationPublicSettingsBySlug(org);
 
-  const statuses: PostStatus[] = sp?.statuses
-    ? (sp.statuses.split(',').filter(Boolean) as PostStatus[])
-    : metadata.public.defaultStatusVisible;
+  const statuses: PostStatus[] =
+    (sp.statuses as PostStatus[] | undefined) ?? settings.defaultStatusVisible;
 
   const options: PostsListOptions = {
     statuses: statuses,
-    boardId: sp?.board || undefined,
-    search: sp?.search || '',
-    sort: (sp?.sort as PostsListSort) || 'new',
+    boardId: sp.board || undefined,
+    search: sp.search || '',
+    sort: (sp.sort as PostsListSort) || 'new',
   };
 
   return (
@@ -61,7 +72,7 @@ export default async function PublicFeedbackPage({
           <PublicPostsList
             orgSlug={org}
             options={options}
-            settings={metadata.public}
+            settings={settings}
           />
         </div>
       </div>
