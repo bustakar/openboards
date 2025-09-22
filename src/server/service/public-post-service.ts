@@ -3,10 +3,11 @@
 import { db } from '@/db';
 import { board, post } from '@/db/schema';
 import { getOrganizationBySlug } from '@/server/repo/org-repo';
+import { publicFeedbackPath } from '@/server/service/path-service';
 import { and, eq, gt } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 import { getOrSetVisitorId } from './public-visitor';
-import { publicFeedbackPath } from '@/server/service/path-service';
 
 export async function createPublicPostAction(input: {
   orgSlug: string;
@@ -15,9 +16,17 @@ export async function createPublicPostAction(input: {
   description: string;
   hp?: string; // honeypot
 }) {
-  if (input.hp && input.hp.trim() !== '') return;
+  const schema = z.object({
+    orgSlug: z.string().min(1),
+    boardId: z.string().min(1),
+    title: z.string().min(1).max(140),
+    description: z.string().max(2000),
+    hp: z.string().optional(),
+  });
+  const parsed = schema.parse(input);
+  if (parsed.hp && parsed.hp.trim() !== '') return;
 
-  const org = await getOrganizationBySlug(input.orgSlug);
+  const org = await getOrganizationBySlug(parsed.orgSlug);
   if (!org) throw new Error('Organization not found');
 
   const visitorId = await getOrSetVisitorId();
@@ -38,7 +47,7 @@ export async function createPublicPostAction(input: {
     throw new Error('You are submitting too fast. Try again later.');
 
   const b = await db.query.board.findFirst({
-    where: and(eq(board.id, input.boardId), eq(board.organizationId, org.id)),
+    where: and(eq(board.id, parsed.boardId), eq(board.organizationId, org.id)),
     columns: { id: true },
   });
   if (!b) throw new Error('Invalid board');
@@ -46,13 +55,13 @@ export async function createPublicPostAction(input: {
   await db.insert(post).values({
     id: crypto.randomUUID(),
     organizationId: org.id,
-    boardId: input.boardId,
-    title: input.title.trim(),
-    description: input.description.trim(),
+    boardId: parsed.boardId,
+    title: parsed.title.trim(),
+    description: parsed.description.trim(),
     status: 'open',
     createdByUserId: null,
     createdByVisitorId: visitorId,
   });
 
-  revalidatePath(publicFeedbackPath(input.orgSlug));
+  revalidatePath(publicFeedbackPath(parsed.orgSlug));
 }

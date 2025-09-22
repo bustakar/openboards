@@ -3,9 +3,9 @@
 import { db } from '@/db';
 import { post, vote } from '@/db/schema';
 import { getOrganizationBySlug } from '@/server/repo/org-repo';
+import { getVoteCount } from '@/server/repo/vote-repo';
 import { and, eq } from 'drizzle-orm';
 import { getOrSetVisitorId } from './public-visitor';
-import { getVoteCount } from '@/server/repo/vote-repo';
 
 async function ensurePost(orgSlug: string, postId: string) {
   const org = await getOrganizationBySlug(orgSlug);
