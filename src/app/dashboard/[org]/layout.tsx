@@ -10,12 +10,11 @@ export default async function DashboardLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ org: string }>;
+  params: { org: string };
 }) {
-  const { org } = await params;
-  const organizations = await auth.api.listOrganizations({
-    headers: await headers(),
-  });
+  const { org } = params;
+  const h = await headers();
+  const organizations = await auth.api.listOrganizations({ headers: h });
 
   if (organizations.length === 0) {
     redirect('/dashboard/organization/setup');

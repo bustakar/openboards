@@ -1,5 +1,5 @@
 import InviteCardContent from '@/components/invitation-form';
-import { Button } from '@/components/ui/button';
+import { SwitchAccountButton } from '@/components/organization/switch-account-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { auth } from '@/server/auth';
 import { getOrganizationById } from '@/server/repo/org-repo';
@@ -23,6 +23,19 @@ export default async function InvitePage({
     headers: h,
   });
 
+  if (!invitation) {
+    return (
+      <div className="flex min-h-svh items-center justify-center p-6">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle>Invitation not found</CardTitle>
+          </CardHeader>
+          <CardContent>It may have been revoked or expired.</CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const organization = await getOrganizationById(invitation.organizationId);
 
   if (!invitation) {
@@ -45,16 +58,7 @@ export default async function InvitePage({
           You are signed in as {session.user.email}, but this invite is for{' '}
           {invitation.email}.
         </p>
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={async () => {
-            await auth.api.signOut({ headers: h });
-            // TODO: Refresh page
-          }}
-        >
-          Switch account
-        </Button>
+        <SwitchAccountButton />
       </div>
     );
   }

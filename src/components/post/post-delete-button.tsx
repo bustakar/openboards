@@ -25,12 +25,16 @@ export function PostDeleteButton({
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
   const onDelete = async () => {
     setBusy(true);
     try {
       await deletePostAction({ orgSlug, id: postId });
       setOpen(false);
+      setError('');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to delete post');
     } finally {
       setBusy(false);
     }
@@ -54,6 +58,7 @@ export function PostDeleteButton({
         <p className="text-sm">
           Are you sure you want to delete “{postTitle}”?
         </p>
+        {error && <p className="text-destructive text-sm">{error}</p>}
         <DialogFooter>
           <Button
             variant="outline"

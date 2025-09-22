@@ -81,18 +81,28 @@ export function OrgPublicSettings({
   const [badgeSet, setBadgeSet] = useState(initialBadgeSet);
   const [defaultSet, setDefaultSet] = useState(initialDefaultSet);
   const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   const save = () =>
     startTransition(async () => {
-      const next: OrganizationMetadata = {
-        ...metadata,
-        public: {
-          ...metadata.public,
-          postBadgeVisibility: Array.from(badgeSet.values()),
-          defaultStatusVisible: Array.from(defaultSet.values()),
-        },
-      };
-      await saveOrganizationSettingsAction(orgSlug, next);
+      setError(null);
+      try {
+        const next: OrganizationMetadata = {
+          ...metadata,
+          public: {
+            ...metadata.public,
+            postBadgeVisibility: Array.from(badgeSet.values()),
+            defaultStatusVisible: Array.from(defaultSet.values()),
+          },
+        };
+        await saveOrganizationSettingsAction(orgSlug, next);
+      } catch (e) {
+        setError(
+          e instanceof Error
+            ? e.message
+            : 'Failed to save organization settings'
+        );
+      }
     });
 
   return (
@@ -125,6 +135,7 @@ export function OrgPublicSettings({
         disabled={!editAllowed || pending}
       />
 
+      {error && <p className="text-destructive text-sm">{error}</p>}
       <Button size="sm" onClick={save} disabled={!editAllowed || pending}>
         Save changes
       </Button>

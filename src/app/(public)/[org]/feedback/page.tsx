@@ -3,15 +3,15 @@ import { PublicPostsList } from '@/components/public/public-posts-list';
 import { PublicTopNav } from '@/components/public/public-top-nav';
 import { Separator } from '@/components/ui/separator';
 import { PostStatus } from '@/db/schema';
-import { getOrganizationBySlug } from '@/server/repo/org-repo';
+import {
+  getOrganizationBySlug,
+  getOrganizationSettingsBySlug,
+} from '@/server/repo/org-repo';
 import {
   PostsListOptions,
   PostsListSort,
 } from '@/server/repo/public-post-repo';
-import {
-  DEFAULT_ORG_SETTINGS,
-  OrganizationMetadata,
-} from '@/types/organization';
+import { OrganizationMetadata } from '@/types/organization';
 
 export default async function PublicFeedbackPage({
   params,
@@ -29,9 +29,8 @@ export default async function PublicFeedbackPage({
   const sp = await searchParams;
 
   const organization = await getOrganizationBySlug(org);
-  const metadata: OrganizationMetadata = organization?.metadata
-    ? JSON.parse(organization.metadata)
-    : DEFAULT_ORG_SETTINGS;
+  const metadata: OrganizationMetadata =
+    await getOrganizationSettingsBySlug(org);
 
   const statuses: PostStatus[] = sp?.statuses
     ? (sp.statuses.split(',').filter(Boolean) as PostStatus[])
