@@ -34,3 +34,10 @@ export async function getOrganizationSettingsBySlug(
     return DEFAULT_ORG_SETTINGS;
   }
 }
+
+export async function getOrganizationPublicSettingsBySlug(
+  slug: string
+): Promise<OrganizationMetadata['public']> {
+  const full = await getOrganizationSettingsBySlug(slug);
+  return full.public;
+}

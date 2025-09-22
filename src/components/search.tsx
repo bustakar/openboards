@@ -23,7 +23,7 @@ export function Search({ initial }: { initial?: string }) {
       router.replace(`${pathname}?${params.toString()}`);
     }, 300);
     return () => clearTimeout(timeout);
-  }, [value]);
+  }, [value, params, pathname, router]);
 
   return (
     <div className="max-w-sm w-full">

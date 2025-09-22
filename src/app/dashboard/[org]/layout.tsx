@@ -10,9 +10,9 @@ export default async function DashboardLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { org: string };
+  params: Promise<{ org: string }>;
 }) {
-  const { org } = params;
+  const { org } = await params;
   const h = await headers();
   const organizations = await auth.api.listOrganizations({ headers: h });
 

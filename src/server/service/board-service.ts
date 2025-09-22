@@ -32,7 +32,7 @@ export async function createBoardAction(input: {
     })
     .returning();
 
-  revalidatePath(dashboardFeedbackPath(input.orgSlug));
+  revalidatePath(await dashboardFeedbackPath(input.orgSlug));
   return row;
 }
 
@@ -60,7 +60,7 @@ export async function updateBoardAction(input: {
     .where(eq(board.id, parsed.id))
     .returning();
 
-  revalidatePath(dashboardFeedbackPath(input.orgSlug));
+  revalidatePath(await dashboardFeedbackPath(input.orgSlug));
   return row;
 }
 
@@ -79,5 +79,5 @@ export async function deleteBoardAction(input: {
     throw new Error('Board not found');
 
   await db.delete(board).where(eq(board.id, parsed.id));
-  revalidatePath(dashboardFeedbackPath(parsed.orgSlug));
+  revalidatePath(await dashboardFeedbackPath(parsed.orgSlug));
 }

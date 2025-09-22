@@ -3,6 +3,9 @@ import { PublicPostsList } from '@/components/public/public-posts-list';
 import { PublicTopNav } from '@/components/public/public-top-nav';
 import { Separator } from '@/components/ui/separator';
 import { PostStatus } from '@/db/schema';
+import { z } from 'zod';
+
+import { OrgSlugSchema } from '@/server/lib/params';
 import {
   getOrganizationBySlug,
   getOrganizationSettingsBySlug,
@@ -12,6 +15,16 @@ import {
   PostsListSort,
 } from '@/server/repo/public-post-repo';
 import { OrganizationMetadata } from '@/types/organization';
+
+const QuerySchema = z.object({
+  board: z.string().min(1).optional(),
+  statuses: z
+    .string()
+    .transform((v) => (v ? v.split(',').filter(Boolean) : []))
+    .optional(),
+  search: z.string().optional(),
+  sort: z.enum(['new', 'top', 'hot', 'old']).optional(),
+});
 
 export default async function PublicFeedbackPage({
   params,
@@ -25,22 +38,22 @@ export default async function PublicFeedbackPage({
     sort?: string;
   };
 }) {
-  const { org } = await params;
-  const sp = await searchParams;
+  const { org } = OrgSlugSchema.parse(params);
+  const sp = QuerySchema.parse(searchParams ?? {});
 
   const organization = await getOrganizationBySlug(org);
   const metadata: OrganizationMetadata =
     await getOrganizationSettingsBySlug(org);
 
-  const statuses: PostStatus[] = sp?.statuses
-    ? (sp.statuses.split(',').filter(Boolean) as PostStatus[])
-    : metadata.public.defaultStatusVisible;
+  const statuses: PostStatus[] =
+    (sp.statuses as PostStatus[] | undefined) ??
+    metadata.public.defaultStatusVisible;
 
   const options: PostsListOptions = {
     statuses: statuses,
-    boardId: sp?.board || undefined,
-    search: sp?.search || '',
-    sort: (sp?.sort as PostsListSort) || 'new',
+    boardId: sp.board || undefined,
+    search: sp.search || '',
+    sort: (sp.sort as PostsListSort) || 'new',
   };
 
   return (
