@@ -1,5 +1,5 @@
 {
-  "id": "b7bbe7ec-0e2b-4545-9ac0-95808f286d71",
+  "id": "f97181b3-ad7e-4718-abb6-0d59b80e9aed",
   "prevId": "59cf9d99-e261-4bd3-88e1-11a182813e4f",
   "version": "7",
   "dialect": "postgresql",
@@ -730,12 +730,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "custom_domain": {
-          "name": "custom_domain",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -968,7 +962,6 @@
       "schema": "public",
       "values": [
         "open",
-        "backlog",
         "planned",
         "in_progress",
         "done",

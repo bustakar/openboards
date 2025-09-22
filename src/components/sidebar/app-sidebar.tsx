@@ -6,8 +6,11 @@ import {
   SidebarHeader,
 } from '@/components/ui/sidebar';
 import { auth } from '@/server/auth';
+import { Globe } from 'lucide-react';
 import { headers } from 'next/headers';
+import Link from 'next/link';
 import * as React from 'react';
+import { Button } from '../ui/button';
 import { AppSidebarNav } from './app-sidebar-nav';
 import { AppSidebarUserNav } from './app-sidebar-user-nav';
 
@@ -46,6 +49,12 @@ export async function AppSidebar({
       </SidebarContent>
       {session?.user && (
         <SidebarFooter>
+          <Link href={`/${org}/feedback`} passHref>
+            <Button className="w-full justify-start" variant="ghost" size="sm">
+              <Globe />
+              Public site
+            </Button>
+          </Link>
           <AppSidebarUserNav user={session.user} />
         </SidebarFooter>
       )}

@@ -50,7 +50,7 @@ export function LoginForm({
     try {
       await authClient.signIn.magicLink({
         email: data.email,
-        callbackURL: '/dashboard',
+        callbackURL: '/dashboard/organization/select',
       });
       form.reset();
     } catch (error) {
@@ -68,7 +68,7 @@ export function LoginForm({
     try {
       await authClient.signIn.social({
         provider: 'github',
-        callbackURL: '/app',
+        callbackURL: '/dashboard/organization/select',
       });
     } catch (error) {
       setError(
@@ -141,10 +141,6 @@ export function LoginForm({
           </Form>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{' '}
-        and <a href="#">Privacy Policy</a>.
-      </div>
     </div>
   );
 }

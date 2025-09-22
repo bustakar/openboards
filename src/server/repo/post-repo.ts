@@ -66,6 +66,6 @@ export async function getPostsWithVotesByBoardId(
 
 export async function getPostsByOrgSlug(slug: string) {
   const org = await getOrganizationBySlug(slug);
-  if (!org) throw new Error('Organization not found');
+  if (!org) return [];
   return getPostsWithVotesByOrgId(org.id, null);
 }

@@ -41,7 +41,7 @@ export function PublicVoteButton({
 
   return (
     <Button
-      variant={voted ? 'secondary' : 'outline'}
+      variant={voted ? 'default' : 'outline'}
       size="sm"
       onClick={onClick}
       disabled={isPending}

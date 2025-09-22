@@ -1,20 +1,26 @@
-import { PostStatus } from '@/db/schema';
 import { getBoardsByOrgSlug } from '@/server/repo/board-repo';
 import { getOrganizationBySlug } from '@/server/repo/org-repo';
-import { getPublicPostsByOrgSlug } from '@/server/repo/public-post-repo';
+import {
+  getPublicPostsByOrgSlug,
+  PostsListOptions,
+} from '@/server/repo/public-post-repo';
 import { getVisitorId } from '@/server/service/public-visitor';
+import { OrganizationPublicMetadata } from '@/types/organization';
 import { PostStatusBadge } from '../post/post-status-badge';
+import { PostsListFilterButton } from '../post/posts-list-filter-button';
+import { PostsListSortButton } from '../post/posts-list-sort-button';
+import { Search } from '../search';
 import { SubmitPostButton } from './public-submit-post-button';
 import { PublicVoteButton } from './public-vote-button';
 
 export async function PublicPostsList({
   orgSlug,
-  boardId,
-  statuses,
+  options,
+  settings,
 }: {
   orgSlug: string;
-  boardId?: string;
-  statuses?: string[];
+  options: PostsListOptions;
+  settings: OrganizationPublicMetadata;
 }) {
   const org = await getOrganizationBySlug(orgSlug);
   if (!org) return null;
@@ -23,25 +29,25 @@ export async function PublicPostsList({
     getVisitorId(),
   ]);
 
-  const posts = await getPublicPostsByOrgSlug(
-    orgSlug,
-    visitorId,
-    statuses as PostStatus[],
-    boardId
-  );
+  const posts = await getPublicPostsByOrgSlug(orgSlug, options, visitorId);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 w-full">
+      <div className="flex items-center justify-between gap-2 w-full">
         <h2 className="text-base font-medium">Posts</h2>
-        <SubmitPostButton
-          orgSlug={orgSlug}
-          boards={boards.map((b) => ({
-            id: b.id,
-            title: b.title,
-            icon: b.icon,
-          }))}
-        />
+        <div className="flex items-center gap-2">
+          <Search initial={options.search} />
+          <PostsListSortButton />
+          <PostsListFilterButton />
+          <SubmitPostButton
+            orgSlug={orgSlug}
+            boards={boards.map((b) => ({
+              id: b.id,
+              title: b.title,
+              icon: b.icon,
+            }))}
+          />
+        </div>
       </div>
 
       <ul className="space-y-2">
@@ -51,25 +57,21 @@ export async function PublicPostsList({
           posts.map((p) => (
             <li
               key={p.id}
-              className="border rounded-md p-3 flex gap-3 items-start"
+              className="border rounded-md p-3 flex gap-3 items-start w-full"
             >
-              <PublicVoteButton
-                orgSlug={orgSlug}
-                postId={p.id}
-                initialVoted={p.hasVoted as boolean}
-                initialCount={p.votesCount as number}
-              />
-              <div className="flex-1 gap-2 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="truncate font-medium">{p.title}</span>
+              <div className="flex flex-col gap-2 w-full">
+                {settings.postBadgeVisibility.includes(p.status) && (
                   <PostStatusBadge status={p.status} />
-                </div>
+                )}
+                <span className="truncate font-medium">{p.title}</span>
                 <div className="text-muted-foreground line-clamp-2 text-sm">
                   {p.description}
                 </div>
                 <div className="text-muted-foreground text-xs mt-1 flex items-center gap-2">
-                  <span>{p.boardIcon}</span>
-                  <span className="truncate">{p.boardTitle}</span>
+                  <div className="bg-muted rounded-md py-1 px-2 flex items-center gap-2">
+                    <span>{p.boardIcon}</span>
+                    <span className="truncate">{p.boardTitle}</span>
+                  </div>
                   <span>•</span>
                   <span>
                     {new Date(
@@ -78,6 +80,12 @@ export async function PublicPostsList({
                   </span>
                 </div>
               </div>
+              <PublicVoteButton
+                orgSlug={orgSlug}
+                postId={p.id}
+                initialVoted={p.hasVoted as boolean}
+                initialCount={p.votesCount as number}
+              />
             </li>
           ))
         )}

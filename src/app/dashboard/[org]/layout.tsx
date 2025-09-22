@@ -14,9 +14,7 @@ export default async function DashboardLayout({
 }) {
   const { org } = await params;
   const h = await headers();
-  const organizations = await auth.api.listOrganizations({
-    headers: h,
-  });
+  const organizations = await auth.api.listOrganizations({ headers: h });
 
   if (organizations.length === 0) {
     redirect('/dashboard/organization/setup');

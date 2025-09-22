@@ -1,24 +1,11 @@
-import nodemailer from 'nodemailer';
+import { getEmailAdapter } from './email/email-provider';
 
-const smtpHost = process.env.SMTP_HOST;
-const smtpPort = Number(process.env.SMTP_PORT || 587);
-const smtpUser = process.env.SMTP_USER;
-const smtpPass = process.env.SMTP_PASS;
-const smtpFrom = process.env.SMTP_FROM || 'OpenBoards <noreply@localhost>';
-
-export const transporter = nodemailer.createTransport({
-  host: smtpHost,
-  port: smtpPort,
-  secure: smtpPort === 465,
-  auth: smtpUser && smtpPass ? { user: smtpUser, pass: smtpPass } : undefined,
-});
-
-// In development, verify the SMTP connection once (best-effort)
-if (process.env.NODE_ENV !== 'production') {
-  transporter.verify().catch(() => {});
-}
+const appName =
+  process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, '') || 'OpenBoards';
+const fromDisplay = process.env.EMAIL_FROM || `OpenBoards <noreply@${appName}>`;
 
 export async function sendMagicLinkEmail(toEmail: string, url: string) {
+  const subject = 'Sign in to OpenBoards';
   const text = `Sign in by clicking this link: ${url}`;
   const html = `
     <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height:1.6">
@@ -33,13 +20,12 @@ export async function sendMagicLinkEmail(toEmail: string, url: string) {
       <p style="word-break:break-all"><a href="${url}">${url}</a></p>
     </div>
   `;
-
-  await transporter.sendMail({
+  await getEmailAdapter().send({
     to: toEmail,
-    from: smtpFrom,
-    subject: 'Sign in to OpenBoards',
+    subject,
     text,
     html,
+    from: fromDisplay,
   });
 }
 
@@ -56,6 +42,7 @@ export async function sendOrganizationInvitation({
   teamName: string;
   inviteLink: string;
 }) {
+  const subject = 'Invitation to join OpenBoards';
   const text = `You are invited to join ${teamName} on OpenBoards. Click the link below to accept the invitation: ${inviteLink}`;
   const html = `
     <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; line-height:1.6">
@@ -70,12 +57,11 @@ export async function sendOrganizationInvitation({
       <p style="word-break:break-all"><a href="${inviteLink}">${inviteLink}</a></p>
     </div>
   `;
-
-  await transporter.sendMail({
+  await getEmailAdapter().send({
     to: email,
-    from: smtpFrom,
-    subject: 'Invitation to join OpenBoards',
+    subject,
     text,
     html,
+    from: fromDisplay,
   });
 }
