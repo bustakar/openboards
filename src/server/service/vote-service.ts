@@ -1,24 +1,11 @@
 'use server';
 
 import { and, eq } from 'drizzle-orm';
-import { headers } from 'next/headers';
 
 import { db } from '@/db';
 import { post, vote } from '@/db/schema';
-import { auth } from '@/server/auth';
-import { getOrganizationBySlug } from '@/server/repo/org-repo';
 import { getVoteCount } from '@/server/repo/vote-repo';
-
-async function requireViewer(orgSlug: string) {
-  const h = await headers();
-  const session = await auth.api.getSession({ headers: h });
-  if (!session) throw new Error('Not authenticated');
-
-  const org = await getOrganizationBySlug(orgSlug);
-  if (!org) throw new Error('Organization not found');
-
-  return { org, userId: session.user.id };
-}
+import { requireOrgAndRole } from '@/server/service/auth-service';
 
 async function ensurePostInOrg(orgId: string, postId: string) {
   const row = await db.query.post.findFirst({
@@ -32,7 +19,7 @@ export async function addVoteAction(input: {
   orgSlug: string;
   postId: string;
 }) {
-  const { org, userId } = await requireViewer(input.orgSlug);
+  const { org, session } = await requireOrgAndRole(input.orgSlug, 'member');
   await ensurePostInOrg(org.id, input.postId);
 
   await db
@@ -41,7 +28,7 @@ export async function addVoteAction(input: {
       id: crypto.randomUUID(),
       organizationId: org.id,
       postId: input.postId,
-      userId,
+      userId: session.user.id,
     })
     .onConflictDoNothing({ target: [vote.postId, vote.userId] });
 
@@ -52,12 +39,12 @@ export async function removeVoteAction(input: {
   orgSlug: string;
   postId: string;
 }) {
-  const { org, userId } = await requireViewer(input.orgSlug);
+  const { org, session } = await requireOrgAndRole(input.orgSlug, 'member');
   await ensurePostInOrg(org.id, input.postId);
 
   await db
     .delete(vote)
-    .where(and(eq(vote.postId, input.postId), eq(vote.userId, userId)));
+    .where(and(eq(vote.postId, input.postId), eq(vote.userId, session.user.id)));
 
   return { count: await getVoteCount(input.postId) };
 }

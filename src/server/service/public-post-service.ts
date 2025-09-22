@@ -6,10 +6,7 @@ import { getOrganizationBySlug } from '@/server/repo/org-repo';
 import { and, eq, gt } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { getOrSetVisitorId } from './public-visitor';
-
-function path(orgSlug: string) {
-  return `/${orgSlug}/feedback`;
-}
+import { publicFeedbackPath } from '@/server/service/path-service';
 
 export async function createPublicPostAction(input: {
   orgSlug: string;
@@ -57,5 +54,5 @@ export async function createPublicPostAction(input: {
     createdByVisitorId: visitorId,
   });
 
-  revalidatePath(path(input.orgSlug));
+  revalidatePath(publicFeedbackPath(input.orgSlug));
 }
