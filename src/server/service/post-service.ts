@@ -42,7 +42,7 @@ export async function createPostAction(input: {
     })
     .returning();
 
-  revalidatePath(dashboardFeedbackPath(parsed.orgSlug));
+  revalidatePath(await dashboardFeedbackPath(parsed.orgSlug));
   return row;
 }
 
@@ -86,7 +86,7 @@ export async function updatePostAction(input: {
     .where(eq(post.id, parsed.id))
     .returning();
 
-  revalidatePath(dashboardFeedbackPath(parsed.orgSlug));
+  revalidatePath(await dashboardFeedbackPath(parsed.orgSlug));
   return row;
 }
 
@@ -105,5 +105,5 @@ export async function deletePostAction(input: { orgSlug: string; id: string }) {
     throw new Error('Post not found');
 
   await db.delete(post).where(eq(post.id, parsed.id));
-  revalidatePath(dashboardFeedbackPath(parsed.orgSlug));
+  revalidatePath(await dashboardFeedbackPath(parsed.orgSlug));
 }
