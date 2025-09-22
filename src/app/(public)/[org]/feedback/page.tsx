@@ -8,13 +8,13 @@ import { z } from 'zod';
 import { OrgSlugSchema } from '@/server/lib/params';
 import {
   getOrganizationBySlug,
-  getOrganizationSettingsBySlug,
+  getOrganizationPublicSettingsBySlug,
 } from '@/server/repo/org-repo';
 import {
   PostsListOptions,
   PostsListSort,
 } from '@/server/repo/public-post-repo';
-import { OrganizationMetadata } from '@/types/organization';
+import { OrganizationPublicMetadata } from '@/types/organization';
 
 const QuerySchema = z.object({
   board: z.string().min(1).optional(),
@@ -42,12 +42,11 @@ export default async function PublicFeedbackPage({
   const sp = QuerySchema.parse(searchParams ?? {});
 
   const organization = await getOrganizationBySlug(org);
-  const metadata: OrganizationMetadata =
-    await getOrganizationSettingsBySlug(org);
+  const settings: OrganizationPublicMetadata =
+    await getOrganizationPublicSettingsBySlug(org);
 
   const statuses: PostStatus[] =
-    (sp.statuses as PostStatus[] | undefined) ??
-    metadata.public.defaultStatusVisible;
+    (sp.statuses as PostStatus[] | undefined) ?? settings.defaultStatusVisible;
 
   const options: PostsListOptions = {
     statuses: statuses,
@@ -73,7 +72,7 @@ export default async function PublicFeedbackPage({
           <PublicPostsList
             orgSlug={org}
             options={options}
-            settings={metadata.public}
+            settings={settings}
           />
         </div>
       </div>
