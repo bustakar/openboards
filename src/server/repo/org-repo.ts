@@ -17,13 +17,12 @@ export async function getOrganizationBySlug(slug: string) {
   return db.query.organization.findFirst({
     where: eq(organization.slug, slug),
     columns: { id: true, name: true, slug: true, metadata: true },
-    columns: { id: true, name: true, slug: true, metadata: true },
   });
 }
 
 export async function getOrganizationByCustomDomain(domain: string) {
   return db.query.organization.findFirst({
-    where: eq(organization.metadata.customDomain, domain),
+    where: eq(organization.customDomain, domain),
     columns: { id: true, name: true, slug: true, metadata: true },
   });
 }

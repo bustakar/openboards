@@ -33,7 +33,7 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar org={org} />
       <SidebarInset>
         <Breadcrumbs />
         {children}

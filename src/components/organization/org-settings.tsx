@@ -24,12 +24,14 @@ export function OrganizationSettings({
   members,
   invitations,
   metadata,
+  customDomain,
 }: {
   editAllowed: boolean;
   org: Organization;
   members: MemberData[];
   invitations: Invitation[];
   metadata?: OrganizationMetadata;
+  customDomain?: string;
 }) {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-24">
@@ -66,7 +68,7 @@ export function OrganizationSettings({
           <CustomDomainSettings
             org={org}
             editAllowed={editAllowed}
-            initialDomain={metadata?.customDomain || undefined}
+            initialDomain={customDomain || undefined}
           />
         </div>
       )}

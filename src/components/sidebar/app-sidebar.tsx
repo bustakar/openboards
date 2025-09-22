@@ -15,8 +15,11 @@ import { AppSidebarNav } from './app-sidebar-nav';
 import { AppSidebarUserNav } from './app-sidebar-user-nav';
 
 export async function AppSidebar({
+  org,
   ...props
-}: React.ComponentProps<typeof Sidebar>) {
+}: React.ComponentProps<typeof Sidebar> & {
+  org: string;
+}) {
   const h = await headers();
   const session = await auth.api.getSession({ headers: h });
   const orgs = await auth.api.listOrganizations({ headers: h });
