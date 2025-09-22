@@ -3,7 +3,8 @@
 import { db } from '@/db';
 import { post, vote } from '@/db/schema';
 import { getOrganizationBySlug } from '@/server/repo/org-repo';
-import { and, eq, sql } from 'drizzle-orm';
+import { getVoteCount } from '@/server/repo/vote-repo';
+import { and, eq } from 'drizzle-orm';
 import { getOrSetVisitorId } from './public-visitor';
 
 async function ensurePost(orgSlug: string, postId: string) {
@@ -35,11 +36,7 @@ export async function publicAddVoteAction(input: {
     })
     .onConflictDoNothing({ target: [vote.postId, vote.anonymousId] });
 
-  const [{ c }] = await db
-    .select({ c: sql<number>`count(*)::int` })
-    .from(vote)
-    .where(eq(vote.postId, input.postId));
-  return { count: Number(c ?? 0) };
+  return { count: await getVoteCount(input.postId) };
 }
 
 export async function publicRemoveVoteAction(input: {
@@ -53,9 +50,5 @@ export async function publicRemoveVoteAction(input: {
     .delete(vote)
     .where(and(eq(vote.postId, input.postId), eq(vote.anonymousId, anon)));
 
-  const [{ c }] = await db
-    .select({ c: sql<number>`count(*)::int` })
-    .from(vote)
-    .where(eq(vote.postId, input.postId));
-  return { count: Number(c ?? 0) };
+  return { count: await getVoteCount(input.postId) };
 }

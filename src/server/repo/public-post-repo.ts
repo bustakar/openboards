@@ -32,7 +32,7 @@ export async function getPublicPostsByOrgSlug(
   visitorId?: string | null
 ) {
   const org = await getOrganizationBySlug(orgSlug);
-  if (!org) throw new Error('Organization not found');
+  if (!org) return [];
 
   const { statuses, boardId, search, sort = 'new' } = options;
 
