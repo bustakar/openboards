@@ -61,7 +61,7 @@ export function OrganizationSettings({
         <Separator orientation="horizontal" />
         <InvitationsTable invitations={invitations} />
       </div>
-      {process.env.NEXT_PUBLIC_CUSTOM_DOMAINS !== 'disabled' && (
+      {process.env.CUSTOM_DOMAINS_PROVIDER !== 'disabled' && (
         <div className="space-y-4">
           <div className="text-xl">Custom Domain</div>
           <Separator orientation="horizontal" />
