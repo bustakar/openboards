@@ -39,10 +39,6 @@ export function CustomDomainSettings({
   const [message, setMessage] = useState<string>('');
   const [details, setDetails] = useState<DomainDetails | null>(null);
 
-  const disabled =
-    !editAllowed ||
-    (process.env.NEXT_PUBLIC_CUSTOM_DOMAINS || 'off') !== 'vercel';
-
   const onCheck = async () => {
     setMessage('');
     setDetails(null);
@@ -113,16 +109,16 @@ export function CustomDomainSettings({
           placeholder="feedback.yourdomain.com"
           value={domain}
           onChange={(e) => setDomain(e.target.value)}
-          disabled={disabled}
+          disabled={!editAllowed}
         />
-        <Button onClick={onCheck} disabled={disabled || checking}>
+        <Button onClick={onCheck} disabled={!editAllowed || checking}>
           {checking ? 'Checking…' : 'Check'}
         </Button>
-        <Button onClick={onSave} disabled={disabled || saving}>
+        <Button onClick={onSave} disabled={!editAllowed || saving}>
           {saving ? 'Saving…' : 'Save'}
         </Button>
         {domain ? (
-          <Button onClick={onVerify} disabled={disabled || verifying}>
+          <Button onClick={onVerify} disabled={!editAllowed || verifying}>
             {verifying ? 'Verifying…' : 'Verify'}
           </Button>
         ) : null}
@@ -130,7 +126,7 @@ export function CustomDomainSettings({
           <Button
             variant="outline"
             onClick={onRemove}
-            disabled={disabled || removing}
+            disabled={!editAllowed || removing}
           >
             {removing ? 'Removing…' : 'Remove'}
           </Button>
