@@ -17,6 +17,7 @@ export async function PublicTopNav({
       (org) => org.slug === organizationSlug
     );
   } catch (error) {
+    isDashboardButtonVisible = false;
     console.error(error);
   }
 

@@ -20,8 +20,10 @@ export default async function FeedbackPage({
   params: { org: string };
   searchParams?: { board?: string; statuses?: string };
 }) {
-  const { org } = OrgSlugSchema.parse(params);
-  const qp = QuerySchema.parse(searchParams ?? {});
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const { org } = OrgSlugSchema.parse(resolvedParams);
+  const qp = QuerySchema.parse(resolvedSearchParams ?? {});
   const statusesArray = (qp.statuses as PostStatus[] | undefined) ?? [];
 
   return (
