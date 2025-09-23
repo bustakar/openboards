@@ -10,6 +10,8 @@ export default async function OrganizationPage() {
 
   if (organizations.length === 0) {
     redirect('/dashboard/organization/setup');
+  } else if (organizations.length === 1) {
+    redirect(`/dashboard/${organizations[0].slug}/feedback`);
   }
 
   return (

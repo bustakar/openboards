@@ -24,7 +24,7 @@ export async function PublicTopNav({
   return (
     <div className="flex items-center justify-between mb-4">
       <Link
-        href={`/${organizationSlug}/feedback`}
+        href={`/feedback`}
         className="text-base font-medium hover:underline"
       >
         {organizationName || organizationSlug}
