@@ -8,6 +8,7 @@ import { Separator } from '../ui/separator';
 import { InvitationsTable } from './invitations-table';
 import { MemberInviteButton } from './member-invite-button';
 import { MembersTable } from './members-table';
+import { CustomDomainSettings } from './org-custom-domain-settings';
 import { OrganizationDeleteButton } from './org-delete-button';
 import { OrgPublicSettings } from './org-public-settings';
 
@@ -23,12 +24,14 @@ export function OrganizationSettings({
   members,
   invitations,
   metadata,
+  customDomain,
 }: {
   editAllowed: boolean;
   org: Organization;
   members: MemberData[];
   invitations: Invitation[];
   metadata?: OrganizationMetadata;
+  customDomain?: string;
 }) {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-24">
@@ -58,6 +61,17 @@ export function OrganizationSettings({
         <Separator orientation="horizontal" />
         <InvitationsTable invitations={invitations} />
       </div>
+      {process.env.NEXT_PUBLIC_CUSTOM_DOMAINS !== 'disabled' && (
+        <div className="space-y-4">
+          <div className="text-xl">Custom Domain</div>
+          <Separator orientation="horizontal" />
+          <CustomDomainSettings
+            org={org}
+            editAllowed={editAllowed}
+            initialDomain={customDomain || undefined}
+          />
+        </div>
+      )}
       <div className="space-y-4">
         <div className="text-xl">Danger Zone</div>
         <Separator orientation="horizontal" />

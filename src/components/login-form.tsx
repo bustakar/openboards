@@ -36,6 +36,7 @@ export function LoginForm({
 }: React.ComponentProps<'div'>) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,6 +54,7 @@ export function LoginForm({
         callbackURL: '/dashboard/organization/select',
       });
       form.reset();
+      setSuccess('Magic link sent to your email');
     } catch (error) {
       setError(
         error instanceof Error ? error.message : 'Failed to send magic link'
@@ -132,6 +134,9 @@ export function LoginForm({
                     )}
                   />
                   {error && <p className="text-destructive text-sm">{error}</p>}
+                  {success && (
+                    <p className="text-green-500 text-sm">{success}</p>
+                  )}
                   <Button disabled={isLoading} type="submit" className="w-full">
                     {isLoading ? 'Sending...' : 'Send Magic Link'}
                   </Button>

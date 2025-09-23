@@ -22,6 +22,13 @@ export default async function DashboardLayout({
 
   if (!organizations.some((organization) => organization.slug === org)) {
     redirect('/dashboard/organization/select');
+  } else {
+    await auth.api.setActiveOrganization({
+      body: {
+        organizationSlug: org,
+      },
+      headers: h,
+    });
   }
 
   return (

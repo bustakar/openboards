@@ -31,12 +31,17 @@
 - [x] Anonymous voting (one per person; cookie-based `visitorId`)
 - [x] Rate limiting + honeypot fields
 
-## M5 – Roadmap
+## M5 - Subdomains & custom domains
 
-- [ ] Public `[project]/roadmap` by post status
+- [x] Move organizations ([org]) to subdomain
+- [ ] Add support for custom domains (settings + org setup)
+
+## M6 – Roadmap
+
+- [ ] Public `[organization]/roadmap` by post status
 - [ ] Dashboard roadmap management (no DnD initially)
 
-## M6 – Settings & Billing (hosted mode)
+## M7 – Settings & Billing (hosted mode)
 
 - [ ] Team management & roles
 - [ ] Profile settings

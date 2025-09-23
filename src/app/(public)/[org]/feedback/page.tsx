@@ -38,8 +38,10 @@ export default async function PublicFeedbackPage({
     sort?: string;
   };
 }) {
-  const { org } = OrgSlugSchema.parse(params);
-  const sp = QuerySchema.parse(searchParams ?? {});
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const { org } = OrgSlugSchema.parse(resolvedParams);
+  const sp = QuerySchema.parse(resolvedSearchParams ?? {});
 
   const organization = await getOrganizationBySlug(org);
   const settings: OrganizationPublicMetadata =

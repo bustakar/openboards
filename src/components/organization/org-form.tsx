@@ -53,9 +53,6 @@ export function OrganizationForm() {
         slug: data.slug,
       });
       if (organization.data?.id) {
-        await authClient.organization.setActive({
-          organizationId: organization.data?.id,
-        });
         router.push(`/dashboard/${organization.data?.slug}/feedback`);
       }
       form.reset();
