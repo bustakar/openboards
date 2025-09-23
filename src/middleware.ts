@@ -3,6 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 const ROOT = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
 
 export const getOrgFromHost = (host?: string | null) => {
+  if (host && !host.endsWith(ROOT as string)) {
+    return null;
+  }
   let subdomain: string | null = null;
   if (!host && typeof window !== 'undefined') {
     host = window.location.host;
