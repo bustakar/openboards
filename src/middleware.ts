@@ -1,41 +1,69 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { rootDomain } from '@/lib/utils';
+import { type NextRequest, NextResponse } from 'next/server';
 
-const ROOT = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+function extractSubdomain(request: NextRequest): string | null {
+  const url = request.url;
+  const host = request.headers.get('host') || '';
+  const hostname = host.split(':')[0];
 
-export const getOrgFromHost = (host?: string | null) => {
-  if (host && !host.endsWith(ROOT as string)) {
+  if (url.includes('localhost') || url.includes('127.0.0.1')) {
+    const fullUrlMatch = url.match(/http:\/\/([^.]+)\.localhost/);
+    if (fullUrlMatch && fullUrlMatch[1]) {
+      return fullUrlMatch[1];
+    }
+
+    if (hostname.includes('.localhost')) {
+      return hostname.split('.')[0];
+    }
+
     return null;
   }
-  let subdomain: string | null = null;
-  if (!host && typeof window !== 'undefined') {
-    host = window.location.host;
-  }
-  if (host && host.includes('.')) {
-    const candidate = host.split('.')[0];
-    if (candidate && !candidate.includes('localhost')) {
-      subdomain = candidate;
-    }
-  }
-  return subdomain;
-};
 
-export function middleware(req: NextRequest) {
-  const url = req.nextUrl.clone();
-  const org = getOrgFromHost(req.headers.get('host'));
+  const rootDomainFormatted = rootDomain.split(':')[0];
 
-  if (!org) {
-    return NextResponse.next();
+  if (hostname.includes('---') && hostname.endsWith('.vercel.app')) {
+    const parts = hostname.split('---');
+    return parts.length > 0 ? parts[0] : null;
   }
 
-  if (url.pathname.startsWith('/dashboard')) {
-    url.pathname = `/dashboard/${org}${url.pathname}`;
-    return NextResponse.rewrite(url);
+  const isSubdomain =
+    hostname !== rootDomainFormatted &&
+    hostname !== `www.${rootDomainFormatted}` &&
+    hostname.endsWith(`.${rootDomainFormatted}`);
+
+  return isSubdomain ? hostname.replace(`.${rootDomainFormatted}`, '') : null;
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl;
+  const subdomain = extractSubdomain(request);
+
+  if (subdomain && pathname === '/feedback') {
+    const rewriteUrl = new URL(
+      `/${subdomain}${pathname}?${searchParams.toString()}`,
+      request.url
+    );
+    return NextResponse.rewrite(rewriteUrl);
+  } else if (subdomain) {
+    const redirectUrl = new URL(
+      `/feedback?${searchParams.toString()}`,
+      request.url
+    );
+    return NextResponse.redirect(redirectUrl);
   }
 
-  url.pathname = `/${org}${url.pathname}`;
-  return NextResponse.rewrite(url);
+  // On the root domain, allow normal access
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!_next/|static/|favicon.ico|robots.txt|sitemap.xml|api/).*)'],
+  matcher: [
+    /*
+     * Match all paths except for:
+     * 1. /api routes
+     * 2. /_next (Next.js internals)
+     * 3. all root files inside /public (e.g. /favicon.ico)
+     */
+    '/((?!api|_next|[\\w-]+\\.\\w+).*)',
+  ],
 };

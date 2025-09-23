@@ -63,5 +63,5 @@ export async function createPublicPostAction(input: {
     createdByVisitorId: visitorId,
   });
 
-  revalidatePath(await publicFeedbackPath(parsed.orgSlug));
+  revalidatePath(await publicFeedbackPath());
 }
