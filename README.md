@@ -1,39 +1,30 @@
 # OpenBoards
 
-Source-available feedback boards and roadmap for multi-project teams.
+Source-available (ELv2) feedback boards & roadmap for multi‑project teams.
 
-License: Elastic License v2 (ELv2). You may use, modify, and distribute; you may not offer it as a managed service. For commercial hosting rights, contact the author.
+## Features
 
-© 2025 Karel Busta
+- Public feedback portal with boards and posts
+- Private dashboard for moderation & settings
+- Subdomains and optional custom domains for per‑org public pages
+- Multiple organization members
 
-## Stack
+## Tech stack
 
-Next.js (App Router), better-auth (magic link + GitHub), Drizzle ORM, Postgres, shadcn/ui, Zod.
+- Next.js 15 (App Router) + React 19
+- Drizzle ORM + PostgreSQL
+- better-auth, Zod
+- Tailwind CSS + shadcn/ui
+- Nodemailer (SMTP)
 
-## Features (MVP) - In Progress
+## Getting started
 
-- Public: `/[project]/feedback` (boards + posts + submit), `/[project]/roadmap`
-- Anonymous voting (one per person) and comments (optional display name)
-- Anonymous post creation (stored with `visitorId`)
-- Private dashboard: orgs/teams, projects, feedback, roadmap
-- Multi-tenant RBAC (OWNER/ADMIN/MEMBER/VIEWER/BILLING)
+1. Install dependencies: `npm install`
+2. Create `.env.local` (database URL + email/auth settings)
+3. Apply migrations: `npm run db:migrate`
+4. Start dev server: `npm run dev` and open `http://localhost:3000`
 
-## Routing - In Progress
-
-- Public:
-  - `/[project]/feedback`
-  - `/[project]/roadmap`
-- Private (dashboard):
-  - `/[org]/[project]/feedback` (single page; dialogs for new/detail)
-  - `/[org]/[project]/roadmap`
-  - `/[org]/settings/{profile,team,billing,projects,boards}`
-
-## Local Development
-
-1. Copy `.env.example` to `.env.local` and fill values.
-2. Start Postgres (Docker/Neon) and create database `openboards`.
-3. Run migrations and seed data.
-4. Start the app.
+Tip: in development you can test subdomains via `http://[org].localhost:3000/feedback`.
 
 ## Contributing
 
