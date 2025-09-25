@@ -4,7 +4,7 @@
 
 - [x] Initialize repo (Next.js App Router, TS, Tailwind, shadcn/ui, ESLint/Prettier)
 - [ ] CI: type-check, lint, build
-- [x] Database: Drizzle setup, migrations skeleton, seed script
+- [x] Database: Drizzle setup, migrations skeleton
 - [x] Auth: better-auth scaffolding (magic link + GitHub)
 - [x] Docs: README, LICENSE (ELv2), CONTRIBUTING
 
@@ -19,7 +19,7 @@
 ## M3 – Feedback (private)
 
 - [x] Boards schema + CRUD
-- [x] Posts schema (status: backlog/planned/in_progress/done/closed; optional `visitorId`)
+- [x] Posts schema (status: open/planned/in_progress/done/closed; optional `visitorId`)
 - [x] Private feedback single page: table + dialogs for new post
 - [x] Votes schema + vote button for posts
 - [x] Post statuses
@@ -30,11 +30,13 @@
 - [x] Public `[organization]/feedback`: boards list + posts list + submit post dialog
 - [x] Anonymous voting (one per person; cookie-based `visitorId`)
 - [x] Rate limiting + honeypot fields
+- [ ] Pagination for public posts (limit/offset + total)
+- [ ] Optional SSR redirect to persist default statuses in URL
 
 ## M5 - Subdomains & custom domains
 
 - [x] Move organizations ([org]) to subdomain
-- [ ] Add support for custom domains (settings + org setup)
+- [x] Add support for custom domains
 
 ## M6 – Roadmap
 
@@ -43,8 +45,8 @@
 
 ## M7 – Settings & Billing (hosted mode)
 
-- [ ] Team management & roles
-- [ ] Profile settings
+- [x] Team management & roles
+- [x] Profile settings
 - [ ] Billing (feature-flagged; Stripe portal)
 
 ## Quality & Docs
@@ -52,3 +54,4 @@
 - [ ] Accessibility pass (landmarks, labels, keyboard)
 - [ ] E2E smoke (auth → org → project → post → public view)
 - [ ] API docs and architectural notes
+- [ ] Add `.env.example` with documented environment variables
