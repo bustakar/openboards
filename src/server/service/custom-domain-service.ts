@@ -2,36 +2,10 @@
 
 import { db } from '@/db';
 import { organization } from '@/db/auth-schema';
-import { auth } from '@/server/auth';
 import { getCustomDomainAdapter } from '@/server/custom-domain/custom-domain-provider';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { headers } from 'next/headers';
-
-type Role = 'owner' | 'admin' | 'member';
-
-function hasMinRole(role: Role | undefined, min: Role) {
-  const rank: Record<Role, number> = { member: 1, admin: 2, owner: 3 };
-  return !!role && rank[role] >= rank[min];
-}
-
-async function requireOrgAndRole(orgSlug: string, min: Role) {
-  const h = await headers();
-  const session = await auth.api.getSession({ headers: h });
-  if (!session) throw new Error('Not authenticated');
-
-  const fullOrg = await auth.api.getFullOrganization({
-    query: { organizationSlug: orgSlug },
-    headers: h,
-  });
-  if (!fullOrg) throw new Error('Organization not found');
-
-  const me = fullOrg.members.find((m) => m.userId === session.user.id);
-  const role = me?.role as Role | undefined;
-  if (!hasMinRole(role, min)) throw new Error('Insufficient permissions');
-
-  return { h, org: fullOrg };
-}
+import { requireOrgAndRole } from './auth-service';
 
 function normalizeDomain(input: string): string {
   let d = input.trim().toLowerCase();
@@ -41,36 +15,13 @@ function normalizeDomain(input: string): string {
   return d;
 }
 
-export async function checkCustomDomainAction(input: { domain: string }) {
-  const domain = normalizeDomain(input.domain);
-  if (!domain) throw new Error('Enter a domain');
-  const adapter = getCustomDomainAdapter();
-  await adapter.add(domain);
-  const cfg = await adapter.getConfig(domain);
-
-  const recommended = cfg.recommendations || cfg.records || [];
-  const apexA =
-    recommended.find?.((r) => r.type === 'A')?.value || '76.76.21.21';
-
-  return {
-    domain,
-    configuredBy: cfg.configuredBy || 'unknown',
-    misconfigured: !!cfg.misconfigured,
-    recommendations: recommended,
-    tips: {
-      subdomain: 'Use CNAME to cname.vercel-dns.com',
-      apex: `Use ALIAS/ANAME to cname.vercel-dns.com or A to ${apexA}`,
-    },
-  };
-}
-
 export async function saveCustomDomainAction(input: {
   orgSlug: string;
   domain: string;
 }) {
   const { org } = await requireOrgAndRole(input.orgSlug, 'owner');
   const domain = normalizeDomain(input.domain);
-  if (!domain) throw new Error('Enter a domain');
+  if (!domain) throw new Error('Enter a valid domain');
 
   const adapter = getCustomDomainAdapter();
   await adapter.add(domain);
@@ -90,11 +41,10 @@ export async function verifyCustomDomainAction(input: {
 }) {
   await requireOrgAndRole(input.orgSlug, 'owner');
   const domain = normalizeDomain(input.domain);
-  if (!domain) throw new Error('Enter a domain');
+  if (!domain) throw new Error('Enter a valid domain');
 
   const adapter = getCustomDomainAdapter();
-  const res = await adapter.verify(domain);
-  return { domain, verified: !!res.verified, provider: res.raw };
+  return await adapter.verify(domain);
 }
 
 export async function removeCustomDomainAction(input: { orgSlug: string }) {

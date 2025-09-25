@@ -111,13 +111,13 @@ export function OrgPublicSettings({
       <StatusRow
         label="Which posts are visible in the public list?"
         selected={defaultSet}
-        onToggle={(s) =>
+        onToggle={(s) => {
           setDefaultSet((prev) => {
             const next = new Set(prev);
             next.has(s) ? next.delete(s) : next.add(s);
             return next;
-          })
-        }
+          });
+        }}
         disabled={!editAllowed || pending}
       />
 
@@ -125,13 +125,13 @@ export function OrgPublicSettings({
       <StatusRow
         label="Which badges are visible on post card?"
         selected={badgeSet}
-        onToggle={(s) =>
+        onToggle={(s) => {
           setBadgeSet((prev) => {
             const next = new Set(prev);
             next.has(s) ? next.delete(s) : next.add(s);
             return next;
-          })
-        }
+          });
+        }}
         disabled={!editAllowed || pending}
       />
 
