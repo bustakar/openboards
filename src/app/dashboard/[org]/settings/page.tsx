@@ -62,6 +62,7 @@ export default async function OrganizationSettingsPage({
         members={members}
         invitations={invitations}
         metadata={organizationMetadata}
+        customDomain={fullOrganization?.customDomain}
       />
     </div>
   );

@@ -2,8 +2,8 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { VerifyInstruction } from '@/server/custom-domain/custom-domain-adapter';
 import {
-  checkCustomDomainAction,
   removeCustomDomainAction,
   saveCustomDomainAction,
   verifyCustomDomainAction,
@@ -32,38 +32,21 @@ export function CustomDomainSettings({
   initialDomain?: string | null;
 }) {
   const [domain, setDomain] = useState(initialDomain || '');
-  const [checking, setChecking] = useState(false);
   const [saving, setSaving] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [message, setMessage] = useState<string>('');
   const [details, setDetails] = useState<DomainDetails | null>(null);
-
-  const onCheck = async () => {
-    setMessage('');
-    setDetails(null);
-    setChecking(true);
-    try {
-      const result = await checkCustomDomainAction({ domain });
-      setDetails(result);
-      setMessage(
-        result.misconfigured
-          ? 'Domain is added but DNS appears misconfigured.'
-          : 'Domain appears correctly configured.'
-      );
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Failed to check domain');
-    } finally {
-      setChecking(false);
-    }
-  };
+  const [instructions, setInstructions] = useState<VerifyInstruction[]>([]);
 
   const onSave = async () => {
     setMessage('');
+    setInstructions([]);
     setSaving(true);
     try {
+      await removeCustomDomainAction({ orgSlug: org.slug! });
       await saveCustomDomainAction({ orgSlug: org.slug!, domain });
-      setMessage('Saved. If not yet configured, add DNS as shown below.');
+      onVerify();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Failed to save domain');
     } finally {
@@ -73,13 +56,23 @@ export function CustomDomainSettings({
 
   const onVerify = async () => {
     setMessage('');
+    setInstructions([]);
     setVerifying(true);
     try {
-      await verifyCustomDomainAction({
+      const result = await verifyCustomDomainAction({
         orgSlug: org.slug!,
         domain,
       });
-      setMessage('Verification requested with Vercel.');
+      if (result.configured) {
+        setMessage('Domain configured.');
+      } else if (result.verified && !result.configured) {
+        setMessage(
+          'Domain not configured. Make sure to add the following DNS records to your DNS provider:'
+        );
+        setInstructions(result.instructions);
+      } else {
+        setMessage('Domain verification failed.');
+      }
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Failed to verify domain');
     } finally {
@@ -89,6 +82,7 @@ export function CustomDomainSettings({
 
   const onRemove = async () => {
     setMessage('');
+    setInstructions([]);
     setRemoving(true);
     try {
       await removeCustomDomainAction({ orgSlug: org.slug! });
@@ -111,18 +105,17 @@ export function CustomDomainSettings({
           onChange={(e) => setDomain(e.target.value)}
           disabled={!editAllowed}
         />
-        <Button onClick={onCheck} disabled={!editAllowed || checking}>
-          {checking ? 'Checking…' : 'Check'}
-        </Button>
-        <Button onClick={onSave} disabled={!editAllowed || saving}>
-          {saving ? 'Saving…' : 'Save'}
-        </Button>
-        {domain ? (
+        {initialDomain !== domain ? (
+          <Button onClick={onSave} disabled={!editAllowed || saving}>
+            {saving ? 'Saving…' : 'Save'}
+          </Button>
+        ) : null}
+        {initialDomain === domain ? (
           <Button onClick={onVerify} disabled={!editAllowed || verifying}>
             {verifying ? 'Verifying…' : 'Verify'}
           </Button>
         ) : null}
-        {initialDomain ? (
+        {initialDomain === domain ? (
           <Button
             variant="outline"
             onClick={onRemove}
@@ -132,19 +125,25 @@ export function CustomDomainSettings({
           </Button>
         ) : null}
       </div>
-      {message ? <p className="text-sm">{message}</p> : null}
-      {details ? (
-        <div className="rounded-md border p-3 bg-muted/30 text-sm space-y-2">
-          <div className="font-medium">Vercel DNS guidance</div>
-          <div>
-            Subdomains: set CNAME to{' '}
-            <span className="font-mono">cname.vercel-dns.com</span>
-          </div>
-          <div>
-            Apex: use ALIAS/ANAME to{' '}
-            <span className="font-mono">cname.vercel-dns.com</span> or A to{' '}
-            <span className="font-mono">76.76.21.21</span>
-          </div>
+      {message ? (
+        <pre className="text-sm whitespace-pre-wrap">{message}</pre>
+      ) : null}
+      {details ? <p>{details.toString()}</p> : null}
+      {instructions.length > 0 ? (
+        <div className="space-y-1">
+          {instructions.map((inst) => (
+            <div key={inst.value} className="text-sm">
+              {inst.rank === 1 ? (
+                <span>
+                  - CNAME <b>{inst.value}</b> (preferred)
+                </span>
+              ) : (
+                <span>
+                  - CNAME <b>{inst.value}</b>
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       ) : null}
     </div>

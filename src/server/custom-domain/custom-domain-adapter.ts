@@ -7,11 +7,15 @@ export type DomainConfig = {
   records?: DomainRecommendation[];
 };
 
-export type VerifyResult = { verified: boolean; raw?: unknown };
+export type VerifyInstruction = { rank: number; value: string };
+export type VerifyResult = {
+  verified: boolean;
+  configured: boolean;
+  instructions: VerifyInstruction[];
+};
 
 export interface CustomDomainAdapter {
   add(domain: string): Promise<void>;
-  getConfig(domain: string): Promise<DomainConfig>;
   verify(domain: string): Promise<VerifyResult>;
   remove(domain: string): Promise<void>;
 }
