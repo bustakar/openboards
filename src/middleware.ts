@@ -34,9 +34,22 @@ function extractSubdomain(request: NextRequest): string | null {
   return isSubdomain ? hostname.replace(`.${rootDomainFormatted}`, '') : null;
 }
 
+async function getOrgSlugFromCustomDomain(domain: string) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/resolve-host?host=${domain}`
+  );
+  const data = await response.json();
+  return data.orgSlug;
+}
+
 export async function middleware(request: NextRequest) {
-  const { pathname, searchParams } = request.nextUrl;
-  const subdomain = extractSubdomain(request);
+  const { host, pathname, searchParams } = request.nextUrl;
+  let subdomain = null;
+  if (host !== process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
+    subdomain = await getOrgSlugFromCustomDomain(host);
+  } else {
+    subdomain = extractSubdomain(request);
+  }
 
   if (subdomain && pathname === '/feedback') {
     const rewriteUrl = new URL(
