@@ -45,7 +45,7 @@ async function getOrgSlugFromCustomDomain(domain: string) {
 export async function middleware(request: NextRequest) {
   const { host, pathname, searchParams } = request.nextUrl;
   let subdomain = null;
-  if (host !== process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
+  if (!host.endsWith(process.env.NEXT_PUBLIC_ROOT_DOMAIN as string)) {
     subdomain = await getOrgSlugFromCustomDomain(host);
   } else {
     subdomain = extractSubdomain(request);
